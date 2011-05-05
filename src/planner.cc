@@ -476,7 +476,7 @@ namespace hpp
 	  double deltaX = abs ( (endX - startX) /  maxX_ );
 	  double deltaY = abs ( (endY - startY) /  maxY_ );
 	  deltaY = 0;
-	  double deltaTh =  abs ( (endTh - startTh) /  maxTheta_ );
+	  double deltaTh = dTh  /  maxTheta_ ;
 
 	  double stepFrac = std::max ( std::max ( deltaX , deltaY ),
 				       deltaTh );
