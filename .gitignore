@@ -7,3 +7,4 @@ doc/Makefile.in
 include/Makefile.in
 src/Makefile.in
 tests/Makefile.in
+build-aux
