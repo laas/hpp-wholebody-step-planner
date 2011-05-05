@@ -61,6 +61,16 @@ namespace hpp
       if (gikStandingRobot_) delete gikStandingRobot_;
     }
 
+    ChppHumanoidRobotShPtr Planner::humanoidRobot ()
+    {
+      return humanoidRobot_;
+    }
+    
+    wholeBodyConstraintShPtr Planner::wholeBodyConstraint ()
+    {
+      wholeBodyConstraint_;
+    }
+
     ktStatus
     Planner::initializeProblem()
     {
@@ -201,9 +211,11 @@ namespace hpp
       
       CkwsLoopOptimizerShPtr optimizer = 
 	CkwsRandomOptimizer::create();
-      
+      optimizer->penetration (rdmBuilder->penetration ());
+
       PathOptimizerShPtr postOptimizer = 
 	PathOptimizer::create();
+      postOptimizer->penetration (rdmBuilder->penetration () / 100);
 
       CkwsConfigShPtr halfSittingCfg;
       humanoidRobot_->getCurrentConfig(halfSittingCfg);
@@ -476,7 +488,7 @@ namespace hpp
 	  double deltaX = abs ( (endX - startX) /  maxX_ );
 	  double deltaY = abs ( (endY - startY) /  maxY_ );
 	  deltaY = 0;
-	  double deltaTh =  abs ( (endTh - startTh) /  maxTheta_ );
+	  double deltaTh = dTh  /  maxTheta_ ;
 
 	  double stepFrac = std::max ( std::max ( deltaX , deltaY ),
 				       deltaTh );
@@ -783,7 +795,7 @@ namespace hpp
 
       humanoidRobot_->userConstraints()->add(wholeBodyConstraint_);
       ktStatus res =  solveOneProblem(0);
-      humanoidRobot_->userConstraints()->remove(wholeBodyConstraint_);
+      //      humanoidRobot_->userConstraints()->remove(wholeBodyConstraint_);
 
       if ( res != KD_OK )
 	{

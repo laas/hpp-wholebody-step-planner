@@ -4,9 +4,9 @@ include $(top_srcdir)/build-aux/init.mk
 ACLOCAL_AMFLAGS = -I build-aux
 
 SUBDIRS = 		\
-	doc		\
 	include		\
 	src		
+#	doc		\
 #	tests
 
 
