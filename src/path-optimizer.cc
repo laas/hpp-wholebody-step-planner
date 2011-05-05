@@ -1,6 +1,8 @@
+# include <iostream>
 
 # include <KineoWorks2/kwsDevice.h>
 # include <KineoWorks2/kwsSteeringMethod.h>
+# include <KineoWorks2/kwsValidatorDPCollision.h>
 
 # include <hpp/wholebody-step-planner/path-optimizer.hh>
 
@@ -93,7 +95,12 @@ namespace hpp
     ktStatus
     PathOptimizer::doOptimizeOneStep(const CkwsPathShPtr & io_path)
     {
+      std::cout << "Running in post-optimizer loop"<< std::endl;
 
+      CkwsValidatorDPCollisionShPtr dpValidator = io_path->device ()->directPathValidators ()
+	->retrieve<CkwsValidatorDPCollision> ();
+      dpValidator->penetration (penetration ());
+     
       CkwsDeviceShPtr device = io_path->device();
       CkwsSteeringMethodShPtr steeringMethod = device->steeringMethod();
       CkwsConfig cfgStart(device), cfgEnd(device), cfgMiddle(device), cfgMiddle_opt(device);
@@ -114,6 +121,9 @@ namespace hpp
 	      CkwsDirectPathShPtr dp1 = steeringMethod->makeDirectPath(cfgStart,cfgMiddle);
 	      CkwsDirectPathShPtr dp2 = steeringMethod->makeDirectPath(cfgMiddle,cfgEnd);
       
+	      dpValidator->validate (*dp1);
+	      dpValidator->validate (*dp2);
+
 	      if ( (dp1->isValid()) && (dp2->isValid()))
 		{
 		  CkwsPathShPtr replacingPath = CkwsPath::create(device);
