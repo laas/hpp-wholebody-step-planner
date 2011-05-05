@@ -61,6 +61,16 @@ namespace hpp
       if (gikStandingRobot_) delete gikStandingRobot_;
     }
 
+    ChppHumanoidRobotShPtr Planner::humanoidRobot ()
+    {
+      return humanoidRobot_;
+    }
+    
+    wholeBodyConstraintShPtr Planner::wholeBodyConstraint ()
+    {
+      wholeBodyConstraint_;
+    }
+
     ktStatus
     Planner::initializeProblem()
     {
@@ -783,7 +793,7 @@ namespace hpp
 
       humanoidRobot_->userConstraints()->add(wholeBodyConstraint_);
       ktStatus res =  solveOneProblem(0);
-      humanoidRobot_->userConstraints()->remove(wholeBodyConstraint_);
+      //      humanoidRobot_->userConstraints()->remove(wholeBodyConstraint_);
 
       if ( res != KD_OK )
 	{

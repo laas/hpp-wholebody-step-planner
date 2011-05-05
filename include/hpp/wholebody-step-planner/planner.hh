@@ -36,6 +36,10 @@ namespace hpp
 
       ~Planner();
 
+      ChppHumanoidRobotShPtr humanoidRobot ();
+
+      wholeBodyConstraintShPtr wholeBodyConstraint ();
+
       ktStatus initAndGoalConfig (CkwsPathShPtr inPath);
 
       virtual ktStatus initializeProblem();
