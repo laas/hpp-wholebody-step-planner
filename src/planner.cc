@@ -69,7 +69,7 @@ namespace hpp
     
     wholeBodyConstraintShPtr Planner::wholeBodyConstraint ()
     {
-      wholeBodyConstraint_;
+      return wholeBodyConstraint_;
     }
 
     ktStatus
