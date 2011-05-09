@@ -3,6 +3,7 @@
 # include <KineoWorks2/kwsDiffusingRdmBuilder.h>
 # include <KineoWorks2/kwsRandomOptimizer.h>
 
+# include <kwsPlus/roadmap/kwsPlusLTRdmBuilder.h>
 # include <hpp/gik/task/generic-task.hh>
 
 
@@ -204,7 +205,8 @@ namespace hpp
 
       CkwsRoadmapShPtr roadmap = CkwsRoadmap::create(humanoidRobot_);
       CkwsDiffusingRdmBuilderShPtr rdmBuilder = 
-	CkwsDiffusingRdmBuilder::create ( roadmap );
+	CkwsPlusLTRdmBuilder< CkwsDiffusingRdmBuilder >::create (roadmap, 0.1);
+      rdmBuilder->diffuseFromProblemGoal (true);
       
       steeringMethodIthProblem(0, CkwsSMLinear::create ());
       roadmapBuilderIthProblem (0,rdmBuilder);
