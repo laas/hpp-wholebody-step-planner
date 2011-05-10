@@ -4,7 +4,7 @@
 #ifndef CHPP_WHOLEBODY_STEP_PLANNER
 #define CHPP_WHOLEBODY_STEP_PLANNER
 
-
+# include <fstream>
 # include <vector>
 # include <map> 
 
@@ -64,7 +64,8 @@ namespace hpp
 			      double maxY,
 			      double minTheta,
 			      double maxTheta);
-
+      
+      ktStatus writeSeqplayFiles ();
 
     protected:
 
@@ -81,6 +82,10 @@ namespace hpp
 
       ktStatus convertGikRobotMotionToKineoPath(ChppRobotMotion * i_motion, 
 						CkwsPathShPtr o_path);
+      
+      ktStatus
+      kwsToOpenHrpDofValues (const std::vector<double>& inKwsDofVector,
+			     vector<double>& outOpenHrpDofVector);
 
       ChppGikFootprint * footPrintFromConfig(CkwsConfig & cfg, 
 					     bool isRightFoot);
@@ -106,7 +111,6 @@ namespace hpp
       double footFlightTime_;
       double stepHeight_;
       
-      
       /* Gik constraints allocated only once */
       ChppGikPlaneConstraint * waistPlaneConstraint_;
       ChppGikParallelConstraint* waistParallelConstraint_;
@@ -127,10 +131,22 @@ namespace hpp
       /* Precision threshold for path exploration */
       double paramPrecision_;
 
+
       /* step parameters for each footprint */
 
       std::map < ChppGikFootprint *, double> stepFracOfFootprint_;
       std::vector  < footprintOfParam_t > resultFootprints_;
+
+
+      /* Valid Gik motions to be outputted */
+      ChppRobotMotion * currentGikMotion_;
+      vector<ChppRobotMotion*> validGikMotion_;
+
+      /* Seqplay files */
+      double timestamp_;
+      std::ofstream posFile_;
+      std::ofstream rpyFile_;
+      std::ofstream zmpFile_;
 
     };
   }
