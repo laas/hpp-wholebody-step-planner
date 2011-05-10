@@ -340,7 +340,7 @@ namespace hpp
 
 		resultFootprints_.push_back( ftprints );
 
-		validGikMotion_.push_back (currentGikMotion_);
+		//validGikMotion_.push_back (currentGikMotion_);
 
 
 		if (!resultPath->isEmpty()) {
@@ -1091,6 +1091,10 @@ namespace hpp
 	  ChppRobotMotion  motion =   genericTask.solutionMotion();
 	  if (!motion.empty())
 	    {
+	      validGikMotion_.push_back (&motion);
+	      if (writeSeqplayFiles() != KD_OK) {
+		std::cerr << "ERROR in writing seqplay files." << std::endl;
+	      }
 	      convertGikRobotMotionToKineoPath(&motion,newPath);
 	    }
 	}
