@@ -25,3 +25,17 @@ AC_SUBST([KWSPLUS_DOCDIR])
 AC_SUBST([KWSPLUS_DOXYGENDOCDIR])
 
 AC_SUBST([PKGCONFIG_REQUIRES], ["kwsplus_reqd"])
+
+m4_define([hpputil_reqd], [hpp-util >= 0.1])
+AC_SUBST([HPPUTIL_REQD], ["hpputil_reqd"])
+PKG_CHECK_MODULES([HPPUTIL], [hpputil_reqd])
+HPPUTIL_PREFIX=`$PKG_CONFIG hpp-util --variable=prefix`
+HPPUTIL_DOCDIR=`$PKG_CONFIG hpp-util --variable=docdir`
+HPPUTIL_DOXYGENDOCDIR=`$PKG_CONFIG hpp-util --variable=doxygendocdir`
+AC_SUBST([HPPUTIL_CFLAGS])
+AC_SUBST([HPPUTIL_LIBS])
+AC_SUBST([HPPUTIL_PREFIX])
+AC_SUBST([HPPUTIL_DOCDIR])
+AC_SUBST([HPPUTIL_DOXYGENDOCDIR])
+
+AC_SUBST([PKGCONFIG_REQUIRES], ["hpputil_reqd"])
