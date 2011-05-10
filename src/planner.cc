@@ -14,12 +14,13 @@
 
 
 # define PARAM_PRECISION 0.01
+# define TASK_PRECISION 1e-4
 
 /* Pattern Generator default parameters */
 # define END_COEFF 0.5
 # define START_SHIFT_TIME 0.1
 # define END_SHIFT_TIME 0.1
-# define FOOT_FILGHT_TIME 1.0
+# define FOOT_FILGHT_TIME 1
 # define STEP_HEIGHT 0.05
 
 namespace hpp
@@ -106,15 +107,16 @@ namespace hpp
 	}
 
       std::string property,value;
-      property="ComputeZMP"; value="false";humanoidRobot_->setProperty ( property,value );
+      property="ComputeZMP"; value="true";humanoidRobot_->setProperty ( property,value );
       property="TimeStep"; value="0.005";humanoidRobot_->setProperty ( property,value );
-      property="ComputeAccelerationCoM"; value="false";humanoidRobot_->setProperty ( property,value );
+      property="ComputeAccelerationCoM"; value="true";humanoidRobot_->setProperty ( property,value );
       property="ComputeBackwardDynamics"; value="false";humanoidRobot_->setProperty ( property,value );
-      property="ComputeMomentum"; value="false";humanoidRobot_->setProperty ( property,value );
-      property="ComputeAcceleration"; value="false";humanoidRobot_->setProperty ( property,value );
-      property="ComputeVelocity"; value="false";humanoidRobot_->setProperty ( property,value );
-      property="ComputeSkewCom"; value="false";humanoidRobot_->setProperty ( property,value );
+      property="ComputeMomentum"; value="true";humanoidRobot_->setProperty ( property,value );
+      property="ComputeAcceleration"; value="true";humanoidRobot_->setProperty ( property,value );
+      property="ComputeVelocity"; value="true";humanoidRobot_->setProperty ( property,value );
+      property="ComputeSkewCom"; value="true";humanoidRobot_->setProperty ( property,value );
       property="ComputeCoM"; value="true";humanoidRobot_->setProperty ( property,value );
+
 
   
       gikStandingRobot_ = new ChppGikStandingRobot(*humanoidRobot_);
@@ -267,108 +269,145 @@ namespace hpp
     CkwsPathShPtr 
     Planner::findDynamicPath( CkwsPathShPtr i_path)
     {
-      std::cout << "-------------------------------" << std::endl
-		<< "Animating path of length: " 
-		<< i_path->length() << std::endl;
 
-      /* Initializing the state of the robot */
+      CkwsPathShPtr resultPath = CkwsPath::create(humanoidRobot_);
+      CkwsPathShPtr pathToAnimate = i_path;
+      CkwsPathShPtr pathAtEnd = CkwsPath::create(humanoidRobot_);
       std::vector<double> configKineo;
-      CkwsConfigShPtr currentCfg = i_path->configAtStart();
-      humanoidRobot_->hppSetCurrentConfig(*currentCfg);
+      CkwsConfig currentCfg(humanoidRobot_);
 
       MAL_VECTOR_DIM(zeros, double, humanoidRobot_->numberDof());
       for(unsigned int i=0; i<zeros.size(); i++)
 	zeros[i] =0;
-      humanoidRobot_->currentVelocity(zeros);
-      humanoidRobot_->currentAcceleration(zeros);
-      humanoidRobot_->computeForwardKinematics();
+  
+      while ( (pathToAnimate->length() > 0.01) 
+	      || (pathAtEnd->length() != 0) )
+	{
+
+	  if (pathToAnimate->length() <= 0.01) {
+	    std::cerr << "FindDynamicPath(): ERROR: animating path of length less than 1cm. Aborting." 
+		      << std::endl;
+
+	    pathToAnimate = pathAtEnd;
+	    pathAtEnd =  CkwsPath::create(humanoidRobot_);
+	  }
+	  
+	  else {
+	    std::cout << "-------------------------------" << std::endl
+		      << "Animating path of length: " 
+		      << pathToAnimate->length() << std::endl;
+
       
-      CkwsPathShPtr animatedPath;
-      footprintOfParam_t ftprints;
+	    CkwsPathShPtr animatedPath;
+	    footprintOfParam_t ftprints;
 
-      if (i_path->length() < 0.001 )
-	{
-	  animatedPath.reset();
-	  return animatedPath;
-	}
+	    if (computeFootPrints(pathToAnimate,ftprints) != KD_OK)
+	      {
+		return resultPath;
+	      }
 
-      if (computeFootPrints(i_path,ftprints) != KD_OK)
-	{
-	  animatedPath.reset();
-	  return animatedPath;
-	}
+	    std::cout << "Computed " << ftprints.size() 
+		      << " footprints" << std::endl;
 
-      std::cout << "Computed " << ftprints.size() 
-		<< " footprints" << std::endl;
-
-      animatedPath = animatePath(i_path,ftprints);
-
-
-      animatedPath->validateWithPenetration(0.2);
-
-      if ((animatedPath->length()!=0) && (animatedPath->isValid()))
-	validGikMotion_.push_back (currentGikMotion_);
-
-      if ((animatedPath->length()==0) || (!animatedPath->isValid())) 
-	{
-	  
-	  std::cout << "Animated path is not valid"
-		    << std::endl;
-	  
-	  freeFootPrints(ftprints);
-	  ftprints.clear();
-	  animatedPath->clear();
-
-	  double halfLength = 0.5 * i_path->length() ;
-
-	  /* Attaching the constraint to the device before interpolating, to avoid flying configs */
-
-	  humanoidRobot_->userConstraints()->add(wholeBodyConstraint_);
-
-	  CkwsPathShPtr startPath = CkwsPath::createByExtractingTo(i_path,halfLength);
-	  CkwsPathShPtr endPath  =  CkwsPath::createByExtractingFrom(i_path,halfLength);
-
-	  humanoidRobot_->userConstraints()->remove(wholeBodyConstraint_);
-
-
-   
-	  CkwsPathShPtr startAnimatedPath = findDynamicPath ( startPath );
-
-	  if (!startAnimatedPath)
-	    {
-	      animatedPath.reset();
-	      return animatedPath;
+	    /* Initializing the state of the robot before animating */
+	    if (!resultPath->isEmpty()) {
+	      resultPath->getConfigAtEnd(currentCfg);
+	      humanoidRobot_->hppSetCurrentConfig(currentCfg);
+	      humanoidRobot_->currentVelocity(zeros);
+	      humanoidRobot_->currentAcceleration(zeros);
+	      humanoidRobot_->computeForwardKinematics();
+	      humanoidRobot_->computeForwardKinematics();
 	    }
-	  CkwsPathShPtr endAnimatedPath = findDynamicPath ( endPath );
-
-	  if (!endAnimatedPath)
-	    {
-	      animatedPath.reset();
-	      return animatedPath;
+	    else  {
+	      pathToAnimate->getConfigAtStart(currentCfg);
+	      humanoidRobot_->hppSetCurrentConfig(currentCfg);
+	      humanoidRobot_->currentVelocity(zeros);
+	      humanoidRobot_->currentAcceleration(zeros);
+	      humanoidRobot_->computeForwardKinematics();
+	      humanoidRobot_->computeForwardKinematics();
 	    }
 
-	  CkwsConfigShPtr endStartCfg = startAnimatedPath->configAtEnd();
-	  CkwsConfigShPtr startEndCfg = endAnimatedPath->configAtStart();
+	    animatedPath = animatePath(pathToAnimate,ftprints);
 
-	  animatedPath->appendPath(startAnimatedPath);
-	  
-	  if (!endStartCfg->isEquivalent(*startEndCfg))
-	    {
-	      std::cout << "End Config of start path is not equivalent to start config of end path." 
-			<< std::endl;
+	    animatedPath->validateWithPenetration(0.2);
 
-	      CkwsDirectPathShPtr newDP = 
-		humanoidRobot_->steeringMethod()->makeDirectPath(*endStartCfg,*startEndCfg);
+	    if ((animatedPath->isValid()) && (animatedPath->length())) 
+	      {
+		validGikMotion_.push_back (currentGikMotion_);
+
+		if (!resultPath->isEmpty()) {
+		  CkwsConfigShPtr endStartCfg = resultPath->configAtEnd();
+		  CkwsConfigShPtr startEndCfg = animatedPath->configAtStart();
+	    
+		  if (!endStartCfg->isEquivalent(*startEndCfg))
+		    {
+		      std::cout << "End Config of start path is not equivalent to start config of end path." 
+				<< std::endl;
+		      
+		      CkwsDirectPathShPtr newDP = 
+			humanoidRobot_->steeringMethod()->makeDirectPath(*endStartCfg,*startEndCfg);
 	     
-	      animatedPath->appendDirectPath ( newDP );
-	    }
-	  animatedPath->appendPath(endAnimatedPath);
+		      resultPath->appendDirectPath ( newDP );
+		      
+		    }
+		}
+		resultPath->appendPath ( animatedPath );
+	  
+		pathToAnimate = pathAtEnd;
+		pathAtEnd =  CkwsPath::create(humanoidRobot_) ;
+	      }
+	 
+	    else
+	      {
+      
+		std::cout << "Animated path is not valid"
+			  << std::endl;
+	
+		/* Finding first unvalid directPath */
+		unsigned int i = 0;
+		unsigned int n = animatedPath->countDirectPaths();
+		
+		while ( ( i < n ) && 
+			(animatedPath->directPath(i)->isValid()) ) { 
+		  i++; 
+		}
+
+		std::cout << "First unvalid path: " 
+			  << i << "/" << n 
+			  << std::endl;
+
+		freeFootPrints(ftprints);
+		ftprints.clear();
+		animatedPath->clear();
+	
+		double halfLength = 
+		  n ?  pathToAnimate->length() * i/ (double) n : 0.5 * pathToAnimate->length()  ;
+
+		/* Attaching the constraint to the device before interpolating, to avoid flying configs */
+
+		humanoidRobot_->userConstraints()->add(wholeBodyConstraint_);
+
+		CkwsPathShPtr startPath = CkwsPath::createByExtractingTo(pathToAnimate,halfLength);
+		CkwsPathShPtr endPath = CkwsPath::createByExtractingFrom(pathToAnimate,halfLength);
+
+		humanoidRobot_->userConstraints()->remove(wholeBodyConstraint_);
+
+
+		CkwsPathShPtr newPathAtEnd = CkwsPath::create(humanoidRobot_);
+		newPathAtEnd->appendPath(endPath);
+		if (!pathAtEnd->isEmpty()) {
+		  if (newPathAtEnd->appendPath (pathAtEnd) != KD_OK ){
+		    std::cerr << "FindDynamicPath(): ERROR: failed to add second part of the path to the agregator."
+			      << std::endl ;
+		    return resultPath;
+		  }
+		}
+		pathToAnimate = startPath ;
+		pathAtEnd = newPathAtEnd ;
+	      }
+	  }
 	}
-
-      if (animatedPath)
-	hppProblem(0)->addPath(animatedPath);
-
-      return animatedPath;
+      return resultPath;
     }
 
 
@@ -452,19 +491,6 @@ namespace hpp
     {
       CkwsPathShPtr newPath = CkwsPath::create(humanoidRobot_);
 
-      /* Initializing the state of the robot */
-      std::vector<double> configKineo;
-      CkwsConfigShPtr currentCfg = i_path->configAtStart();
-
-      humanoidRobot_->hppSetCurrentConfig(*currentCfg);
-
-      MAL_VECTOR_DIM(zeros, double, humanoidRobot_->numberDof());
-      for(unsigned int i=0; i<zeros.size(); i++)
-	zeros[i] =0;
-      humanoidRobot_->currentVelocity(zeros);
-      humanoidRobot_->currentAcceleration(zeros);
-      humanoidRobot_->computeForwardKinematics();
-
       /* Maps the times of steps to the distance along Kineo path */
       std::map<double,double> paramOfTime;
       paramOfTime[0.] = 0.;
@@ -521,7 +547,12 @@ namespace hpp
 	  stepHeight *= stepFrac ;
 	}
 
-      if (( footFlightTime < 0.5 ) && ( samplingPeriod > 5e-3)) samplingPeriod = 5e-3;
+      if (( footFlightTime < 1 ) && ( samplingPeriod > 5e-3)) samplingPeriod = 5e-3;
+
+      footFlightTime = ((int) (footFlightTime / samplingPeriod) +1) * samplingPeriod ;
+      zmpStartShiftTime =  ((int) (zmpStartShiftTime /  samplingPeriod) +1) * samplingPeriod ;
+      zmpEndShiftTime =  ((int) (zmpEndShiftTime /  samplingPeriod) +1) * samplingPeriod ;
+
 
       std::cout << "Step parameters: " << std::endl
 		<< "\t footFlightTime: " << footFlightTime << std::endl
@@ -561,12 +592,15 @@ namespace hpp
 
 	  genericTask.addElement( stepElement );
 	}
-      time += 3.;
+      
+      std::cout << "Total walking time: "  << time << std::endl;
 
+      time += 2;
+   
       //Constraint on the waist height
       ChppGikInterpolatedElement heightElem ( gikStandingRobot_->robot(),
 					      waistPlaneConstraint_,
-					      1,
+					      2,
 					      startTime,
 					      time,
 					      samplingPeriod);
@@ -575,7 +609,7 @@ namespace hpp
       //Constraint on the waist orientation
       ChppGikInterpolatedElement verticalElem ( gikStandingRobot_->robot(),
 						waistParallelConstraint_,
-						2,
+						3,
 						startTime,
 						time,
 						samplingPeriod);
@@ -586,33 +620,28 @@ namespace hpp
       vectorN wbMaskVector = gikStandingRobot_->maskFactory()->wholeBodyMask();
       
       ChppGikConfigMotionConstraint cfgConstraint(humanoidRobot_,startTime,time,i_path,paramOfTime,ubMaskVector);
-      ChppGikPrioritizedMotion cfgElement(&(*humanoidRobot_),3,&cfgConstraint,0.1);
-      cfgElement.workingJoints(wbMaskVector);
+      ChppGikPrioritizedMotion cfgElement(&(*humanoidRobot_),4,&cfgConstraint,0.2);
+      cfgElement.workingJoints(ubMaskVector);
       genericTask.addElement( &cfgElement );
 
-      //Config interpolated element at end of locomotion
+      double configTaskDuration = 3;
       CkwsConfigShPtr endCfg = i_path->configAtEnd();
-      std::vector<double> kineoTargetCfg;
+      std::vector<double> kineoTargetCfg; 
       endCfg->getDofValues(kineoTargetCfg);
       MAL_VECTOR_DIM(jrlTargetCfg, double, humanoidRobot_->numberDof());
       humanoidRobot_->kwsToJrlDynamicsDofValues(kineoTargetCfg,jrlTargetCfg);
+      ChppGikConfigurationConstraint configTask(*(gikStandingRobot_->robot()), jrlTargetCfg, wbMaskVector);
+      ChppGikInterpolatedElement interpolatedCfgElement(gikStandingRobot_->robot(), 
+							&configTask,
+							1,
+							time,
+							configTaskDuration,
+							samplingPeriod);
 
-      ChppGikConfigurationConstraint configTask(*humanoidRobot_,
-						jrlTargetCfg,
-						wbMaskVector);
-      double cfgElementDuration = 2.;
-      ChppGikInterpolatedElement interCfgElement(&(*humanoidRobot_),
-						 &configTask,
-						 0,
-						 time,
-						 cfgElementDuration,
-						 samplingPeriod);
+      genericTask.addElement( &interpolatedCfgElement );
       
-      genericTask.addElement( &interCfgElement );
-
-
-
-
+  
+      std::cout << "Solving the task" << std::endl;
 
       //solving the task
       bool isSolved = genericTask.solve();
@@ -631,6 +660,13 @@ namespace hpp
 	{
 	  std::cout << "Failed to solve generic task"
 		    << std::endl;
+	  ChppRobotMotion  motion =   genericTask.solutionMotion();
+	  if (!motion.empty())
+	    {
+	      convertGikRobotMotionToKineoPath(&motion,newPath);
+	    }
+	  hppProblem(0)->addPath ( newPath);
+	  newPath = CkwsPath::create(humanoidRobot_);
 	}
       return newPath;
     }
@@ -903,12 +939,13 @@ namespace hpp
       maxTheta_ = maxTheta;
     }
 
+
     ktStatus Planner::solve()
     {
 
       humanoidRobot_->userConstraints()->add(wholeBodyConstraint_);
       ktStatus res =  solveOneProblem(0);
-      //      humanoidRobot_->userConstraints()->remove(wholeBodyConstraint_);
+      humanoidRobot_->userConstraints()->remove(wholeBodyConstraint_);
 
       if ( res != KD_OK )
 	{
