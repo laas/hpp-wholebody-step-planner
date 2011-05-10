@@ -6,6 +6,7 @@
 # include <kwsPlus/roadmap/kwsPlusLTRdmBuilder.h>
 # include <hpp/gik/task/generic-task.hh>
 
+# include <hpp/util/debug.hh>
 
 # include <hpp/wholebody-step-planner/planner.hh>
 # include <hpp/wholebody-step-planner/config-motion-constraint.hh>
@@ -48,7 +49,14 @@ namespace hpp
        maxY_(1),
        minTheta_(-1),
        maxTheta_(1),
-       paramPrecision_(PARAM_PRECISION)
+       paramPrecision_(PARAM_PRECISION),
+       timestamp_ (0),
+       posFile_
+       (debug::getFilename ("trajectory.pos", "hpp-wholebody-step-planner").c_str ()),
+       zmpFile_
+       (debug::getFilename ("trajectory.zmp", "hpp-wholebody-step-planner").c_str ()),
+       rpyFile_
+       (debug::getFilename ("trajectory.rpy", "hpp-wholebody-step-planner").c_str ())
     {
       std::cout << "ParamPrecision: " 
 		<<  paramPrecision_ 
@@ -60,6 +68,10 @@ namespace hpp
       if (waistPlaneConstraint_) delete waistPlaneConstraint_ ;
       if (waistParallelConstraint_) delete waistParallelConstraint_ ;
       if (gikStandingRobot_) delete gikStandingRobot_;
+      if (currentGikMotion_) delete currentGikMotion_;
+      if (validGikMotion_.size () > 0)
+	for (unsigned int i = 0; i < validGikMotion_.size (); ++i)
+	  delete validGikMotion_[i];
     }
 
     ChppHumanoidRobotShPtr Planner::humanoidRobot ()
@@ -271,7 +283,6 @@ namespace hpp
       humanoidRobot_->currentAcceleration(zeros);
       humanoidRobot_->computeForwardKinematics();
       
-
       CkwsPathShPtr animatedPath;
       footprintOfParam_t ftprints;
 
@@ -294,6 +305,9 @@ namespace hpp
 
 
       animatedPath->validateWithPenetration(0.2);
+
+      if ((animatedPath->length()!=0) && (animatedPath->isValid()))
+	validGikMotion_.push_back (currentGikMotion_);
 
       if ((animatedPath->length()==0) || (!animatedPath->isValid())) 
 	{
@@ -609,6 +623,7 @@ namespace hpp
 	  ChppRobotMotion  motion =   genericTask.solutionMotion();
 	  if (!motion.empty())
 	    {
+	      currentGikMotion_ = new ChppRobotMotion (motion);
 	      convertGikRobotMotionToKineoPath(&motion,newPath);
 	    }
 	}
@@ -676,7 +691,7 @@ namespace hpp
 	{
 	  humanoidRobot_->jrlDynamicsToKwsDofValues(motionSample->configuration, endKineoCfg);
 	  endCfg->setDofValues(endKineoCfg);
-       
+
 	  if (!startCfg->isEquivalent(*endCfg)) {
 	    if ( o_path->appendDirectPath( startCfg , endCfg) == KD_OK)
 	      {
@@ -689,6 +704,102 @@ namespace hpp
       return KD_OK;
     }
 
+    ktStatus Planner::writeSeqplayFiles ()
+    {
+      if (validGikMotion_.size () == 0)
+	{
+	  std::cerr << "ERROR: writeSeqplayFiles: Empty motion vector" 
+		    << std::endl;
+	  return KD_ERROR;
+	}
+      else std::cout << "validGikMotion_ size: " << validGikMotion_.size () << std::endl;
+
+      std::vector<double> kineoCfg(humanoidRobot_->countDofs ());
+      std::vector<double> openHrpCfg(humanoidRobot_->countDofs ());
+      
+      for (vector<ChppRobotMotion*>::iterator it = validGikMotion_.begin ();
+	   it < validGikMotion_.end (); it++)
+	{
+	  std::cout << "start x: " << (*it)->firstSample ()->configuration[0] << " "
+		    << "end x: " << (*it)->lastSample ()->configuration[0] << " "
+		    << std::endl;
+
+	  const ChppRobotMotionSample * motionSample = (*it)->firstSample();
+	  
+	  if (!motionSample)
+	    {
+	      std::cerr << "ERROR: writeSeqplayFiles: Empty motion sample" 
+			<< std::endl;
+	      return KD_ERROR;
+	    }
+	 
+	  // Connect two motion files with a 5ms gap between end and start
+	  // since speed and ZMP are (theoretically) null.
+	  timestamp_ += 0.005; 
+	  
+	  while (motionSample)
+	    {
+	      humanoidRobot_->jrlDynamicsToKwsDofValues(motionSample->configuration, kineoCfg);
+	      kwsToOpenHrpDofValues (kineoCfg, openHrpCfg);
+
+	      // Write configuration in Seqplay files.
+	      zmpFile_ << timestamp_ << " "
+	      	       << motionSample->ZMPwstPla[0] << " "
+	      	       << motionSample->ZMPwstPla[1] << " "
+		       << motionSample->ZMPwstPla[2] << "\n";
+	      
+	      rpyFile_ << timestamp_ << " "
+		       << motionSample->configuration[3] << " "
+		       << motionSample->configuration[4] << " "
+		       << motionSample->configuration[5] << "\n";
+
+	      posFile_ << timestamp_ << " ";
+	      for (unsigned int dof = 6; dof < humanoidRobot_->countDofs (); dof++)
+		posFile_ << openHrpCfg[dof] << " ";
+	      posFile_ << "\n";
+	      
+	      motionSample = (*it)->nextSample() ;
+	      timestamp_ += (*it)->samplingPeriod ();
+	    }
+	}
+      
+      posFile_.close ();
+      zmpFile_.close ();
+      rpyFile_.close ();
+
+      return KD_OK;
+    }
+    
+    ktStatus
+    Planner::kwsToOpenHrpDofValues (const std::vector<double>& inKwsDofVector,
+				    std::vector<double>& outOpenHrpDofVector)
+    {
+      if (outOpenHrpDofVector.size () != inKwsDofVector.size ())
+	return KD_ERROR;
+      
+      for (unsigned int i = 0; i < 29; i++)
+	outOpenHrpDofVector[i] = inKwsDofVector[i];
+
+      // Switch vector index for left arm and right hand joints.
+      outOpenHrpDofVector[29] = inKwsDofVector[34];
+      outOpenHrpDofVector[30] = inKwsDofVector[35];
+      outOpenHrpDofVector[31] = inKwsDofVector[36];
+      outOpenHrpDofVector[32] = inKwsDofVector[37];
+      outOpenHrpDofVector[33] = inKwsDofVector[38];
+      outOpenHrpDofVector[34] = inKwsDofVector[39];
+      outOpenHrpDofVector[35] = inKwsDofVector[40];
+
+      outOpenHrpDofVector[36] = inKwsDofVector[29];
+      outOpenHrpDofVector[37] = inKwsDofVector[30];
+      outOpenHrpDofVector[38] = inKwsDofVector[31];
+      outOpenHrpDofVector[39] = inKwsDofVector[32];
+      outOpenHrpDofVector[40] = inKwsDofVector[33];
+
+      for (unsigned int i = 41 ; i < 46; i++) 
+	outOpenHrpDofVector[i] = inKwsDofVector[i];
+
+      return KD_OK;
+    }
 
     ChppGikFootprint * 
     Planner::findNextFootPrint(CkwsPathShPtr i_path, 
