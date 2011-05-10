@@ -54,7 +54,8 @@ namespace hpp
 				   footprintOfParam_t & i_footPrintOfParam );
 
 
-      CkwsPathShPtr findDynamicPath( CkwsPathShPtr i_path);
+  
+      CkwsPathShPtr findDynamicPath ( CkwsPathShPtr i_path );
 
       void setFootPrintLimits(double minX,
 			      double maxX,
