@@ -207,6 +207,9 @@ namespace hpp
       CkwsRoadmapShPtr roadmap = CkwsRoadmap::create(humanoidRobot_);
       CkwsDiffusingRdmBuilderShPtr rdmBuilder = 
 	CkwsDiffusingRdmBuilder::create ( roadmap );
+
+      rdmBuilder->diffuseFromProblemStart(true);
+      rdmBuilder->diffuseFromProblemGoal(true);
       
       steeringMethodIthProblem(0, CkwsSMLinear::create ());
       roadmapBuilderIthProblem (0,rdmBuilder);
@@ -229,7 +232,7 @@ namespace hpp
       postOptimizer->targetConfig(halfSittingCfg);
       postOptimizer->setConfigMask(wbMask);
 
-      optimizer->postOptimizer(postOptimizer);
+      //optimizer->postOptimizer(postOptimizer);
 
       pathOptimizerIthProblem(0,optimizer);
 
@@ -262,6 +265,8 @@ namespace hpp
       std::vector<double> configKineo;
       CkwsConfig currentCfg(humanoidRobot_);
 
+      resultFootprints_.clear();
+
       MAL_VECTOR_DIM(zeros, double, humanoidRobot_->numberDof());
       for(unsigned int i=0; i<zeros.size(); i++)
 	zeros[i] =0;
@@ -274,8 +279,8 @@ namespace hpp
 	    std::cerr << "FindDynamicPath(): ERROR: animating path of length less than 1cm. Aborting." 
 		      << std::endl;
 
-	    pathToAnimate = pathAtEnd;
-	    pathAtEnd =  CkwsPath::create(humanoidRobot_);
+	    pathToAnimate->clear();
+	    pathAtEnd->clear();
 	  }
 	  
 	  else {
@@ -319,6 +324,8 @@ namespace hpp
 
 	    if ((animatedPath->isValid()) && (animatedPath->length())) 
 	      {
+		resultFootprints_.push_back( ftprints );
+		
 		if (!resultPath->isEmpty()) {
 		  CkwsConfigShPtr endStartCfg = resultPath->configAtEnd();
 		  CkwsConfigShPtr startEndCfg = animatedPath->configAtStart();
@@ -391,6 +398,20 @@ namespace hpp
 	      }
 	  }
 	}
+
+      /* Reinitializing robot state before animating the whole path */
+      i_path->getConfigAtStart(currentCfg);
+      humanoidRobot_->hppSetCurrentConfig(currentCfg);
+      humanoidRobot_->currentVelocity(zeros);
+      humanoidRobot_->currentAcceleration(zeros);
+      humanoidRobot_->computeForwardKinematics();
+      humanoidRobot_->computeForwardKinematics();
+      CkwsPathShPtr wholeAnimatedPath = animateWholePath( i_path );
+
+      if (wholeAnimatedPath) hppProblem(0)->addPath ( wholeAnimatedPath) ;
+	
+
+
       return resultPath;
     }
 
@@ -448,14 +469,19 @@ namespace hpp
 		    << newFootPrint->th() << " , "
 		    << std::endl;
 
-	  o_footPrintOfParam[currentDist] = newFootPrint;
+	  double dist = currentDist;
+	  if (currentDist>= length) {
+	    dist = length - (paramPrecision_ /100);
+	  }
+
+	  o_footPrintOfParam[dist] = newFootPrint;
 	  isRightFoot = !isRightFoot;
 	  currentFootPrint = newFootPrint;
 	}
 
       ChppGikFootprint * newFootPrint = addLastFootPrint(i_path,currentFootPrint,isRightFoot);
 
-      o_footPrintOfParam[currentDist+1] = newFootPrint;
+      o_footPrintOfParam[length] = newFootPrint;
 
       return KD_OK;
     }
@@ -563,6 +589,9 @@ namespace hpp
 								      zmpStartShiftTime,
 								      footFlightTime,
 								      stepHeight);
+
+	  stepFracOfFootprint_[(*it).second] = footFlightTime / footFlightTime_;
+
 	  double stepDuration = stepElement->duration();
 	  time+= stepDuration;
 
@@ -643,13 +672,6 @@ namespace hpp
 	{
 	  std::cout << "Failed to solve generic task"
 		    << std::endl;
-	  ChppRobotMotion  motion =   genericTask.solutionMotion();
-	  if (!motion.empty())
-	    {
-	      convertGikRobotMotionToKineoPath(&motion,newPath);
-	    }
-	  hppProblem(0)->addPath ( newPath);
-	  newPath = CkwsPath::create(humanoidRobot_);
 	}
       return newPath;
     }
@@ -809,6 +831,170 @@ namespace hpp
 
       delete ft2Local;
       return res;
+    }
+
+    CkwsPathShPtr Planner::animateWholePath(CkwsPathShPtr i_path) {
+      
+      footprintOfParam_t allFootprints;
+      footprintOfParam_t::iterator it;
+      double length = 0;
+      double extraLength = 0; //Used when we concatenate two footprints
+
+
+      /* Building footprintofparam for the total path */
+      for ( unsigned int i = 0; i < resultFootprints_.size() ; i++)
+	{
+	  bool isRightFoot = true;
+
+	  footprintOfParam_t footPrintOfParam = resultFootprints_[i] ;
+
+	  for (it=footPrintOfParam.begin();it!=footPrintOfParam.end();it++){
+	    allFootprints[(*it).first + length] = (*it).second ;
+
+	    stepFracOfFootprint_ [ (*it).second ] += extraLength;
+	    extraLength = 0;
+
+	    isRightFoot = !isRightFoot;
+	  }
+	  if ( (!isRightFoot)   //The last footprint is right foot, we erase it.
+	       && (i < resultFootprints_.size() -1) )
+	    {
+	      it = allFootprints.end(); it --;
+	      extraLength = stepFracOfFootprint_[ (*it).second ];
+	      allFootprints.erase(it);
+	    }
+	  it = footPrintOfParam.end(); it --;
+	  length += (*it).first;
+	}
+
+      std::cout << "---------------------" << std::endl
+		<< " Animating Whole Path" << std::endl
+		<< "Length: " << i_path->length() << std::endl;
+
+      std::cout << "Footprints: "  << std::endl;
+
+      for ( it = allFootprints.begin() ; it != allFootprints.end() ; it++) 
+	{
+	  std::cout << "\tat length " << (*it).first 
+		    << " : "
+		    << (*it).second->x() << ","
+		    << (*it).second->y() << ","
+		    << (*it).second->th() << ","
+		    << std::endl ;
+	}
+
+
+      CkwsPathShPtr newPath = CkwsPath::create(humanoidRobot_);
+      std::map<double,double> paramOfTime;
+      paramOfTime[0.] = 0.;
+      double startTime = 0.;
+      double time = 1.6;
+      paramOfTime[time] = 0.;
+  
+      /* Footstep parameters */
+      double samplingPeriod = 5e-3;
+
+      /* Creating generic task */
+      ChppGikGenericTask genericTask( gikStandingRobot_ , samplingPeriod );
+   
+      /* Iterating over footsteps */
+      bool isRightFoot = true;
+      double lastParam = 0.;
+
+      for(it=allFootprints.begin();it!=allFootprints.end();it++)
+	{
+	  double stepFrac = stepFracOfFootprint_[ (*it).second ];
+	  double zmpEndShiftTime = stepFrac * zmpEndShiftTime_;
+	  double zmpStartShiftTime = stepFrac * zmpStartShiftTime_;
+	  double footFlightTime = stepFrac * footFlightTime_;
+	  double stepHeight = stepFrac * stepHeight_;
+	  footFlightTime = ((int) (footFlightTime / samplingPeriod) +1) * samplingPeriod ;
+	  zmpStartShiftTime =  ((int) (zmpStartShiftTime /  samplingPeriod) +1) * samplingPeriod ;
+	  zmpEndShiftTime =  ((int) (zmpEndShiftTime /  samplingPeriod) +1) * samplingPeriod ;
+
+	  ChppGikStepElement * stepElement = new ChppGikStepElement ( gikStandingRobot_,
+								      time,
+								      (*it).second,
+								      isRightFoot,
+								      samplingPeriod,
+								      zmpEndCoeff_,
+								      zmpEndShiftTime,
+								      zmpStartShiftTime,
+								      footFlightTime,
+								      stepHeight);
+
+	  double stepDuration = stepElement->duration();
+	  time+= stepDuration;
+
+	  // When the foot reaches the ground, the configuration to approach 
+	  // is the one halfway between the two footsteps
+	  double currentParam = (lastParam + (*it).first) /2.;
+	  paramOfTime[time] = currentParam;
+	  lastParam =  (*it).first ;
+	  isRightFoot = !isRightFoot;
+
+	  genericTask.addElement( stepElement );
+	}
+
+      std::cout << "Total walking time: "  << time << std::endl;
+
+      time += 2;
+   
+      //Constraint on the waist height
+      ChppGikInterpolatedElement heightElem ( gikStandingRobot_->robot(),
+					      waistPlaneConstraint_,
+					      2,
+					      startTime,
+					      time,
+					      samplingPeriod);
+      genericTask.addElement( &heightElem );
+
+      //Constraint on the waist orientation
+      ChppGikInterpolatedElement verticalElem ( gikStandingRobot_->robot(),
+						waistParallelConstraint_,
+						3,
+						startTime,
+						time,
+						samplingPeriod);
+      genericTask.addElement( &verticalElem );
+
+      //Config Constraint
+      vectorN ubMaskVector = gikStandingRobot_->maskFactory()->upperBodyMask();
+         
+      ChppGikConfigMotionConstraint cfgConstraint(humanoidRobot_,startTime,time,i_path,paramOfTime,ubMaskVector);
+      ChppGikPrioritizedMotion cfgElement(&(*humanoidRobot_),4,&cfgConstraint,0.2);
+      cfgElement.workingJoints(ubMaskVector);
+      genericTask.addElement( &cfgElement );
+      
+      std::cout << "Solving the task" << std::endl;
+
+      //solving the task
+      bool isSolved = genericTask.solve();
+      
+
+      if (isSolved)
+	{
+	  ChppRobotMotion  motion =   genericTask.solutionMotion();
+	  if (!motion.empty())
+	    {
+	      convertGikRobotMotionToKineoPath(&motion,newPath);
+	    }
+	}
+      else 
+	{
+	  std::cout << "Failed to solve generic task"
+		    << std::endl;
+
+	  ChppRobotMotion  motion =   genericTask.solutionMotion();
+	  if (!motion.empty())
+	    {
+	      convertGikRobotMotionToKineoPath(&motion,newPath);
+	    }
+	  hppProblem(0)->addPath (newPath);
+
+	}
+      return newPath;
+	  
     }
 
     void Planner::setFootPrintLimits(double minX,

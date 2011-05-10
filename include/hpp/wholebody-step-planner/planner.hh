@@ -53,6 +53,7 @@ namespace hpp
       CkwsPathShPtr  animatePath ( CkwsPathShPtr i_path ,  
 				   footprintOfParam_t & i_footPrintOfParam );
 
+      CkwsPathShPtr animateWholePath (CkwsPathShPtr i_path);
 
   
       CkwsPathShPtr findDynamicPath ( CkwsPathShPtr i_path );
@@ -125,6 +126,11 @@ namespace hpp
 
       /* Precision threshold for path exploration */
       double paramPrecision_;
+
+      /* step parameters for each footprint */
+
+      std::map < ChppGikFootprint *, double> stepFracOfFootprint_;
+      std::vector  < footprintOfParam_t > resultFootprints_;
 
     };
   }
