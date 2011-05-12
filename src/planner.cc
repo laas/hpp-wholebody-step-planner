@@ -229,11 +229,11 @@ namespace hpp
       
       CkwsLoopOptimizerShPtr optimizer = 
 	CkwsRandomOptimizer::create();
-      optimizer->penetration (rdmBuilder->penetration ());
+      optimizer->penetration (hppProblem (0)->penetration ());
 
       PathOptimizerShPtr postOptimizer = 
 	PathOptimizer::create();
-      postOptimizer->penetration (rdmBuilder->penetration () / 100);
+      postOptimizer->penetration (hppProblem (0)->penetration () / 100);
 
       CkwsConfigShPtr halfSittingCfg;
       humanoidRobot_->getCurrentConfig(halfSittingCfg);
