@@ -19,6 +19,7 @@
 # include <hppModel/hppHumanoidRobot.h>
 
 # include <tlcWholeBodyPlanner/tlcGikManager.h>
+# include <tlcWholeBodyPlanner/tlcGraspBallGoalGenerator.h>
 
 # include <hpp/wholebody-step-planner/wholebody-constraint.hh>
 
@@ -40,7 +41,11 @@ namespace hpp
 
       wholeBodyConstraintShPtr wholeBodyConstraint ();
 
+      CtlcGraspBallGoalGeneratorShPtr getGoalTask();
+
       ktStatus initAndGoalConfig (CkwsPathShPtr inPath);
+
+      ktStatus generateGoalConfig ();
 
       virtual ktStatus initializeProblem();
 
@@ -103,6 +108,9 @@ namespace hpp
       double samplingPeriod_;
       CtlcGikManagerShPtr  gikManager_;
       wholeBodyConstraintShPtr wholeBodyConstraint_;
+
+      /* Attributes for goal configurations generation */
+      CtlcGraspBallGoalGeneratorShPtr goalConfigGenerator_;
 
       /* Footstep parameters */
       double zmpEndCoeff_;

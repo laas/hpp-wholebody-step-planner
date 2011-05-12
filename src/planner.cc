@@ -1,12 +1,17 @@
+#include <sstream>
 
 # include <KineoWorks2/kwsRoadmap.h>
 # include <KineoWorks2/kwsDiffusingRdmBuilder.h>
 # include <KineoWorks2/kwsRandomOptimizer.h>
 
+#include <KineoModel/kppConfigComponent.h>
+
 # include <kwsPlus/roadmap/kwsPlusLTRdmBuilder.h>
 # include <hpp/gik/task/generic-task.hh>
 
 # include <hpp/util/debug.hh>
+
+# include <tlcWholeBodyPlanner/tlcGikCfgOptimizer.h>
 
 # include <hpp/wholebody-step-planner/planner.hh>
 # include <hpp/wholebody-step-planner/config-motion-constraint.hh>
@@ -85,6 +90,11 @@ namespace hpp
       return wholeBodyConstraint_;
     }
 
+    CtlcGraspBallGoalGeneratorShPtr Planner::getGoalTask()
+    {
+      return goalConfigGenerator_;
+    }
+    
     ktStatus
     Planner::initializeProblem()
     {
@@ -214,7 +224,17 @@ namespace hpp
 
       wholeBodyConstraint_->setConstraints(sot);
 
-
+      /* Initializeing goal config generator */
+     
+      gikManager_->setTasks (sot);
+      goalConfigGenerator_ =
+	CtlcGraspBallGoalGenerator::create(gikManager_, humanoidRobot_);
+      if(!goalConfigGenerator_) {
+	std::cerr <<
+	  (":initializeProblem: Creating the attWholeBodyConfigGenerator failed.") << std::endl;
+	return KD_ERROR;
+      }
+      
       /* initializing the motion planning problem */
 
       CkwsRoadmapShPtr roadmap = CkwsRoadmap::create(humanoidRobot_);
@@ -260,11 +280,70 @@ namespace hpp
       assert (inPath->device() == humanoidRobot_);
       
       CkwsConfigShPtr iCfg = inPath->configAtStart();
-      CkwsConfigShPtr fCfg = inPath->configAtEnd(); 
+      CkwsConfigShPtr fCfg = inPath->configAtEnd();
 
       initConfIthProblem(0,iCfg);
       goalConfIthProblem(0,fCfg);
       
+      return KD_OK;
+    }
+
+    ktStatus Planner::generateGoalConfig ()
+    {
+      std::vector<CjrlGikStateConstraint*> sot;
+      sot.push_back (waistPlaneConstraint_);
+      sot.push_back (waistParallelConstraint_);
+      gikManager_->setTasks (sot);
+
+      if (!goalConfigGenerator_->compute() == KD_OK)
+	{
+	  std::cerr << (":ERROR generateGoalConfig::Generating goal config.") << std::endl;
+	  return KD_ERROR;
+	}
+
+      std::vector <CkwsConfigShPtr> goalWholeBodyConfigVector = 
+	goalConfigGenerator_->getWholeBodyTargetConfig();
+
+      if (goalWholeBodyConfigVector.size() == 0)
+	{
+	  std::cerr << (":generateGoalConfig::No goal config has been generated. You can try another time") << std::endl;
+	  return KD_ERROR;
+	}
+
+      CtlcGikCfgOptimizerShPtr gikCfgOptimizer
+	= CtlcGikCfgOptimizer::create (gikManager_);
+
+      for (unsigned int i = 0; i < goalWholeBodyConfigVector.size (); ++i)
+	{
+	  /* Attach goal config to device */
+
+	  std::stringstream ss (stringstream::in | stringstream::out);
+	  ss << "goal config " << i+1;
+	  humanoidRobot_
+	    ->addChildComponent (CkppConfigComponent::create (goalWholeBodyConfigVector[i],
+	  						      ss.str ()));
+
+	  /* Optimize each configuration towards half-sitting */
+	  std::cout << "Starting optimizing config " << i << std::endl;
+	  // sot.push_back (goalConfigGenerator_->getGoalTask ()[0]);
+	  // gikCfgOptimizer->setUserConstraint (sot);
+	  gikManager_->setRobotBoxPos (goalWholeBodyConfigVector[i]);
+	  CkwsPathShPtr optimizedPath
+	    = gikCfgOptimizer->optimizeCfg (goalWholeBodyConfigVector[i]);
+	  std::cout << "Finished optimizing config " << i << std::endl;
+
+	  /* Attach goal config to device */
+
+	  std::stringstream ssOpt (stringstream::in | stringstream::out);
+	  ssOpt << "otpimized goal config " << i+1;
+	  humanoidRobot_
+	    ->addChildComponent (CkppConfigComponent::create (optimizedPath->configAtEnd (),
+	  						      ssOpt.str ()));
+	}
+
+      std::cout << "Goal config found." << std::endl;
+      std::vector<CjrlGikStateConstraint*> emptyTask;
+      gikManager_->setTasks (emptyTask);
       return KD_OK;
     }
 
