@@ -1160,13 +1160,33 @@ namespace hpp
 
       //Config Constraint
       vectorN ubMaskVector = gikStandingRobot_->maskFactory()->upperBodyMask();
-         
+      vectorN wbMaskVector = gikStandingRobot_->maskFactory()->wholeBodyMask();         
+
       ChppGikConfigMotionConstraint cfgConstraint(humanoidRobot_,startTime,time,i_path,paramOfTime,ubMaskVector);
       ChppGikPrioritizedMotion cfgElement(&(*humanoidRobot_),4,&cfgConstraint,0.2);
       cfgElement.workingJoints(ubMaskVector);
       genericTask.addElement( &cfgElement );
       
       std::cout << "Solving the task" << std::endl;
+
+      // Interpolated config task
+      double configTaskDuration = 3;
+      CkwsConfigShPtr endCfg = i_path->configAtEnd();
+      std::vector<double> kineoTargetCfg; 
+      endCfg->getDofValues(kineoTargetCfg);
+      MAL_VECTOR_DIM(jrlTargetCfg, double, humanoidRobot_->numberDof());
+      humanoidRobot_->kwsToJrlDynamicsDofValues(kineoTargetCfg,jrlTargetCfg);
+      ChppGikConfigurationConstraint configTask(*(gikStandingRobot_->robot()), jrlTargetCfg, wbMaskVector);
+      ChppGikInterpolatedElement interpolatedCfgElement(gikStandingRobot_->robot(), 
+							&configTask,
+							1,
+							time,
+							configTaskDuration,
+							samplingPeriod);
+
+      genericTask.addElement( &interpolatedCfgElement );
+      
+
 
       //solving the task
       bool isSolved = genericTask.solve();
