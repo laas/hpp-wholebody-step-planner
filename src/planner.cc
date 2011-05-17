@@ -16,7 +16,7 @@
 # include <hpp/wholebody-step-planner/planner.hh>
 # include <hpp/wholebody-step-planner/config-motion-constraint.hh>
 # include <hpp/wholebody-step-planner/path-optimizer.hh>
-
+# include <hpp/wholebody-step-planner/distance.hh>
 
 # define PARAM_PRECISION 0.01
 # define TASK_PRECISION 1e-4
@@ -257,15 +257,21 @@ namespace hpp
       CkwsConfigShPtr halfSittingCfg;
       humanoidRobot_->getCurrentConfig(halfSittingCfg);
 
+      DistanceShPtr distance = Distance::create ();
+      distance->fixedCostPerDirectPath (0.0);
+
       /* Building wholebody mask, without the free flyer dofs */
       std::vector<bool> wbMask(humanoidRobot_->countDofs(),true);
       for(unsigned int i = 0; i<6; i++) wbMask[i] = false;
       
       postOptimizer->targetConfig(halfSittingCfg);
       postOptimizer->setConfigMask(wbMask);
+      distance->targetConfig(halfSittingCfg);
+      distance->setConfigMask(wbMask);
 
-      //optimizer->postOptimizer(postOptimizer);
-
+      optimizer->postOptimizer(postOptimizer);
+      optimizer->postOptimizer ()->distance (distance);
+ 
       pathOptimizerIthProblem(0,optimizer);
 
       hppProblem (0)->alwaysOptimize (true);
