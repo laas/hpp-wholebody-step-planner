@@ -43,6 +43,8 @@ namespace hpp
 
       CtlcGraspBallGoalGeneratorShPtr getGoalTask();
 
+      ktStatus goalWaistConfig (CkwsPathShPtr inPath);
+
       ktStatus initAndGoalConfig (CkwsPathShPtr inPath);
 
       ktStatus generateGoalConfig ();

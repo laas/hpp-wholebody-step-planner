@@ -226,7 +226,6 @@ namespace hpp
 
       /* Initializeing goal config generator */
      
-      gikManager_->setTasks (sot);
       goalConfigGenerator_ =
 	CtlcGraspBallGoalGenerator::create(gikManager_, humanoidRobot_);
       if(!goalConfigGenerator_) {
@@ -274,6 +273,17 @@ namespace hpp
       return KD_OK;
     }
 
+    ktStatus Planner::goalWaistConfig (CkwsPathShPtr inPath)
+    {
+      assert (inPath->device() == humanoidRobot_);
+
+      CkwsConfigShPtr fCfg = inPath->configAtEnd ();
+      goalConfigGenerator_->setGoalBoxPosition (fCfg->dofValue (0),
+						fCfg->dofValue (1),
+						fCfg->dofValue (5));
+      return KD_OK;
+    }
+
     ktStatus
     Planner::initAndGoalConfig (CkwsPathShPtr inPath)
     {
@@ -296,14 +306,14 @@ namespace hpp
       gikManager_->setTasks (sot);
 
       if (!goalConfigGenerator_->compute() == KD_OK)
-	{
-	  std::cerr << (":ERROR generateGoalConfig::Generating goal config.") << std::endl;
-	  return KD_ERROR;
-	}
+        {
+          std::cerr << (":ERROR generateGoalConfig::Generating goal config.") << std::endl;
+          return KD_ERROR;
+        }
 
       std::vector <CkwsConfigShPtr> goalWholeBodyConfigVector = 
 	goalConfigGenerator_->getWholeBodyTargetConfig();
-
+      
       if (goalWholeBodyConfigVector.size() == 0)
 	{
 	  std::cerr << (":generateGoalConfig::No goal config has been generated. You can try another time") << std::endl;
@@ -323,10 +333,9 @@ namespace hpp
 	    ->addChildComponent (CkppConfigComponent::create (goalWholeBodyConfigVector[i],
 	  						      ss.str ()));
 
-	  /* Optimize each configuration towards half-sitting */
+	  /* Optimize each configuration towards half-sitting */ 
+
 	  std::cout << "Starting optimizing config " << i << std::endl;
-	  // sot.push_back (goalConfigGenerator_->getGoalTask ()[0]);
-	  // gikCfgOptimizer->setUserConstraint (sot);
 	  gikManager_->setRobotBoxPos (goalWholeBodyConfigVector[i]);
 	  CkwsPathShPtr optimizedPath
 	    = gikCfgOptimizer->optimizeCfg (goalWholeBodyConfigVector[i]);
