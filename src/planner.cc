@@ -712,6 +712,8 @@ namespace hpp
       std::cout << "Total walking time: "  << time << std::endl;
 
       time += 2;
+
+      paramOfTime[time] = i_path->length();
    
       //Constraint on the waist height
       ChppGikInterpolatedElement heightElem ( gikStandingRobot_->robot(),
@@ -1139,6 +1141,7 @@ namespace hpp
       std::cout << "Total walking time: "  << time << std::endl;
 
       time += 2;
+      paramOfTime[time] = i_path->length();
    
       //Constraint on the waist height
       ChppGikInterpolatedElement heightElem ( gikStandingRobot_->robot(),
@@ -1160,7 +1163,12 @@ namespace hpp
 
       //Config Constraint
       vectorN ubMaskVector = gikStandingRobot_->maskFactory()->upperBodyMask();
-      vectorN wbMaskVector = gikStandingRobot_->maskFactory()->wholeBodyMask();         
+      vectorN wbMaskVector = gikStandingRobot_->maskFactory()->wholeBodyMask();
+
+      //Removing ff dofs from upper body mask vector 
+      for(unsigned int i = 0;i<6;i++)
+	ubMaskVector[i] = 0;
+
 
       ChppGikConfigMotionConstraint cfgConstraint(humanoidRobot_,startTime,time,i_path,paramOfTime,ubMaskVector);
       ChppGikPrioritizedMotion cfgElement(&(*humanoidRobot_),4,&cfgConstraint,0.2);

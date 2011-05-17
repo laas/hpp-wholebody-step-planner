@@ -72,11 +72,11 @@ namespace hpp
       if (it == paramOfTime_.end() )
 	{
 	  it--;
-	  dist = (*it).first;
+	  dist = (*it).second;
 	}
       else if (it == paramOfTime_.begin())
 	{
-	  dist = (*it).first;
+	  dist = (*it).second;
 	}
       else
 	{
@@ -97,6 +97,7 @@ namespace hpp
       humanoidRobot_->kwsToJrlDynamicsDofValues(cfg,jrlCfg);
 
       configConstraint_->target(jrlCfg);
+
       return configConstraint_;
     }
 
