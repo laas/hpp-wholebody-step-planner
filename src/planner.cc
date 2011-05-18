@@ -803,6 +803,11 @@ namespace hpp
       vectorN ubMaskVector = gikStandingRobot_->maskFactory()->upperBodyMask();
       vectorN wbMaskVector = gikStandingRobot_->maskFactory()->wholeBodyMask();
 
+      for(unsigned int i =0;i<6;i++){
+	ubMaskVector[i] = 0;
+	wbMaskVector[i] = 0;
+      }
+
       ChppGikConfigMotionConstraint cfgConstraint(humanoidRobot_,startTime,time,i_path,paramOfTime,ubMaskVector);
       ChppGikPrioritizedMotion cfgElement(&(*humanoidRobot_),4,&cfgConstraint,1e-6);
       cfgElement.workingJoints(ubMaskVector);
@@ -1247,7 +1252,12 @@ namespace hpp
 
       //Config Constraint
       vectorN ubMaskVector = gikStandingRobot_->maskFactory()->upperBodyMask();
-      vectorN wbMaskVector = gikStandingRobot_->maskFactory()->wholeBodyMask();
+      vectorN wbMaskVector = gikStandingRobot_->maskFactory()->wholeBodyMask();  
+
+      for(unsigned int i =0;i<6;i++){
+	ubMaskVector[i] = 0;       
+	wbMaskVector[i] = 0;
+      }
 
       //Removing ff dofs from upper body mask vector
       for(unsigned int i = 0;i<6;i++)
