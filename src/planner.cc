@@ -116,11 +116,15 @@ namespace hpp
 	  return KD_ERROR;
 	}
 
+      gikStandingRobot_ = new ChppGikStandingRobot(*humanoidRobot_);
+      gikManager_ =  CtlcGikManager::create(humanoidRobot_);
+   
+
       std::string property,value;
       property="ComputeZMP"; value="true";humanoidRobot_->setProperty ( property,value );
       property="TimeStep"; value="0.005";humanoidRobot_->setProperty ( property,value );
       property="ComputeAccelerationCoM"; value="true";humanoidRobot_->setProperty ( property,value );
-      property="ComputeBackwardDynamics"; value="false";humanoidRobot_->setProperty ( property,value );
+      property="ComputeBackwardDynamics"; value="true";humanoidRobot_->setProperty ( property,value );
       property="ComputeMomentum"; value="true";humanoidRobot_->setProperty ( property,value );
       property="ComputeAcceleration"; value="true";humanoidRobot_->setProperty ( property,value );
       property="ComputeVelocity"; value="true";humanoidRobot_->setProperty ( property,value );
@@ -128,10 +132,7 @@ namespace hpp
       property="ComputeCoM"; value="true";humanoidRobot_->setProperty ( property,value );
 
 
-  
-      gikStandingRobot_ = new ChppGikStandingRobot(*humanoidRobot_);
-
-      gikManager_ =  CtlcGikManager::create(humanoidRobot_);
+ 
 
       /* Building the tasks */
       waistZ_ = 
@@ -664,6 +665,8 @@ namespace hpp
       if ( footFlightTime < 0.4 ) samplingPeriod = 0.01;
       if ( footFlightTime < 0.2 ) samplingPeriod = 0.05;
 
+      samplingPeriod = 0.005;
+
       footFlightTime = ((int) (footFlightTime / samplingPeriod) +1) * samplingPeriod ;
       zmpStartShiftTime =  ((int) (zmpStartShiftTime /  samplingPeriod) +1) * samplingPeriod ;
       zmpEndShiftTime =  ((int) (zmpEndShiftTime /  samplingPeriod) +1) * samplingPeriod ;
@@ -686,6 +689,8 @@ namespace hpp
       /* Creating generic task */
       ChppGikGenericTask genericTask( gikStandingRobot_ , samplingPeriod );
    
+      genericTask.bringBackZMP(false,0,0);
+
       /* Iterating over footsteps */
       bool isRightFoot = true;
       double lastParam = 0.;
