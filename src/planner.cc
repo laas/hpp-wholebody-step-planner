@@ -25,7 +25,7 @@
 # define END_COEFF 0.5
 # define START_SHIFT_TIME 0.1
 # define END_SHIFT_TIME 0.1
-# define FOOT_FILGHT_TIME 1
+# define FOOT_FILGHT_TIME 0.8
 # define STEP_HEIGHT 0.05
 
 namespace hpp
@@ -918,9 +918,9 @@ namespace hpp
 		       << motionSample->configuration[5] << "\n";
 
 	      posFile_ << timestamp_ << " ";
-	      for (unsigned int dof = 6; dof < humanoidRobot_->countDofs (); dof++)
+	      for (unsigned int dof = 6; dof < humanoidRobot_->countDofs () -1; dof++)
 		posFile_ << openHrpCfg[dof] << " ";
-	      posFile_ << "\n";
+	      posFile_ << openHrpCfg[humanoidRobot_->countDofs()-1] << "\n";
 	      
 	      motionSample = (*it)->nextSample() ;
 	      timestamp_ += (*it)->samplingPeriod ();
@@ -1107,7 +1107,7 @@ namespace hpp
       std::map<double,double> paramOfTime;
       paramOfTime[0.] = 0.;
       double startTime = 0.;
-      double time = 1.6;
+      double time = 3.2;
       paramOfTime[time] = 0.;
   
       /* Footstep parameters */
@@ -1157,12 +1157,12 @@ namespace hpp
 
       std::cout << "Total walking time: "  << time << std::endl;
 
-      time += 2;
+      time += 4;
    
       //Constraint on the waist height
       ChppGikInterpolatedElement heightElem ( gikStandingRobot_->robot(),
 					      waistPlaneConstraint_,
-					      2,
+					      3,
 					      startTime,
 					      time,
 					      samplingPeriod);
@@ -1171,7 +1171,7 @@ namespace hpp
       //Constraint on the waist orientation
       ChppGikInterpolatedElement verticalElem ( gikStandingRobot_->robot(),
 						waistParallelConstraint_,
-						3,
+						4,
 						startTime,
 						time,
 						samplingPeriod);
@@ -1187,7 +1187,7 @@ namespace hpp
       }
 
       ChppGikConfigMotionConstraint cfgConstraint(humanoidRobot_,startTime,time,i_path,paramOfTime,ubMaskVector);
-      ChppGikPrioritizedMotion cfgElement(&(*humanoidRobot_),4,&cfgConstraint,0.2);
+      ChppGikPrioritizedMotion cfgElement(&(*humanoidRobot_),5,&cfgConstraint,0.2);
       cfgElement.workingJoints(ubMaskVector);
       genericTask.addElement( &cfgElement );
       
@@ -1203,7 +1203,7 @@ namespace hpp
       ChppGikConfigurationConstraint configTask(*(gikStandingRobot_->robot()), jrlTargetCfg, wbMaskVector);
       ChppGikInterpolatedElement interpolatedCfgElement(gikStandingRobot_->robot(), 
 							&configTask,
-							1,
+							3,
 							time,
 							configTaskDuration,
 							samplingPeriod);
@@ -1218,7 +1218,34 @@ namespace hpp
 
       if (isSolved)
 	{
+	
 	  ChppRobotMotion  motion =   genericTask.solutionMotion();
+	  if (!motion.empty())
+	    {
+	      /*
+	      validGikMotion_.push_back (&motion);
+	      if (writeSeqplayFiles() != KD_OK) {
+		std::cerr << "ERROR in writing seqplay files." << std::endl;
+	      }
+	      */
+	      convertGikRobotMotionToKineoPath(&motion,newPath);
+	      hppProblem(0)->addPath (newPath);
+	    }
+
+	  bool filterWorked = genericTask.filterZmpError();
+
+	  if (filterWorked) {
+	    isSolved = genericTask.solve();
+
+	    if (!isSolved) {
+	      std::cerr << "ERROR: AnimateWholePath - Second pass zmp filtering failed." 
+			<< std::endl;
+	      newPath.reset();
+	      return newPath;
+	    }
+	  }
+
+	  motion =   genericTask.solutionMotion();
 	  if (!motion.empty())
 	    {
 	      validGikMotion_.push_back (&motion);
@@ -1227,6 +1254,8 @@ namespace hpp
 	      }
 	      convertGikRobotMotionToKineoPath(&motion,newPath);
 	    }
+	  genericTask.filterZmpError();
+	  
 	}
       else 
 	{
