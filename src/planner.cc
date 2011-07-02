@@ -6,6 +6,7 @@
 
 #include <KineoModel/kppConfigComponent.h>
 
+# include <jrl/mal/matrixabstractlayer.hh>
 # include <kwsPlus/roadmap/kwsPlusLTRdmBuilder.h>
 # include <hpp/gik/task/generic-task.hh>
 

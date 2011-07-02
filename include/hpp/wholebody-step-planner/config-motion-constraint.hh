@@ -6,7 +6,7 @@
 
 # include <map> 
 
-# include "MatrixAbstractLayer/MatrixAbstractLayer.h"
+# include <jrl/mal/matrixabstractlayer.hh>
 
 # include <KineoWorks2/kwsPath.h>
 

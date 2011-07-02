@@ -38,9 +38,9 @@ SETUP_PROJECT()
 
 
 # Search for dependencies.
-ADD_REQUIRED_DEPENDENCY("tlcWholeBodyPlanner >= 0.1")
-ADD_REQUIRED_DEPENDENCY("kwsPlus >= 0.1")
-ADD_REQUIRED_DEPENDENCY("hpp-util >= 0.1")
+ADD_REQUIRED_DEPENDENCY("tlcWholeBodyPlanner >= 2.0")
+ADD_REQUIRED_DEPENDENCY("kwsPlus >= 1.8")
+ADD_REQUIRED_DEPENDENCY("hpp-util >= 0.4")
 
 ADD_SUBDIRECTORY(src)
 
