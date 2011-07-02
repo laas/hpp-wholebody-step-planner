@@ -4,7 +4,7 @@
 # include <KineoWorks2/kwsSteeringMethod.h>
 # include <KineoWorks2/kwsValidatorDPCollision.h>
 
-# include <hpp/wholebody-step-planner/path-optimizer.hh>
+# include "hpp/wholebody/step/planner/path-optimizer.hh"
 
 # define INTER_PARAM 0.01
 

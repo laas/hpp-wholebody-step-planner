@@ -14,9 +14,9 @@
 
 # include <tlcWholeBodyPlanner/tlcGikCfgOptimizer.h>
 
-# include <hpp/wholebody-step-planner/planner.hh>
-# include <hpp/wholebody-step-planner/config-motion-constraint.hh>
-# include <hpp/wholebody-step-planner/path-optimizer.hh>
+# include "hpp/wholebody/step/planner/planner.hh"
+# include "hpp/wholebody/step/planner/config-motion-constraint.hh"
+# include "hpp/wholebody/step/planner/path-optimizer.hh"
 
 
 # define PARAM_PRECISION 0.01

@@ -21,7 +21,7 @@
 # include <tlcWholeBodyPlanner/tlcGikManager.h>
 # include <tlcWholeBodyPlanner/tlcGraspBallGoalGenerator.h>
 
-# include <hpp/wholebody-step-planner/wholebody-constraint.hh>
+# include "hpp/wholebody/step/planner/wholebody-constraint.hh"
 
 namespace hpp
 {
