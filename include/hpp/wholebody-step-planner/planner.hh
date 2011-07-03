@@ -8,25 +8,25 @@
 # include <vector>
 # include <map> 
 
-# include <hpp/gik/robot/foot-print-related.hh>
-# include <hpp/gik/robot/robot-motion.hh>
-# include <hpp/gik/robot/standing-robot.hh>
-# include <hpp/gik/constraint/parallel-constraint.hh>
-# include <hpp/gik/constraint/plane-constraint.hh>
-# include <hpp/gik/motionplanner/element/step-element.hh>
-# include <hpp/gik/motionplanner/element/interpolated-element.hh>
+# include <KineoUtility/kitDefine.h>
+
 # include <hpp/core/planner.hh>
 # include <hppModel/hppHumanoidRobot.h>
 
 # include <tlcWholeBodyPlanner/tlcGikManager.h>
 # include <tlcWholeBodyPlanner/tlcGraspBallGoalGenerator.h>
 
-# include <hpp/wholebody-step-planner/wholebody-constraint.hh>
+class ChppGikFootprint;
+class ChppGikStandingRobot;
+class ChppGikPlaneConstraint;
+class ChppGikParallelConstraint;
 
 namespace hpp
 {
   namespace wholeBodyStepPlanner
   {
+    KIT_PREDEF_CLASS (wholeBodyConstraint);
+
     class Planner : public ChppPlanner
     {
     public:

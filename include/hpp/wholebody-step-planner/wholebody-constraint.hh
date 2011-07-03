@@ -6,10 +6,10 @@
 
 # include <vector>
 
+# include <KineoUtility/kitDefine.h>
 # include <KineoWorks2/kwsConstraint.h>
 
-# include <tlcWholeBodyPlanner/tlcGikManager.h>
-
+KIT_PREDEF_CLASS (CtlcGikManager);
 
 namespace hpp
 {

@@ -14,10 +14,18 @@
 
 # include <tlcWholeBodyPlanner/tlcGikCfgOptimizer.h>
 
+# include <hpp/gik/robot/foot-print-related.hh>
+# include <hpp/gik/robot/robot-motion.hh>
+# include <hpp/gik/robot/standing-robot.hh>
+# include <hpp/gik/constraint/parallel-constraint.hh>
+# include <hpp/gik/constraint/plane-constraint.hh>
+# include <hpp/gik/motionplanner/element/step-element.hh>
+# include <hpp/gik/motionplanner/element/interpolated-element.hh>
+
 # include <hpp/wholebody-step-planner/planner.hh>
 # include <hpp/wholebody-step-planner/config-motion-constraint.hh>
 # include <hpp/wholebody-step-planner/path-optimizer.hh>
-
+# include <hpp/wholebody-step-planner/wholebody-constraint.hh>
 
 # define PARAM_PRECISION 0.01
 # define TASK_PRECISION 1e-4

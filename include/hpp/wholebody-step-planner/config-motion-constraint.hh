@@ -7,12 +7,12 @@
 # include <map> 
 
 # include <jrl/mal/matrixabstractlayer.hh>
-
+# include <KineoUtility/kitDefine.h>
 # include <KineoWorks2/kwsPath.h>
-
 # include <gikTask/jrlGikMotionConstraint.h>
-# include <hpp/gik/constraint/configuration-constraint.hh>
-# include <hppModel/hppHumanoidRobot.h>
+
+class ChppGikConfigurationConstraint;
+KIT_PREDEF_CLASS (ChppHumanoidRobot);
 
 namespace hpp
 {

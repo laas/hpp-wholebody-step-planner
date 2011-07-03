@@ -1,5 +1,5 @@
+# include <tlcWholeBodyPlanner/tlcGikManager.h>
 # include <hpp/wholebody-step-planner/wholebody-constraint.hh>
-
 
 namespace hpp
 {
