@@ -33,6 +33,7 @@ SET(${PROJECT_NAME}_HEADERS
   include/hpp/wholebody-step-planner/config-motion-constraint.hh
   include/hpp/wholebody-step-planner/wholebody-constraint.hh
   include/hpp/wholebody-step-planner/path-optimizer.hh
+  include/hpp/wholebody-step-planner/fwd.hh
 )
 
 SETUP_PROJECT()
