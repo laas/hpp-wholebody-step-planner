@@ -19,7 +19,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 SET(CXX_DISABLE_WERROR true)
-SET(CUSTOM_HEADER_DIR "hpp/whole-body-step-planner")
+SET(CUSTOM_HEADER_DIR "hpp/wholebody-step-planner")
 
 INCLUDE(cmake/base.cmake)
 INCLUDE(cmake/cpack.cmake)
