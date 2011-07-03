@@ -10,6 +10,8 @@
 # include <KineoWorks2/kwsConstraint.h>
 
 KIT_PREDEF_CLASS (CtlcGikManager);
+KIT_PREDEF_CLASS (ChppHumanoidRobot);
+class CjrlGikStateConstraint;
 
 namespace hpp
 {
