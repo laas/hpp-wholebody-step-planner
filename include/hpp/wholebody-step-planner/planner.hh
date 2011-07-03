@@ -155,8 +155,8 @@ namespace hpp
       /* Seqplay files */
       double timestamp_;
       std::ofstream posFile_;
-      std::ofstream rpyFile_;
       std::ofstream zmpFile_;
+      std::ofstream rpyFile_;
 
     };
   }
