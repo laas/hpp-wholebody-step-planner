@@ -4,7 +4,7 @@
 
 # include <KineoModel/kppConfigComponent.h>
 
-# include "hpp/wholebody/step/planner/config-motion-constraint.hh"
+# include <hpp/wholebody-step-planner/config-motion-constraint.hh>
 
 namespace hpp
 {

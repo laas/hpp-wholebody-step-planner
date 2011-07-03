@@ -1,4 +1,4 @@
-# include "hpp/wholebody/step/planner/wholebody-constraint.hh"
+# include <hpp/wholebody-step-planner/wholebody-constraint.hh>
 
 
 namespace hpp
