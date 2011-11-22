@@ -91,12 +91,12 @@ namespace hpp
 	  delete validGikMotion_[i];
     }
 
-    ChppHumanoidRobotShPtr Planner::humanoidRobot ()
+    hpp::model::HumanoidRobotShPtr Planner::humanoidRobot ()
     {
       return humanoidRobot_;
     }
     
-    wholeBodyConstraintShPtr Planner::wholeBodyConstraint ()
+    hpp::constrained::KwsConstraintShPtr Planner::wholeBodyConstraint ()
     {
       return wholeBodyConstraint_;
     }
@@ -121,7 +121,7 @@ namespace hpp
 	}
 
       humanoidRobot_ = KIT_DYNAMIC_PTR_CAST
-	(ChppHumanoidRobot, robotIthProblem (0));
+	(hpp::model::HumanoidRobot, robotIthProblem (0));
 
       if (!humanoidRobot_)
 	{
@@ -168,13 +168,13 @@ namespace hpp
       /* Creating kineo constraint */
       
       std::vector<CjrlGikStateConstraint*>  sot;
-      hpp::constrained::planner::Planner::buildDoubleSupportSlidingStaticStabilityConstraints(halfSittingCfg,
-											      sot);
+      hpp::constrained::Planner::buildDoubleSupportSlidingStaticStabilityConstraints(halfSittingCfg,
+										     sot);
       sot.push_back(waistPlaneConstraint_);
       sot.push_back(waistParallelConstraint_);
       
       hpp::constrained::ConfigExtendor * extendor =
-	new hpp::constrained::ConfigProjector(humanoidRobot_);
+	new hpp::constrained::ConfigExtendor(humanoidRobot_);
       extendor->setConstraints(sot);
 
       wholeBodyConstraint_ = 
@@ -198,7 +198,7 @@ namespace hpp
       //CkwsDiffusingRdmBuilderShPtr rdmBuilder = CkwsDiffusingRdmBuilder::create(roadmap);
       //	CkwsPlusLTRdmBuilder< CkwsDiffusingRdmBuilder >::create (roadmap, 0.1);
       CkwsDiffusingRdmBuilderShPtr rdmBuilder =
-	hpp::constrained::DiffusingRoadmapBuilder(roadmap,extendor);
+	hpp::constrained::DiffusingRoadmapBuilder::create(roadmap,extendor);
       rdmBuilder->diffuseFromProblemStart (true);
       rdmBuilder->diffuseFromProblemGoal (true);
 
@@ -831,7 +831,7 @@ namespace hpp
       std::vector<double> kineoCfg(humanoidRobot_->countDofs ());
       std::vector<double> openHrpCfg(humanoidRobot_->countDofs ());
       
-      for (vector<ChppRobotMotion*>::iterator it = validGikMotion_.begin ();
+      for (std::vector<ChppRobotMotion*>::iterator it = validGikMotion_.begin ();
 	   it < validGikMotion_.end (); it++)
 	{
 	  std::cout << "start x: " << (*it)->firstSample ()->configuration[0] << " "

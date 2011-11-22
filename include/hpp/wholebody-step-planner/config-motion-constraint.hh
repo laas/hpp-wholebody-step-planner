@@ -10,9 +10,10 @@
 # include <KineoUtility/kitDefine.h>
 # include <KineoWorks2/kwsPath.h>
 # include <gikTask/jrlGikMotionConstraint.h>
+# include <hpp/model/humanoid-robot.hh>
 
 class ChppGikConfigurationConstraint;
-KIT_PREDEF_CLASS (ChppHumanoidRobot);
+
 
 namespace hpp
 {
@@ -21,7 +22,7 @@ namespace hpp
     class ChppGikConfigMotionConstraint : public CjrlGikMotionConstraint
     {
     public:
-      ChppGikConfigMotionConstraint(const ChppHumanoidRobotShPtr humanoidRobot,
+      ChppGikConfigMotionConstraint(const hpp::model::HumanoidRobotShPtr humanoidRobot,
 				    const double startTime,
 				    const double endTime,
 				    const CkwsPathShPtr inPath,
@@ -48,7 +49,7 @@ namespace hpp
       double endTime_;
       CkwsPathShPtr wbPath_;
       std::map<double,double> paramOfTime_;
-      ChppHumanoidRobotShPtr humanoidRobot_;
+      hpp::model::HumanoidRobotShPtr humanoidRobot_;
       vectorN maskVector_;
       
     };

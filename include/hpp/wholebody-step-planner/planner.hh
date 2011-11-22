@@ -11,7 +11,7 @@
 # include <KineoUtility/kitDefine.h>
 
 # include <hpp/core/planner.hh>
-# include <hppModel/hppHumanoidRobot.h>
+# include <hpp/model/humanoid-robot.hh>
 
 # include <hpp/constrained/kws-constraint.hh>
 
@@ -34,7 +34,7 @@ namespace hpp
 
       ~Planner();
 
-      ChppHumanoidRobotShPtr humanoidRobot ();
+      hpp::model::HumanoidRobotShPtr humanoidRobot ();
 
       hpp::constrained::KwsConstraintShPtr wholeBodyConstraint ();
 
@@ -90,7 +90,7 @@ namespace hpp
       
       ktStatus
       kwsToOpenHrpDofValues (const std::vector<double>& inKwsDofVector,
-			     vector<double>& outOpenHrpDofVector);
+			     std::vector<double>& outOpenHrpDofVector);
 
       ChppGikFootprint * footPrintFromConfig(CkwsConfig & cfg, 
 					     bool isRightFoot);
@@ -103,7 +103,7 @@ namespace hpp
  
     private:
       
-      ChppHumanoidRobotShPtr humanoidRobot_;
+      hpp::model::HumanoidRobotShPtr humanoidRobot_;
       ChppGikStandingRobot * gikStandingRobot_;
       double samplingPeriod_;
       hpp::constrained::KwsConstraintShPtr wholeBodyConstraint_;
@@ -147,7 +147,7 @@ namespace hpp
 
       /* Valid Gik motions to be outputted */
       ChppRobotMotion * currentGikMotion_;
-      vector<ChppRobotMotion*> validGikMotion_;
+      std::vector<ChppRobotMotion*> validGikMotion_;
 
       /* Seqplay files */
       double timestamp_;
