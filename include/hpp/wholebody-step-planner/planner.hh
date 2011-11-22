@@ -13,8 +13,7 @@
 # include <hpp/core/planner.hh>
 # include <hppModel/hppHumanoidRobot.h>
 
-# include <tlcWholeBodyPlanner/tlcGikManager.h>
-# include <tlcWholeBodyPlanner/tlcGraspBallGoalGenerator.h>
+# include <hpp/constrained/kws-constraint.hh>
 
 class ChppGikFootprint;
 class ChppGikStandingRobot;
@@ -25,8 +24,6 @@ namespace hpp
 {
   namespace wholeBodyStepPlanner
   {
-    KIT_PREDEF_CLASS (wholeBodyConstraint);
-
     class Planner : public ChppPlanner
     {
     public:
@@ -39,12 +36,13 @@ namespace hpp
 
       ChppHumanoidRobotShPtr humanoidRobot ();
 
-      wholeBodyConstraintShPtr wholeBodyConstraint ();
+      hpp::constrained::KwsConstraintShPtr wholeBodyConstraint ();
 
+      /*
       CtlcGraspBallGoalGeneratorShPtr getGoalTask();
 
       ktStatus goalWaistConfig (CkwsPathShPtr inPath);
-
+      */
       ktStatus initAndGoalConfig (CkwsPathShPtr inPath);
 
       ktStatus generateGoalConfig ();
@@ -108,11 +106,10 @@ namespace hpp
       ChppHumanoidRobotShPtr humanoidRobot_;
       ChppGikStandingRobot * gikStandingRobot_;
       double samplingPeriod_;
-      CtlcGikManagerShPtr  gikManager_;
-      wholeBodyConstraintShPtr wholeBodyConstraint_;
+      hpp::constrained::KwsConstraintShPtr wholeBodyConstraint_;
 
       /* Attributes for goal configurations generation */
-      CtlcGraspBallGoalGeneratorShPtr goalConfigGenerator_;
+      //CtlcGraspBallGoalGeneratorShPtr goalConfigGenerator_;
 
       /* Footstep parameters */
       double zmpEndCoeff_;

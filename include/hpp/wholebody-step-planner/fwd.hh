@@ -24,7 +24,6 @@ namespace hpp {
   namespace wholeBodyStepPlanner {
     class Planner;
     class PathOptimizer;
-    class wholeBodyConstraint;
   } // wholeBodyStepPlanner
 } // namespace hpp
 #endif // HPP_WHOLEBODY_STEP_PLANNER_FWD_HH

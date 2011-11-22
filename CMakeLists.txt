@@ -31,7 +31,6 @@ SET(PROJECT_URL "http://github.com/laas/hpp-wholebody-step-planner")
 SET(${PROJECT_NAME}_HEADERS
   include/hpp/wholebody-step-planner/planner.hh
   include/hpp/wholebody-step-planner/config-motion-constraint.hh
-  include/hpp/wholebody-step-planner/wholebody-constraint.hh
   include/hpp/wholebody-step-planner/path-optimizer.hh
   include/hpp/wholebody-step-planner/fwd.hh
 )
@@ -40,7 +39,7 @@ SETUP_PROJECT()
 
 
 # Search for dependencies.
-ADD_REQUIRED_DEPENDENCY("tlcWholeBodyPlanner >= 2.0")
+ADD_REQUIRED_DEPENDENCY("hpp-constrained-planner")
 ADD_REQUIRED_DEPENDENCY("kwsPlus >= 1.8")
 ADD_REQUIRED_DEPENDENCY("hpp-util >= 0.4")
 PKG_CONFIG_APPEND_LIBS(${PROJECT_NAME})

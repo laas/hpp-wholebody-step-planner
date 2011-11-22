@@ -12,8 +12,6 @@
 
 # include <hpp/util/debug.hh>
 
-# include <tlcWholeBodyPlanner/tlcGikCfgOptimizer.h>
-
 # include <hpp/gik/robot/foot-print-related.hh>
 # include <hpp/gik/robot/robot-motion.hh>
 # include <hpp/gik/robot/standing-robot.hh>
@@ -22,10 +20,15 @@
 # include <hpp/gik/motionplanner/element/step-element.hh>
 # include <hpp/gik/motionplanner/element/interpolated-element.hh>
 
+# include <hpp/constrained/config-extendor.hh>
+# include <hpp/constrained/roadmap-builder.hh>
+# include <hpp/constrained/planner/planner.hh>
+
 # include <hpp/wholebody-step-planner/planner.hh>
 # include <hpp/wholebody-step-planner/config-motion-constraint.hh>
 # include <hpp/wholebody-step-planner/path-optimizer.hh>
-# include <hpp/wholebody-step-planner/wholebody-constraint.hh>
+
+
 
 # define PARAM_PRECISION 0.01
 # define TASK_PRECISION 1e-4
@@ -46,7 +49,6 @@ namespace hpp
       :humanoidRobot_(),
        gikStandingRobot_(NULL),
        samplingPeriod_(samplingPeriod),
-       gikManager_(),
        wholeBodyConstraint_(),
        zmpEndCoeff_(END_COEFF),
        zmpStartShiftTime_(START_SHIFT_TIME),
@@ -99,11 +101,12 @@ namespace hpp
       return wholeBodyConstraint_;
     }
 
-    CtlcGraspBallGoalGeneratorShPtr Planner::getGoalTask()
-    {
+    /*
+      CtlcGraspBallGoalGeneratorShPtr Planner::getGoalTask()
+      {
       return goalConfigGenerator_;
-    }
-    
+      }
+    */
     ktStatus
     Planner::initializeProblem()
     {
@@ -135,13 +138,12 @@ namespace hpp
       property="ComputeVelocity"; value="true";humanoidRobot_->setProperty ( property,value );
       property="ComputeSkewCom"; value="true";humanoidRobot_->setProperty ( property,value );
       property="ComputeCoM"; value="true";humanoidRobot_->setProperty ( property,value );
-
-
   
       gikStandingRobot_ = new ChppGikStandingRobot(*humanoidRobot_);
 
-      gikManager_ =  CtlcGikManager::create(humanoidRobot_);
-
+      CkwsConfigShPtr halfSittingCfg;
+      humanoidRobot_->getCurrentConfig(halfSittingCfg);
+ 
       /* Building the tasks */
       waistZ_ = 
 	MAL_S4x4_MATRIX_ACCESS_I_J(humanoidRobot_->waist()->currentTransformation(),2,3);
@@ -162,93 +164,42 @@ namespace hpp
 					*(humanoidRobot_->waist()), 
 					ZLocalAxis, 
 					ZWorldAxis );
-      
-
-      /* Computing the relative positions of the footprints in the waist frame */
-
-      ChppGikSupportPolygon * supportPolygon = 
-	gikStandingRobot_->supportPolygon();
-
-      if(!supportPolygon) {
-	return KD_ERROR;
-      }
-      
-      if(!supportPolygon->isDoubleSupport()) {
-	return KD_ERROR;
-      }
-
-      const ChppGikFootprint * leftFootprint = supportPolygon->leftFootprint();
-      const ChppGikFootprint * rightFootprint = supportPolygon->rightFootprint();
-
-      matrix4d leftFtT;
-      MAL_S4x4_MATRIX_SET_IDENTITY (leftFtT);
-      MAL_S4x4_MATRIX_ACCESS_I_J(leftFtT,0,0) = cos (leftFootprint->th());
-      MAL_S4x4_MATRIX_ACCESS_I_J(leftFtT,0,1) = - sin (leftFootprint->th());
-      MAL_S4x4_MATRIX_ACCESS_I_J(leftFtT,1,1) = cos (leftFootprint->th() );
-      MAL_S4x4_MATRIX_ACCESS_I_J(leftFtT,1,0) = sin (leftFootprint->th());
-      MAL_S4x4_MATRIX_ACCESS_I_J(leftFtT,0,3) = leftFootprint->x();
-      MAL_S4x4_MATRIX_ACCESS_I_J(leftFtT,1,3) = leftFootprint->y();
-      MAL_S4x4_MATRIX_ACCESS_I_J(leftFtT,2,3) = 0.;
-
-      matrix4d rightFtT;
-      MAL_S4x4_MATRIX_SET_IDENTITY (rightFtT);
-      MAL_S4x4_MATRIX_ACCESS_I_J(rightFtT,0,0) = cos (rightFootprint->th());
-      MAL_S4x4_MATRIX_ACCESS_I_J(rightFtT,0,1) = - sin (rightFootprint->th());
-      MAL_S4x4_MATRIX_ACCESS_I_J(rightFtT,1,1) = cos (rightFootprint->th() );
-      MAL_S4x4_MATRIX_ACCESS_I_J(rightFtT,1,0) = sin (rightFootprint->th());
-      MAL_S4x4_MATRIX_ACCESS_I_J(rightFtT,0,3) = rightFootprint->x();
-      MAL_S4x4_MATRIX_ACCESS_I_J(rightFtT,1,3) = rightFootprint->y();
-      MAL_S4x4_MATRIX_ACCESS_I_J(rightFtT,2,3) = 0.;
-
-      matrix4d currentWaistTransformation = 
-	humanoidRobot_->waist()->currentTransformation();
-
-      std::cout << "Waist Tranformation: \n" 
-		<< currentWaistTransformation
-		<< std::endl;
-
-
-      matrix4d inverseWaistT;
-      MAL_S4x4_INVERSE (currentWaistTransformation, inverseWaistT, double);
-
-      MAL_S4x4_C_eq_A_by_B ( relativeLeftFootTransformation_,
-			     inverseWaistT,
-			     leftFtT);
-
-      MAL_S4x4_C_eq_A_by_B ( relativeRightFootTransformation_,
-			     inverseWaistT,
-			     rightFtT);
-
-      
+            
       /* Creating kineo constraint */
       
       std::vector<CjrlGikStateConstraint*>  sot;
+      hpp::constrained::planner::Planner::buildDoubleSupportSlidingStaticStabilityConstraints(halfSittingCfg,
+											      sot);
       sot.push_back(waistPlaneConstraint_);
       sot.push_back(waistParallelConstraint_);
       
+      hpp::constrained::ConfigExtendor * extendor =
+	new hpp::constrained::ConfigProjector(humanoidRobot_);
+      extendor->setConstraints(sot);
+
       wholeBodyConstraint_ = 
-	wholeBodyConstraint::create("WholeBody Constaint",
-				    humanoidRobot_,
-				    gikManager_);
+	hpp::constrained::KwsConstraint::create("Whole-Body Constraint",
+						extendor);
 
-      wholeBodyConstraint_->setConstraints(sot);
-
-      /* Initializeing goal config generator */
-     
-      goalConfigGenerator_ =
+      /* Initializing goal config generator */
+      /*
+	goalConfigGenerator_ =
 	CtlcGraspBallGoalGenerator::create(gikManager_, humanoidRobot_);
-      if(!goalConfigGenerator_) {
+	if(!goalConfigGenerator_) {
 	std::cerr <<
-	  (":initializeProblem: Creating the attWholeBodyConfigGenerator failed.") << std::endl;
+	(":initializeProblem: Creating the attWholeBodyConfigGenerator failed.") << std::endl;
 	return KD_ERROR;
-      }
-      
+	}
+      */
+
       /* initializing the motion planning problem */
 
       CkwsRoadmapShPtr roadmap = CkwsRoadmap::create(humanoidRobot_);
-      CkwsDiffusingRdmBuilderShPtr rdmBuilder = 
-	CkwsDiffusingRdmBuilder::create(roadmap);
-	//	CkwsPlusLTRdmBuilder< CkwsDiffusingRdmBuilder >::create (roadmap, 0.1);
+      //CkwsDiffusingRdmBuilderShPtr rdmBuilder = CkwsDiffusingRdmBuilder::create(roadmap);
+      //	CkwsPlusLTRdmBuilder< CkwsDiffusingRdmBuilder >::create (roadmap, 0.1);
+      CkwsDiffusingRdmBuilderShPtr rdmBuilder =
+	hpp::constrained::DiffusingRoadmapBuilder(roadmap,extendor);
+      rdmBuilder->diffuseFromProblemStart (true);
       rdmBuilder->diffuseFromProblemGoal (true);
 
       
@@ -262,9 +213,6 @@ namespace hpp
       PathOptimizerShPtr postOptimizer = 
 	PathOptimizer::create();
       postOptimizer->penetration (hppProblem (0)->penetration () / 100);
-
-      CkwsConfigShPtr halfSittingCfg;
-      humanoidRobot_->getCurrentConfig(halfSittingCfg);
 
       /* Building wholebody mask, without the free flyer dofs */
       std::vector<bool> wbMask(humanoidRobot_->countDofs(),true);
@@ -281,18 +229,18 @@ namespace hpp
 
       return KD_OK;
     }
-
-    ktStatus Planner::goalWaistConfig (CkwsPathShPtr inPath)
-    {
+    /*
+      ktStatus Planner::goalWaistConfig (CkwsPathShPtr inPath)
+      {
       assert (inPath->device() == humanoidRobot_);
 
       CkwsConfigShPtr fCfg = inPath->configAtEnd ();
       goalConfigGenerator_->setGoalBoxPosition (fCfg->dofValue (0),
-						fCfg->dofValue (1),
-						fCfg->dofValue (5));
+      fCfg->dofValue (1),
+      fCfg->dofValue (5));
       return KD_OK;
-    }
-
+      }
+    */
     ktStatus
     Planner::initAndGoalConfig (CkwsPathShPtr inPath)
     {
@@ -306,64 +254,65 @@ namespace hpp
       
       return KD_OK;
     }
-
-    ktStatus Planner::generateGoalConfig ()
-    {
+    /*
+      ktStatus Planner::generateGoalConfig ()
+      {
       std::vector<CjrlGikStateConstraint*> sot;
       sot.push_back (waistPlaneConstraint_);
       sot.push_back (waistParallelConstraint_);
       gikManager_->setTasks (sot);
 
       if (!goalConfigGenerator_->compute() == KD_OK)
-        {
-          std::cerr << (":ERROR generateGoalConfig::Generating goal config.") << std::endl;
-          return KD_ERROR;
-        }
+      {
+      std::cerr << (":ERROR generateGoalConfig::Generating goal config.") << std::endl;
+      return KD_ERROR;
+      }
 
       std::vector <CkwsConfigShPtr> goalWholeBodyConfigVector = 
-	goalConfigGenerator_->getWholeBodyTargetConfig();
+      goalConfigGenerator_->getWholeBodyTargetConfig();
       
       if (goalWholeBodyConfigVector.size() == 0)
-	{
-	  std::cerr << (":generateGoalConfig::No goal config has been generated. You can try another time") << std::endl;
-	  return KD_ERROR;
-	}
+      {
+      std::cerr << (":generateGoalConfig::No goal config has been generated. You can try another time") << std::endl;
+      return KD_ERROR;
+      }
 
       CtlcGikCfgOptimizerShPtr gikCfgOptimizer
-	= CtlcGikCfgOptimizer::create (gikManager_);
+      = CtlcGikCfgOptimizer::create (gikManager_);
 
       for (unsigned int i = 0; i < goalWholeBodyConfigVector.size (); ++i)
-	{
-	  /* Attach goal config to device */
+      {
+      // Attach goal config to device
 
-	  std::stringstream ss (stringstream::in | stringstream::out);
-	  ss << "goal config " << i+1;
-	  humanoidRobot_
-	    ->addChildComponent (CkppConfigComponent::create (goalWholeBodyConfigVector[i],
-	  						      ss.str ()));
+      std::stringstream ss (stringstream::in | stringstream::out);
+      ss << "goal config " << i+1;
+      humanoidRobot_
+      ->addChildComponent (CkppConfigComponent::create (goalWholeBodyConfigVector[i],
+      ss.str ()));
 
-	  /* Optimize each configuration towards half-sitting */ 
+      // Optimize each configuration towards half-sitting 
 
-	  std::cout << "Starting optimizing config " << i << std::endl;
-	  gikManager_->setRobotBoxPos (goalWholeBodyConfigVector[i]);
-	  CkwsPathShPtr optimizedPath
-	    = gikCfgOptimizer->optimizeCfg (goalWholeBodyConfigVector[i]);
-	  std::cout << "Finished optimizing config " << i << std::endl;
+      std::cout << "Starting optimizing config " << i << std::endl;
+      gikManager_->setRobotBoxPos (goalWholeBodyConfigVector[i]);
+      CkwsPathShPtr optimizedPath
+      = gikCfgOptimizer->optimizeCfg (goalWholeBodyConfigVector[i]);
+      std::cout << "Finished optimizing config " << i << std::endl;
 
-	  /* Attach goal config to device */
+      // Attach goal config to device 
 
-	  std::stringstream ssOpt (stringstream::in | stringstream::out);
-	  ssOpt << "otpimized goal config " << i+1;
-	  humanoidRobot_
-	    ->addChildComponent (CkppConfigComponent::create (optimizedPath->configAtEnd (),
-	  						      ssOpt.str ()));
-	}
+      std::stringstream ssOpt (stringstream::in | stringstream::out);
+      ssOpt << "otpimized goal config " << i+1;
+      humanoidRobot_
+      ->addChildComponent (CkppConfigComponent::create (optimizedPath->configAtEnd (),
+      ssOpt.str ()));
+      }
 
       std::cout << "Goal config found." << std::endl;
       std::vector<CjrlGikStateConstraint*> emptyTask;
       gikManager_->setTasks (emptyTask);
       return KD_OK;
-    }
+      }
+    */
 
     CkwsPathShPtr 
     Planner::findDynamicPath( CkwsPathShPtr i_path)

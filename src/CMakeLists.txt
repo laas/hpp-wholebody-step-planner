@@ -18,7 +18,6 @@
 SET(SOURCES
   planner.cc
   config-motion-constraint.cc
-  wholebody-constraint.cc
   path-optimizer.cc
 )
 
