@@ -17,11 +17,13 @@
 # include <hpp/gik/robot/standing-robot.hh>
 # include <hpp/gik/constraint/parallel-constraint.hh>
 # include <hpp/gik/constraint/plane-constraint.hh>
+# include <hpp/gik/constraint/position-constraint.hh>
 # include <hpp/gik/motionplanner/element/step-element.hh>
 # include <hpp/gik/motionplanner/element/interpolated-element.hh>
 
 # include <hpp/constrained/config-extendor.hh>
 # include <hpp/constrained/roadmap-builder.hh>
+# include <hpp/constrained/config-optimizer.hh>
 # include <hpp/constrained/planner/planner.hh>
 
 # include <hpp/wholebody-step-planner/planner.hh>
@@ -262,12 +264,12 @@ namespace hpp
       CkwsConfigShPtr halfSittingConfig;
       humanoidRobot_->getCurrentConfig(halfSittingConfig);
       /* Build gik solver weights */
-      ChppGikMaskFactory maskFactory(&(*robot));
+      ChppGikMaskFactory maskFactory(&(*humanoidRobot_));
       vectorN weightVector = maskFactory.weightsDoubleSupport ();
 
       ChppGikPositionConstraint * positionConstraint = 
 	new ChppGikPositionConstraint (*humanoidRobot_,
-				       humanoidRobot_->rightWrist(),
+				       *(humanoidRobot_->rightWrist()),
 				       vector3d(0,0,0),
 				       vector3d(xTarget,yTarget,zTarget));
 
@@ -275,8 +277,10 @@ namespace hpp
       std::vector<CjrlGikStateConstraint*>  goalSoc;
       buildDoubleSupportStaticStabilityConstraints(halfSittingConfig,goalSoc);
       goalSoc.push_back(positionConstraint);
+      goalSoc.push_back(waistPlaneConstraint_);
+      goalSoc.push_back(waistParallelConstraint_);
       hpp::constrained::ConfigExtendor * goalExtendor = 
-	new ConfigExtendor(humanoidRobot_);
+	new hpp::constrained::ConfigExtendor(humanoidRobot_);
       goalExtendor->setConstraints(goalSoc);
       goalExtendor->getGikSolver()->weights(weightVector);
       goalConfigGenerator_ = goalExtendor;
@@ -304,9 +308,9 @@ namespace hpp
       }
 
       // Attach goal config to device 
-      std::stringstream ssOpt (stringstream::in | stringstream::out);
+      std::stringstream ssOpt (std::stringstream::in | std::stringstream::out);
       ssOpt << "optimized goal config ";
-      humanoidRobot_->addChildComponent (CkppConfigComponent::create (optimizedPath->configAtEnd (),
+      humanoidRobot_->addChildComponent (CkppConfigComponent::create (optimizationPath->configAtEnd (),
 								      ssOpt.str ()));
 
       std::cout << "Goal config found and optimized." << std::endl;
