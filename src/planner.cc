@@ -254,65 +254,65 @@ namespace hpp
       
       return KD_OK;
     }
-    /*
-      ktStatus Planner::generateGoalConfig ()
-      {
+    
+    ktStatus Planner::generateGoalConfig (double xTarget,double yTarget,double zTarget)
+    {
       std::vector<CjrlGikStateConstraint*> sot;
-      sot.push_back (waistPlaneConstraint_);
-      sot.push_back (waistParallelConstraint_);
-      gikManager_->setTasks (sot);
 
-      if (!goalConfigGenerator_->compute() == KD_OK)
-      {
-      std::cerr << (":ERROR generateGoalConfig::Generating goal config.") << std::endl;
-      return KD_ERROR;
+      CkwsConfigShPtr halfSittingConfig;
+      humanoidRobot_->getCurrentConfig(halfSittingConfig);
+      /* Build gik solver weights */
+      ChppGikMaskFactory maskFactory(&(*robot));
+      vectorN weightVector = maskFactory.weightsDoubleSupport ();
+
+      ChppGikPositionConstraint * positionConstraint = 
+	new ChppGikPositionConstraint (*humanoidRobot_,
+				       humanoidRobot_->rightWrist(),
+				       vector3d(0,0,0),
+				       vector3d(xTarget,yTarget,zTarget));
+
+      /* Initialize goal manifold stack of constraints */
+      std::vector<CjrlGikStateConstraint*>  goalSoc;
+      buildDoubleSupportStaticStabilityConstraints(halfSittingConfig,goalSoc);
+      goalSoc.push_back(positionConstraint);
+      hpp::constrained::ConfigExtendor * goalExtendor = 
+	new ConfigExtendor(humanoidRobot_);
+      goalExtendor->setConstraints(goalSoc);
+      goalExtendor->getGikSolver()->weights(weightVector);
+      goalConfigGenerator_ = goalExtendor;
+
+      if (generateGoalConfigurations(0,1) != KD_OK) {
+	std::cout << "Failed to generate a goal configuration" <<std::endl;
+	return KD_ERROR;
       }
 
-      std::vector <CkwsConfigShPtr> goalWholeBodyConfigVector = 
-      goalConfigGenerator_->getWholeBodyTargetConfig();
+      CkwsConfigShPtr goalCfg = goalConfIthProblem(0);
       
-      if (goalWholeBodyConfigVector.size() == 0)
-      {
-      std::cerr << (":generateGoalConfig::No goal config has been generated. You can try another time") << std::endl;
-      return KD_ERROR;
+      //Optimize the random goal config
+      hpp::constrained::ConfigOptimizer optimizer(humanoidRobot_,
+						  goalExtendor,
+						  halfSittingConfig);
+
+      CkwsPathShPtr optimizationPath =
+	optimizer.optimizeConfig(goalCfg);
+
+      if (!optimizationPath->isEmpty())
+	hppProblem(0)->addPath(optimizationPath);
+      else {
+	std::cout << "Failed to optimize goal config" <<std::endl;
+	return KD_ERROR;
       }
-
-      CtlcGikCfgOptimizerShPtr gikCfgOptimizer
-      = CtlcGikCfgOptimizer::create (gikManager_);
-
-      for (unsigned int i = 0; i < goalWholeBodyConfigVector.size (); ++i)
-      {
-      // Attach goal config to device
-
-      std::stringstream ss (stringstream::in | stringstream::out);
-      ss << "goal config " << i+1;
-      humanoidRobot_
-      ->addChildComponent (CkppConfigComponent::create (goalWholeBodyConfigVector[i],
-      ss.str ()));
-
-      // Optimize each configuration towards half-sitting 
-
-      std::cout << "Starting optimizing config " << i << std::endl;
-      gikManager_->setRobotBoxPos (goalWholeBodyConfigVector[i]);
-      CkwsPathShPtr optimizedPath
-      = gikCfgOptimizer->optimizeCfg (goalWholeBodyConfigVector[i]);
-      std::cout << "Finished optimizing config " << i << std::endl;
 
       // Attach goal config to device 
-
       std::stringstream ssOpt (stringstream::in | stringstream::out);
-      ssOpt << "otpimized goal config " << i+1;
-      humanoidRobot_
-      ->addChildComponent (CkppConfigComponent::create (optimizedPath->configAtEnd (),
-      ssOpt.str ()));
-      }
+      ssOpt << "optimized goal config ";
+      humanoidRobot_->addChildComponent (CkppConfigComponent::create (optimizedPath->configAtEnd (),
+								      ssOpt.str ()));
 
-      std::cout << "Goal config found." << std::endl;
-      std::vector<CjrlGikStateConstraint*> emptyTask;
-      gikManager_->setTasks (emptyTask);
+      std::cout << "Goal config found and optimized." << std::endl;
+
       return KD_OK;
-      }
-    */
+    }
 
     CkwsPathShPtr 
     Planner::findDynamicPath( CkwsPathShPtr i_path)
