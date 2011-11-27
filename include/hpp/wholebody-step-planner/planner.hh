@@ -10,6 +10,7 @@
 
 # include <KineoUtility/kitDefine.h>
 
+
 # include <hpp/core/planner.hh>
 # include <hpp/model/humanoid-robot.hh>
 
@@ -20,6 +21,7 @@ class ChppGikFootprint;
 class ChppGikStandingRobot;
 class ChppGikPlaneConstraint;
 class ChppGikParallelConstraint;
+class ChppRobotMotion;
 
 namespace hpp
 {
