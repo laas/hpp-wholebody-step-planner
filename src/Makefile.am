@@ -10,7 +10,8 @@ libhpp_wholebody_step_planner_la_SOURCES = 			\
 					config-motion-constraint.cc \
 					wholebody-constraint.cc \
 					path-optimizer.cc \
-					rotation-motion-constraint.cc
+					rotation-motion-constraint.cc \
+					position-motion-constraint.cc
 
 libhpp_wholebody_step_planner_la_LIBADD = $(TLCWHOLEBODYPLANNER_LIBS) 
 libhpp_wholebody_step_planner_la_CPPFLAGS = $(AM_CPPFLAGS) $(TLCWHOLEBODYPLANNER_CFLAGS) 
