@@ -5,7 +5,6 @@
 # include <KineoModel/kppConfigComponent.h>
 # include <jrl/mal/matrixabstractlayer.hh>
 # include <hpp/gik/constraint/position-constraint.hh>
-# include <hppModel/hppHumanoidRobot.h>
 
 # include <hpp/wholebody-step-planner/position-motion-constraint.hh>
 
@@ -13,12 +12,12 @@ namespace hpp
 {
   namespace wholeBodyStepPlanner
   {
-    ChppGikPositionMotionConstraint::ChppGikPositionMotionConstraint(const ChppHumanoidRobotShPtr humanoidRobot,
+    ChppGikPositionMotionConstraint::ChppGikPositionMotionConstraint(const hpp::model::HumanoidRobotShPtr humanoidRobot,
 								     const double startTime,
 								     const double endTime,
 								     const CkwsPathShPtr inPath,
 								     const std::map<double,double> & paramOfTime,
-								     ChppJointShPtr constrainedJoint):
+								     hpp::model::JointShPtr constrainedJoint):
       positionConstraint_(NULL),
       startTime_(startTime),
       endTime_(endTime),
