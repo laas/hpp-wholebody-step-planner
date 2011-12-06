@@ -6,6 +6,7 @@
 # include <jrl/mal/matrixabstractlayer.hh>
 # include <hpp/gik/constraint/position-constraint.hh>
 
+# include <hpp/model/joint.hh>
 # include <hpp/wholebody-step-planner/position-motion-constraint.hh>
 
 namespace hpp
@@ -33,8 +34,8 @@ namespace hpp
     ChppGikPositionMotionConstraint::~ChppGikPositionMotionConstraint()
     {
       if ( positionConstraint_ ) {
-	delete configConstraint_;
-	configConstraint_ = NULL;
+	delete positionConstraint_;
+	positionConstraint_ = NULL;
       }
     }
 
@@ -94,10 +95,10 @@ namespace hpp
 
       humanoidRobot_->setCurrentConfig(kineoCfg);
 
-      CkitMat4 jointT = joint_->kwsJoint->currentPosition();
+      CkitMat4 jointT = joint_->kppJoint()->kwsJoint()->currentPosition();
       vector3d target(jointT(0,3),jointT(1,3),jointT(2,3));
 
-      positionConstraint_->target(target);
+      positionConstraint_->worldTarget(target);
 
       return positionConstraint_;
     }
