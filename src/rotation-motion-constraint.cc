@@ -95,7 +95,7 @@ namespace hpp
 
       humanoidRobot_->setCurrentConfig(kineoCfg);
 
-      CkitMat4 jointT = joint_->kppJoint()->kwsJoint()->currentRotation();
+      CkitMat4 jointT = joint_->kppJoint()->kwsJoint()->currentPosition();
 
       matrix3d target(jointT(0,0),jointT(0,1),jointT(0,2),
 		      jointT(1,0),jointT(1,1),jointT(1,2),
