@@ -19,6 +19,7 @@ SET(SOURCES
   planner.cc
   config-motion-constraint.cc
   position-motion-constraint.cc
+  rotation-motion-constraint.cc
   path-optimizer.cc
 )
 
