@@ -1108,7 +1108,9 @@ namespace hpp
       std::map<double,double> paramOfTime;
       paramOfTime[0.] = 0.;
       double startTime = 0.;
-      double time = 1.6;
+      //double time = 1.6;
+      //double time = 3.2;
+      double time = 4.8;
       paramOfTime[time] = 0.;
 
       /* Footstep parameters */
@@ -1224,12 +1226,63 @@ namespace hpp
 	  ChppRobotMotion  motion =   genericTask.solutionMotion();
 	  if (!motion.empty())
 	    {
+	      
+	      // validGikMotion_.push_back (&motion);
+	      // if (writeSeqplayFiles() != KD_OK) {
+	      // 	std::cerr << "ERROR in writing seqplay files." << std::endl;
+	      // }
+	      // convertGikRobotMotionToKineoPath(&motion,newPath);
+	    }
+
+	  bool filterWorked = genericTask.filterZmpError(1.0);
+
+	  if (filterWorked) {
+	    isSolved = genericTask.solve();
+
+	    if (!isSolved) {
+	      std::cerr << "ERROR: AnimateWholePath - Second pass zmp filtering failed."
+	  		<< std::endl;
+	      newPath.reset();
+	      return newPath;
+	    }
+	  }
+
+	  motion =   genericTask.solutionMotion();
+	  if (!motion.empty())
+	    {
+	      // validGikMotion_.push_back (&motion);
+	      // if (writeSeqplayFiles() != KD_OK) {
+	      // 	std::cerr << "ERROR in writing seqplay files." << std::endl;
+	      // }
+	      // convertGikRobotMotionToKineoPath(&motion,newPath);
+	    }
+
+	  filterWorked = false;
+	  filterWorked = genericTask.filterZmpError(1.0);
+
+	  if (filterWorked) {
+	    isSolved = genericTask.solve();
+
+	    if (!isSolved) {
+	      std::cerr << "ERROR: AnimateWholePath - Second pass zmp filtering failed."
+	  		<< std::endl;
+	      newPath.reset();
+	      return newPath;
+	    }
+	  }
+
+	  motion =   genericTask.solutionMotion();
+	  if (!motion.empty())
+	    {
 	      validGikMotion_.push_back (&motion);
 	      if (writeSeqplayFiles() != KD_OK) {
 		hppDout (error, "when writing seqplay files.");
 	      }
 	      convertGikRobotMotionToKineoPath(&motion,newPath);
 	    }
+
+	  genericTask.filterZmpError(1.0);
+
 	}
       else
 	{
