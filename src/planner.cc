@@ -11,10 +11,13 @@
 
 # include <hpp/util/debug.hh>
 
+# include <hppModel/hppJoint.h>
+
 # include <tlcWholeBodyPlanner/tlcGikCfgOptimizer.h>
 
 # include <hpp/wholebody-step-planner/planner.hh>
 # include <hpp/wholebody-step-planner/config-motion-constraint.hh>
+# include <hpp/wholebody-step-planner/rotation-motion-constraint.hh>
 # include <hpp/wholebody-step-planner/path-optimizer.hh>
 
 
@@ -759,6 +762,16 @@ namespace hpp
 						samplingPeriod);
       genericTask.addElement( &verticalElem );
 
+      // Constraint on the waist orientation
+      CkppJointComponentShPtr kppWaist
+	= humanoidRobot_->hppWaist ()->kppJoint ();
+      if (!kppWaist)
+	std::cerr << "ERROR: null pointer to kppWaist" << std::endl;
+
+      ChppGikRotationMotionConstraint waistRotationConstraint(humanoidRobot_,startTime,time,i_path,paramOfTime, kppWaist);
+      ChppGikPrioritizedMotion waistRotationElement(&(*humanoidRobot_),3,&waistRotationConstraint,0.2);
+      genericTask.addElement( &waistRotationElement );
+
       //Config Constraint
       vectorN ubMaskVector = gikStandingRobot_->maskFactory()->upperBodyMask();
       vectorN wbMaskVector = gikStandingRobot_->maskFactory()->wholeBodyMask();
@@ -1190,13 +1203,23 @@ namespace hpp
       genericTask.addElement( &heightElem );
 
       //Constraint on the waist orientation
-      ChppGikInterpolatedElement verticalElem ( gikStandingRobot_->robot(),
-						waistParallelConstraint_,
-						3,
-						startTime,
-						time,
-						samplingPeriod);
-      genericTask.addElement( &verticalElem );
+      // ChppGikInterpolatedElement verticalElem ( gikStandingRobot_->robot(),
+      // 						waistParallelConstraint_,
+      // 						3,
+      // 						startTime,
+      // 						time,
+      // 						samplingPeriod);
+      // genericTask.addElement( &verticalElem );
+
+      // Constraint on the waist orientation
+      CkppJointComponentShPtr kppWaist
+	= humanoidRobot_->hppWaist ()->kppJoint ();
+      if (!kppWaist)
+	std::cerr << "ERROR: null pointer to kppWaist" << std::endl;
+
+      ChppGikRotationMotionConstraint waistRotationConstraint(humanoidRobot_,startTime,time,i_path,paramOfTime, kppWaist);
+      ChppGikPrioritizedMotion waistRotationElement(&(*humanoidRobot_),3,&waistRotationConstraint,0.2);
+      genericTask.addElement( &waistRotationElement );
 
       //Config Constraint
       vectorN ubMaskVector = gikStandingRobot_->maskFactory()->upperBodyMask();
