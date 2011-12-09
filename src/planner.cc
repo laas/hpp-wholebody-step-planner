@@ -136,6 +136,16 @@ namespace hpp
       return humanoidRobot_;
     }
 
+    ChppGikStandingRobot* Planner::robot ()
+    {
+      return gikStandingRobot_;
+    }
+
+    std::vector<ChppRobotMotion*> Planner::robotMotions ()
+    {
+      return validGikMotion_;
+    }
+
     hpp::constrained::KwsConstraintShPtr Planner::wholeBodyConstraint ()
     {
       return wholeBodyConstraint_;

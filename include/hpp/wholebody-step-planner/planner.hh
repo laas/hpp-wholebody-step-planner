@@ -86,6 +86,16 @@ namespace hpp
       ktStatus generateGoalConfig (double xTarget, double yTarget,
 				   double zTarget, unsigned int nbConfig);
 
+      ChppGikStandingRobot* robot ();
+
+      std::vector<ChppRobotMotion*> robotMotions ();
+
+      ktStatus goalWaistConfig (CkwsPathShPtr inPath);
+
+      ktStatus initAndGoalConfig (CkwsPathShPtr inPath);
+
+      ktStatus generateGoalConfig ();
+
       virtual ktStatus initializeProblem();
 
       virtual ktStatus solve();
