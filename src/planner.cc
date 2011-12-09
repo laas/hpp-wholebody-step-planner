@@ -793,12 +793,12 @@ namespace hpp
       MAL_VECTOR_DIM(jrlTargetCfg, double, humanoidRobot_->numberDof());
       humanoidRobot_->kwsToJrlDynamicsDofValues(kineoTargetCfg,jrlTargetCfg);
       ChppGikConfigurationConstraint configTask(*(gikStandingRobot_->robot()), jrlTargetCfg, wbMaskVector);
-      ChppGikInterpolatedElement interpolatedCfgElement(gikStandingRobot_->robot(), 
-							&configTask,
-							1,
-							time,
-							configTaskDuration,
-							samplingPeriod);
+      ChppGikInterpolatedElement interpolatedCfgElement(gikStandingRobot_->robot(),
+      							&configTask,
+      							5,
+      							time,
+      							configTaskDuration,
+      							samplingPeriod);
 
       genericTask.addElement( &interpolatedCfgElement );
       
@@ -1247,7 +1247,7 @@ namespace hpp
       ChppGikConfigurationConstraint configTask(*(gikStandingRobot_->robot()), jrlTargetCfg, wbMaskVector);
       ChppGikInterpolatedElement interpolatedCfgElement(gikStandingRobot_->robot(), 
 							&configTask,
-							1,
+							5,
 							time,
 							configTaskDuration,
 							samplingPeriod);
