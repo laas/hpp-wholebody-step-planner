@@ -9,9 +9,9 @@
 # include <jrl/mal/matrixabstractlayer.hh>
 # include <KineoUtility/kitDefine.h>
 # include <KineoWorks2/kwsPath.h>
+# include <KineoModel/kppJointComponent.h>
 # include <gikTask/jrlGikMotionConstraint.h>
 # include <hppModel/hppHumanoidRobot.h>
-# include <hppModel/hppJoint.h>
 
 class ChppGikRotationConstraint;
 
@@ -27,7 +27,7 @@ namespace hpp
 				      const double endTime,
 				      const CkwsPathShPtr inPath,
 				      const std::map<double,double> & paramOfTime,
-				      const ChppJointShPtr constrainedJoint);
+				      const CkppJointComponentShPtr constrainedJoint);
       
       ~ChppGikRotationMotionConstraint();
 
@@ -50,7 +50,7 @@ namespace hpp
       CkwsPathShPtr wbPath_;
       std::map<double,double> paramOfTime_;
       ChppHumanoidRobotShPtr humanoidRobot_;
-      ChppJointShPtr joint_;
+      CkppJointComponentShPtr joint_;
       
     };
   }

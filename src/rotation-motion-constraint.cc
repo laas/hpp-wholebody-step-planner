@@ -8,6 +8,8 @@
 
 # include <hpp/wholebody-step-planner/rotation-motion-constraint.hh>
 
+# include <hppModel/hppJoint.h>
+
 namespace hpp
 {
   namespace wholeBodyStepPlanner
@@ -17,7 +19,7 @@ namespace hpp
 								     const double endTime,
 								     const CkwsPathShPtr inPath,
 								     const std::map<double,double> & paramOfTime,
-								     ChppJointShPtr constrainedJoint):
+								     CkppJointComponentShPtr constrainedJoint):
       rotationConstraint_(NULL),
       startTime_(startTime),
       endTime_(endTime),
@@ -27,7 +29,8 @@ namespace hpp
       joint_(constrainedJoint)
     {
       matrix3d target;
-      rotationConstraint_ = new ChppGikRotationConstraint(*humanoidRobot_,*(constrainedJoint->jrlJoint()),target);
+      ChppJoint* hppJoint = humanoidRobot_->kppToHppJoint (joint_);
+      rotationConstraint_ = new ChppGikRotationConstraint(*humanoidRobot_,*(hppJoint->jrlJoint()),target);
     }
 
     ChppGikRotationMotionConstraint::~ChppGikRotationMotionConstraint()
@@ -89,12 +92,18 @@ namespace hpp
 	  dist = dist_i + (dist_f - dist_i) * (inTime - time_i) / (time_f - time_i);
 	}
 
-      CkwsConfig kineoCfg(humanoidRobot_);
-      wbPath_->getConfigAtDistance(dist,kineoCfg );
+      //CkwsConfig kineoCfg(humanoidRobot_);
+      //wbPath_->getConfigAtDistance(dist,kineoCfg );
+      std::vector<CkitMat4> jointTVector;
+      wbPath_->getMatVectorAtDistance(dist, jointTVector);
 
-      humanoidRobot_->setCurrentConfig(kineoCfg);
+      //humanoidRobot_->setCurrentConfig(kineoCfg);
+      unsigned int jointRank;
+      humanoidRobot_->getRankOfJoint (joint_->kwsJoint (),
+				      jointRank);
 
-      CkitMat4 jointT = joint_->kppJoint()->kwsJoint()->currentPosition();
+      //CkitMat4 jointT = joint_->kppJoint()->kwsJoint()->currentPosition();
+      CkitMat4 jointT = jointTVector[jointRank];
 
       matrix3d target(jointT(0,0),jointT(0,1),jointT(0,2),
 		      jointT(1,0),jointT(1,1),jointT(1,2),
