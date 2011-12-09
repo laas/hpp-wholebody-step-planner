@@ -1321,7 +1321,7 @@ namespace hpp
 
       humanoidRobot_->userConstraints()->add(wholeBodyConstraint_);
       ktStatus res =  solveOneProblem (robotId);
-      humanoidRobot_->userConstraints()->remove(wholeBodyConstraint_);
+      //humanoidRobot_->userConstraints()->remove(wholeBodyConstraint_);
 
       if ( res != KD_OK ) return res;
       hppDout (info, "solveOneProblem succeeded.");
