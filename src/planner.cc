@@ -767,11 +767,11 @@ namespace hpp
       humanoidRobot_->kwsToJrlDynamicsDofValues(kineoTargetCfg,jrlTargetCfg);
       ChppGikConfigurationConstraint configTask(*(gikStandingRobot_->robot()), jrlTargetCfg, wbMaskVector);
       ChppGikInterpolatedElement interpolatedCfgElement(gikStandingRobot_->robot(),
-							&configTask,
-							1,
-							time,
-							configTaskDuration,
-							samplingPeriod);
+      							&configTask,
+      							5,
+      							time,
+      							configTaskDuration,
+      							samplingPeriod);
 
       genericTask.addElement( &interpolatedCfgElement );
 
@@ -1206,7 +1206,7 @@ namespace hpp
       ChppGikConfigurationConstraint configTask(*(gikStandingRobot_->robot()), jrlTargetCfg, wbMaskVector);
       ChppGikInterpolatedElement interpolatedCfgElement(gikStandingRobot_->robot(),
 							&configTask,
-							1,
+							5,
 							time,
 							configTaskDuration,
 							samplingPeriod);
