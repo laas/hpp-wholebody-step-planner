@@ -39,6 +39,10 @@ namespace hpp
 
       ChppHumanoidRobotShPtr humanoidRobot ();
 
+      ChppGikStandingRobot* robot ();
+
+      vector<ChppRobotMotion*> robotMotions ();
+
       wholeBodyConstraintShPtr wholeBodyConstraint ();
 
       CtlcGraspBallGoalGeneratorShPtr getGoalTask();
