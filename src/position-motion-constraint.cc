@@ -7,17 +7,18 @@
 # include <hpp/gik/constraint/position-constraint.hh>
 
 # include <hpp/wholebody-step-planner/position-motion-constraint.hh>
+# include <hppModel/hppJoint.h>
 
 namespace hpp
 {
   namespace wholeBodyStepPlanner
   {
-    ChppGikPositionMotionConstraint::ChppGikPositionMotionConstraint(const hpp::model::HumanoidRobotShPtr humanoidRobot,
+    ChppGikPositionMotionConstraint::ChppGikPositionMotionConstraint(const ChppHumanoidRobotShPtr humanoidRobot,
 								     const double startTime,
 								     const double endTime,
 								     const CkwsPathShPtr inPath,
 								     const std::map<double,double> & paramOfTime,
-								     hpp::model::JointShPtr constrainedJoint):
+								     CkppJointComponentShPtr constrainedJoint):
       positionConstraint_(NULL),
       startTime_(startTime),
       endTime_(endTime),
@@ -27,14 +28,15 @@ namespace hpp
       joint_(constrainedJoint)
     {
       vector3d target(0,0,0);
-      positionConstraint_ = new ChppGikPositionConstraint(*humanoidRobot_,*(constrainedJoint->jrlJoint()),vector3d(0,0,0),target);
+      ChppJoint* hppJoint = humanoidRobot_->kppToHppJoint (joint_);
+      positionConstraint_ = new ChppGikPositionConstraint(*humanoidRobot_,*(hppJoint->jrlJoint()),vector3d(0,0,0),target);
     }
 
     ChppGikPositionMotionConstraint::~ChppGikPositionMotionConstraint()
     {
       if ( positionConstraint_ ) {
-	delete configConstraint_;
-	configConstraint_ = NULL;
+	delete positionConstraint_;
+	positionConstraint_ = NULL;
       }
     }
 
@@ -89,15 +91,22 @@ namespace hpp
 	  dist = dist_i + (dist_f - dist_i) * (inTime - time_i) / (time_f - time_i);
 	}
 
-      CkwsConfig kineoCfg(humanoidRobot_);
-      wbPath_->getConfigAtDistance(dist,kineoCfg );
+      // CkwsConfig kineoCfg(humanoidRobot_);
+      // wbPath_->getConfigAtDistance(dist,kineoCfg );
+      std::vector<CkitMat4> jointTVector;
+      wbPath_->getMatVectorAtDistance(dist, jointTVector);
 
-      humanoidRobot_->setCurrentConfig(kineoCfg);
+      // humanoidRobot_->setCurrentConfig(kineoCfg);
+      unsigned int jointRank;
+      humanoidRobot_->getRankOfJoint (joint_->kwsJoint (),
+				      jointRank);
 
-      CkitMat4 jointT = joint_->kwsJoint->currentPosition();
+      // CkitMat4 jointT = joint_->kwsJoint->currentPosition();
+      CkitMat4 jointT = jointTVector[jointRank];
+
       vector3d target(jointT(0,3),jointT(1,3),jointT(2,3));
 
-      positionConstraint_->target(target);
+      positionConstraint_->worldTarget(target);
 
       return positionConstraint_;
     }
