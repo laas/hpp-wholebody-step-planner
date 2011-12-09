@@ -92,6 +92,7 @@ AC_CONFIG_FILES([
    include/Makefile
    src/Makefile
    doc/Makefile
+   unitTesting/Makefile
    tests/Makefile
     tests/atlocal
     tests/package.m4

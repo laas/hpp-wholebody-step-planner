@@ -5,7 +5,8 @@ ACLOCAL_AMFLAGS = -I build-aux
 
 SUBDIRS = 		\
 	include		\
-	src		
+	src		\
+	unitTesting
 #	doc		\
 #	tests
 
