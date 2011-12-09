@@ -200,6 +200,7 @@ namespace hpp
       std::ofstream posFile_;
       std::ofstream zmpFile_;
       std::ofstream rpyFile_;
+      std::ofstream zmpMeasuredFile_;
 
     };
   }

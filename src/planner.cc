@@ -112,6 +112,8 @@ namespace hpp
        (debug::getFilename ("trajectory.pos", "hpp-wholebody-step-planner").c_str ()),
        zmpFile_
        (debug::getFilename ("trajectory.zmp", "hpp-wholebody-step-planner").c_str ()),
+       zmpMeasuredFile_
+       (debug::getFilename ("trajectory.zmpmeas", "hpp-wholebody-step-planner").c_str ()),
        rpyFile_
        (debug::getFilename ("trajectory.rpy", "hpp-wholebody-step-planner").c_str ())
     {
@@ -897,6 +899,11 @@ namespace hpp
 	      	       << motionSample->ZMPwstPla[1] << " "
 		       << motionSample->ZMPwstPla[2] << "\n";
 
+	      zmpMeasuredFile_ << timestamp_ << " "
+			       << motionSample->ZMPwstObs[0] << " "
+			       << motionSample->ZMPwstObs[1] << " "
+			       << motionSample->ZMPwstObs[2] << "\n";
+
 	      rpyFile_ << timestamp_ << " "
 		       << motionSample->configuration[3] << " "
 		       << motionSample->configuration[4] << " "
@@ -914,6 +921,7 @@ namespace hpp
 
       posFile_.close ();
       zmpFile_.close ();
+      zmpMeasuredFile_.close ();
       rpyFile_.close ();
 
       return KD_OK;
