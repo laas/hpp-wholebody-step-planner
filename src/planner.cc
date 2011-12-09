@@ -253,9 +253,9 @@ namespace hpp
       /* initializing the motion planning problem */
 
       CkwsRoadmapShPtr roadmap = CkwsRoadmap::create(humanoidRobot_);
-      CkwsDiffusingRdmBuilderShPtr rdmBuilder = 
-	CkwsDiffusingRdmBuilder::create(roadmap);
-	//	CkwsPlusLTRdmBuilder< CkwsDiffusingRdmBuilder >::create (roadmap, 0.1);
+      CkwsDiffusingRdmBuilderShPtr rdmBuilder =
+	//CkwsDiffusingRdmBuilder::create(roadmap);
+	CkwsPlusLTRdmBuilder< CkwsDiffusingRdmBuilder >::create (roadmap, hppProblem (0)->penetration ());
       rdmBuilder->diffuseFromProblemGoal (true);
 
       
