@@ -6,19 +6,18 @@
 # include <jrl/mal/matrixabstractlayer.hh>
 # include <hpp/gik/constraint/rotation-constraint.hh>
 
-# include <hpp/model/joint.hh>
 # include <hpp/wholebody-step-planner/rotation-motion-constraint.hh>
 
 namespace hpp
 {
   namespace wholeBodyStepPlanner
   {
-    ChppGikRotationMotionConstraint::ChppGikRotationMotionConstraint(const hpp::model::HumanoidRobotShPtr humanoidRobot,
+    ChppGikRotationMotionConstraint::ChppGikRotationMotionConstraint(const ChppHumanoidRobotShPtr humanoidRobot,
 								     const double startTime,
 								     const double endTime,
 								     const CkwsPathShPtr inPath,
 								     const std::map<double,double> & paramOfTime,
-								     hpp::model::JointShPtr constrainedJoint):
+								     ChppJointShPtr constrainedJoint):
       rotationConstraint_(NULL),
       startTime_(startTime),
       endTime_(endTime),
