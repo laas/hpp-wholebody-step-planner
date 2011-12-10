@@ -7,6 +7,7 @@
 # include <hpp/gik/constraint/position-constraint.hh>
 
 # include <hpp/wholebody-step-planner/position-motion-constraint.hh>
+
 # include <hppModel/hppJoint.h>
 
 namespace hpp
@@ -27,7 +28,7 @@ namespace hpp
       humanoidRobot_(humanoidRobot),
       joint_(constrainedJoint)
     {
-      vector3d target(0,0,0);
+      vector3d target;
       ChppJoint* hppJoint = humanoidRobot_->kppToHppJoint (joint_);
       positionConstraint_ = new ChppGikPositionConstraint(*humanoidRobot_,*(hppJoint->jrlJoint()),vector3d(0,0,0),target);
     }

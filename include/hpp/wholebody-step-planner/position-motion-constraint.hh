@@ -9,6 +9,7 @@
 # include <jrl/mal/matrixabstractlayer.hh>
 # include <KineoUtility/kitDefine.h>
 # include <KineoWorks2/kwsPath.h>
+# include <KineoModel/kppJointComponent.h>
 # include <gikTask/jrlGikMotionConstraint.h>
 # include <hppModel/hppHumanoidRobot.h>
 
