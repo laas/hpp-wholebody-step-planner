@@ -1043,11 +1043,21 @@ namespace hpp
 	new ChppGikFootprint(ft2->x(),ft2->y(),ft2->th());
       ChppGikFootprint::makeRelative(ft1,ft2Local);
 
+      // Compute min foot rotation as a function of y to avoid big
+      // rotations toward the oustide when feet are very
+      // close. Minimum allowed rotation is then set to a small
+      // negative value.
+      double minAllowedTheta = 0.;
+      double minThetaSlope = (minTheta - minAllowedTheta)
+	/ (minY - maxY);
+      double minThetaLocal = minThetaSlope * (ft2Local->y () - maxY)
+	+ minAllowedTheta;
+
       bool res =     ( (ft2Local->x()  >= minX_)
 		       && (ft2Local->x() <= maxX_)
 		       && (ft2Local->y() >= minY)
 		       && (ft2Local->y() <= maxY)
-		       && (ft2Local->th() >= minTheta)
+		       && (ft2Local->th() >= minThetaLocal)
 		       && (ft2Local->th() <= maxTheta) );
 
 
