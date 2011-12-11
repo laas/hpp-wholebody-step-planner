@@ -769,7 +769,7 @@ namespace hpp
 	std::cerr << "ERROR: null pointer to kppWaist" << std::endl;
 
       ChppGikRotationMotionConstraint waistRotationConstraint(humanoidRobot_,startTime,time,i_path,paramOfTime, kppWaist);
-      ChppGikPrioritizedMotion waistRotationElement(&(*humanoidRobot_),3,&waistRotationConstraint,0.2);
+      ChppGikPrioritizedMotion waistRotationElement(&(*humanoidRobot_),3,&waistRotationConstraint,1e-6);
       genericTask.addElement( &waistRotationElement );
 
       //Config Constraint
@@ -782,7 +782,7 @@ namespace hpp
       }
       
       ChppGikConfigMotionConstraint cfgConstraint(humanoidRobot_,startTime,time,i_path,paramOfTime,ubMaskVector);
-      ChppGikPrioritizedMotion cfgElement(&(*humanoidRobot_),4,&cfgConstraint,0.2);
+      ChppGikPrioritizedMotion cfgElement(&(*humanoidRobot_),4,&cfgConstraint,1e-6);
       cfgElement.workingJoints(ubMaskVector);
       genericTask.addElement( &cfgElement );
 
@@ -1230,7 +1230,7 @@ namespace hpp
 	std::cerr << "ERROR: null pointer to kppWaist" << std::endl;
 
       ChppGikRotationMotionConstraint waistRotationConstraint(humanoidRobot_,startTime,time,i_path,paramOfTime, kppWaist);
-      ChppGikPrioritizedMotion waistRotationElement(&(*humanoidRobot_),3,&waistRotationConstraint,0.2);
+      ChppGikPrioritizedMotion waistRotationElement(&(*humanoidRobot_),3,&waistRotationConstraint,1e-6);
       genericTask.addElement( &waistRotationElement );
 
       //Config Constraint
@@ -1243,7 +1243,7 @@ namespace hpp
       }
 
       ChppGikConfigMotionConstraint cfgConstraint(humanoidRobot_,startTime,time,i_path,paramOfTime,ubMaskVector);
-      ChppGikPrioritizedMotion cfgElement(&(*humanoidRobot_),4,&cfgConstraint,0.2);
+      ChppGikPrioritizedMotion cfgElement(&(*humanoidRobot_),4,&cfgConstraint,1e-6);
       cfgElement.workingJoints(ubMaskVector);
       genericTask.addElement( &cfgElement );
       
