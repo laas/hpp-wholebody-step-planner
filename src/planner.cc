@@ -742,13 +742,13 @@ namespace hpp
       genericTask.addElement( &heightElem );
 
       //Constraint on the waist orientation
-      ChppGikInterpolatedElement verticalElem ( gikStandingRobot_->robot(),
-						waistParallelConstraint_,
-						3,
-						startTime,
-						time,
-						samplingPeriod);
-      genericTask.addElement( &verticalElem );
+      // ChppGikInterpolatedElement verticalElem ( gikStandingRobot_->robot(),
+      // 						waistParallelConstraint_,
+      // 						3,
+      // 						startTime,
+      // 						time,
+      // 						samplingPeriod);
+      // genericTask.addElement( &verticalElem );
 
       //Config Constraint
       vectorN ubMaskVector = gikStandingRobot_->maskFactory()->upperBodyMask();
