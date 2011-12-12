@@ -146,6 +146,11 @@ namespace hpp
       return validGikMotion_;
     }
 
+    std::map<ChppGikFootprint*, double> Planner::stepFracOfFootprint ()
+    {
+      return stepFracOfFootprint_;
+    }
+
     std::vector<Planner::footprintOfParam_t> Planner::resultFootprints ()
     {
       return resultFootprints_;
