@@ -90,6 +90,10 @@ namespace hpp
 
       std::vector<ChppRobotMotion*> robotMotions ();
 
+      std::vector<footprintOfParam_t> resultFootprints ();
+
+      std::map<double,double> paramOfTime ();
+
       ktStatus goalWaistConfig (CkwsPathShPtr inPath);
 
       ktStatus initAndGoalConfig (CkwsPathShPtr inPath);
@@ -200,6 +204,7 @@ namespace hpp
       /* step parameters for each footprint */
       std::map < ChppGikFootprint *, double> stepFracOfFootprint_;
       std::vector  < footprintOfParam_t > resultFootprints_;
+      std::map<double,double> paramOfTime_;
 
       /* Valid Gik motions to be produced as output */
       ChppRobotMotion * currentGikMotion_;
