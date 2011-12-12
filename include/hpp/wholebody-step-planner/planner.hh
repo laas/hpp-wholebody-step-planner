@@ -90,6 +90,12 @@ namespace hpp
 
       std::vector<ChppRobotMotion*> robotMotions ();
 
+      double zmpStartShiftTime ();
+
+      double zmpEndShiftTime ();
+
+      double footFlightTime ();
+
       std::map<ChppGikFootprint*, double> stepFracOfFootprint ();
 
       std::vector<footprintOfParam_t> resultFootprints ();

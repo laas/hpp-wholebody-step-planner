@@ -146,6 +146,21 @@ namespace hpp
       return validGikMotion_;
     }
 
+    double Planner::zmpStartShiftTime ()
+    {
+      return zmpStartShiftTime_;
+    }
+
+    double Planner::zmpEndShiftTime ()
+    {
+      return zmpEndShiftTime_;
+    }
+
+    double Planner::footFlightTime ()
+    {
+      return footFlightTime_;
+    }
+
     std::map<ChppGikFootprint*, double> Planner::stepFracOfFootprint ()
     {
       return stepFracOfFootprint_;
