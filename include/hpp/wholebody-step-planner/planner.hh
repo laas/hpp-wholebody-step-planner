@@ -78,6 +78,10 @@ namespace hpp
       
       ktStatus writeSeqplayFiles ();
 
+      ktStatus
+      kwsToOpenHrpDofValues (const std::vector<double>& inKwsDofVector,
+			     vector<double>& outOpenHrpDofVector);
+
     protected:
 
       ChppGikFootprint * findNextFootPrint(CkwsPathShPtr i_path, 
@@ -94,10 +98,6 @@ namespace hpp
       ktStatus convertGikRobotMotionToKineoPath(ChppRobotMotion * i_motion, 
 						CkwsPathShPtr o_path);
       
-      ktStatus
-      kwsToOpenHrpDofValues (const std::vector<double>& inKwsDofVector,
-			     vector<double>& outOpenHrpDofVector);
-
       ChppGikFootprint * footPrintFromConfig(CkwsConfig & cfg, 
 					     bool isRightFoot);
 
