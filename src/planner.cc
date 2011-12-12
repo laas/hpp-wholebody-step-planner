@@ -1144,6 +1144,10 @@ namespace hpp
 	  length += (*it).first;
 	}
 
+      // Load new footprints in result vector.
+      resultFootprints_.clear ();
+      resultFootprints_.push_back (allFootprints);
+
       std::cout << "---------------------" << std::endl
 		<< " Animating Whole Path" << std::endl
 		<< "Length: " << i_path->length() << std::endl;
