@@ -1312,8 +1312,8 @@ namespace hpp
 	  ChppRobotMotion  motion =   genericTask.solutionMotion();
 	  if (!motion.empty())
 	    {
-	      
-	      // validGikMotion_.push_back (&motion);
+	      // currentGikMotion_ = new ChppRobotMotion (motion);
+	      // validGikMotion_.push_back (currentGikMotion_);
 	      // if (writeSeqplayFiles() != KD_OK) {
 	      // 	std::cerr << "ERROR in writing seqplay files." << std::endl;
 	      // }
@@ -1336,7 +1336,8 @@ namespace hpp
 	  motion =   genericTask.solutionMotion();
 	  if (!motion.empty())
 	    {
-	      // validGikMotion_.push_back (&motion);
+	      // currentGikMotion_ = new ChppRobotMotion (motion);
+	      // validGikMotion_.push_back (currentGikMotion_);
 	      // if (writeSeqplayFiles() != KD_OK) {
 	      // 	std::cerr << "ERROR in writing seqplay files." << std::endl;
 	      // }
@@ -1360,7 +1361,8 @@ namespace hpp
 	  motion =   genericTask.solutionMotion();
 	  if (!motion.empty())
 	    {
-	      validGikMotion_.push_back (&motion);
+	      currentGikMotion_ = new ChppRobotMotion (motion);
+	      validGikMotion_.push_back (currentGikMotion_);
 	      if (writeSeqplayFiles() != KD_OK) {
 		std::cerr << "ERROR in writing seqplay files." << std::endl;
 	      }
