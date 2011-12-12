@@ -28,7 +28,7 @@
 # define END_COEFF 0.5
 # define START_SHIFT_TIME 0.1
 # define END_SHIFT_TIME 0.1
-# define FOOT_FILGHT_TIME 1
+# define FOOT_FILGHT_TIME 0.8
 # define STEP_HEIGHT 0.05
 
 namespace hpp
