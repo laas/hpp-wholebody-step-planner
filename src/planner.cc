@@ -100,6 +100,16 @@ namespace hpp
       return validGikMotion_;
     }
 
+    std::vector<Planner::footprintOfParam_t> Planner::resultFootprints ()
+    {
+      return resultFootprints_;
+    }
+
+    std::map<double,double> Planner::paramOfTime ()
+    {
+      return paramOfTime_;
+    }
+
     wholeBodyConstraintShPtr Planner::wholeBodyConstraint ()
     {
       return wholeBodyConstraint_;
@@ -1204,6 +1214,7 @@ namespace hpp
 
       time += 2;
       paramOfTime[time] = i_path->length();
+      paramOfTime_ = paramOfTime;
    
       //Constraint on the waist height
       ChppGikInterpolatedElement heightElem ( gikStandingRobot_->robot(),

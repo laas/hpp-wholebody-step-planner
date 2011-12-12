@@ -43,6 +43,10 @@ namespace hpp
 
       vector<ChppRobotMotion*> robotMotions ();
 
+      std::vector<footprintOfParam_t> resultFootprints ();
+
+      std::map<double,double> paramOfTime ();
+
       wholeBodyConstraintShPtr wholeBodyConstraint ();
 
       CtlcGraspBallGoalGeneratorShPtr getGoalTask();
@@ -150,7 +154,7 @@ namespace hpp
 
       std::map < ChppGikFootprint *, double> stepFracOfFootprint_;
       std::vector  < footprintOfParam_t > resultFootprints_;
-
+      std::map<double,double> paramOfTime_;
 
       /* Valid Gik motions to be outputted */
       ChppRobotMotion * currentGikMotion_;
