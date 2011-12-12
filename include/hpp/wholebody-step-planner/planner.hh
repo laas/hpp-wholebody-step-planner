@@ -43,6 +43,8 @@ namespace hpp
 
       vector<ChppRobotMotion*> robotMotions ();
 
+      std::map<ChppGikFootprint*, double> stepFracOfFootprint ();
+
       std::vector<footprintOfParam_t> resultFootprints ();
 
       std::map<double,double> paramOfTime ();
