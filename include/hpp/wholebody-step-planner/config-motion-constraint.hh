@@ -41,7 +41,7 @@ namespace hpp
       ChppGikConfigMotionConstraint(const hpp::model::HumanoidRobotShPtr humanoidRobot,
 				    const double startTime,
 				    const double endTime,
-				    const CkwsPathShPtr inPath,
+				    const CkwsPathConstShPtr inPath,
 				    const std::map<double,double> & paramOfTime,
 				    const vectorN maskVector);
       
@@ -63,7 +63,7 @@ namespace hpp
       ChppGikConfigurationConstraint * configConstraint_;
       double startTime_;
       double endTime_;
-      CkwsPathShPtr wbPath_;
+      CkwsPathConstShPtr wbPath_;
       std::map<double,double> paramOfTime_;
       hpp::model::HumanoidRobotShPtr humanoidRobot_;
       vectorN maskVector_;

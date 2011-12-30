@@ -57,7 +57,7 @@ namespace hpp
 
       hpp::constrained::KwsConstraintShPtr wholeBodyConstraint ();
 
-      ktStatus initAndGoalConfig (CkwsPathShPtr inPath);
+      ktStatus initAndGoalConfig (CkwsPathConstShPtr inPath);
 
       ktStatus generateGoalConfig (double xTarget,double yTarget,double zTarget);
 
@@ -66,16 +66,16 @@ namespace hpp
       virtual ktStatus solve();
 
 
-      ktStatus computeFootPrints( CkwsPathShPtr i_path, 
+      ktStatus computeFootPrints( CkwsPathConstShPtr i_path,
 				  footprintOfParam_t & o_footPrintOfParam);
 
-      CkwsPathShPtr  animatePath ( CkwsPathShPtr i_path ,  
+      CkwsPathShPtr  animatePath ( CkwsPathConstShPtr i_path ,
 				   footprintOfParam_t & i_footPrintOfParam );
 
-      CkwsPathShPtr animateWholePath (CkwsPathShPtr i_path);
+      CkwsPathShPtr animateWholePath (CkwsPathConstShPtr i_path);
 
   
-      CkwsPathShPtr findDynamicPath ( CkwsPathShPtr i_path );
+      CkwsPathShPtr findDynamicPath ( CkwsPathConstShPtr i_path );
 
       void setFootPrintLimits(double minX,
 			      double maxX,
@@ -88,12 +88,12 @@ namespace hpp
 
     protected:
 
-      ChppGikFootprint * findNextFootPrint(CkwsPathShPtr i_path, 
+      ChppGikFootprint * findNextFootPrint(CkwsPathConstShPtr i_path, 
 					   double & param, 
 					   const ChppGikFootprint * currentFootPrint,
 					   bool isRightFoot);
 
-      ChppGikFootprint * addLastFootPrint(CkwsPathShPtr i_path, 
+      ChppGikFootprint * addLastFootPrint(CkwsPathConstShPtr i_path, 
 					  const ChppGikFootprint * currentFootPrint,
 					  bool isRightFoot);
 

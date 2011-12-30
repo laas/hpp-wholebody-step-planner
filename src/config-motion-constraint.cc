@@ -32,13 +32,13 @@ namespace hpp
 {
   namespace wholeBodyStepPlanner
   {
-
-    ChppGikConfigMotionConstraint::ChppGikConfigMotionConstraint(const hpp::model::HumanoidRobotShPtr humanoidRobot,
-								 const double startTime,
-								 const double endTime,
-								 const CkwsPathShPtr inPath,
-								 const std::map<double,double> & paramOfTime,
-								 const vectorN maskVector):
+    ChppGikConfigMotionConstraint::
+    ChppGikConfigMotionConstraint(const hpp::model::HumanoidRobotShPtr humanoidRobot,
+				  const double startTime,
+				  const double endTime,
+				  const CkwsPathConstShPtr inPath,
+				  const std::map<double,double> & paramOfTime,
+				  const vectorN maskVector):
       configConstraint_(NULL),
       startTime_(startTime),
       endTime_(endTime),

@@ -263,7 +263,7 @@ namespace hpp
       }
     */
     ktStatus
-    Planner::initAndGoalConfig (CkwsPathShPtr inPath)
+    Planner::initAndGoalConfig (CkwsPathConstShPtr inPath)
     {
       assert (inPath->device() == humanoidRobot_);
       
@@ -338,11 +338,11 @@ namespace hpp
     }
 
     CkwsPathShPtr 
-    Planner::findDynamicPath( CkwsPathShPtr i_path)
+    Planner::findDynamicPath( CkwsPathConstShPtr i_path)
     {
 
       CkwsPathShPtr resultPath = CkwsPath::create(humanoidRobot_);
-      CkwsPathShPtr pathToAnimate = i_path;
+      CkwsPathConstShPtr pathToAnimate = i_path;
       CkwsPathShPtr pathAtEnd = CkwsPath::create(humanoidRobot_);
       std::vector<double> configKineo;
       CkwsConfig currentCfg(humanoidRobot_);
@@ -499,7 +499,8 @@ namespace hpp
 
 
     ktStatus 
-    Planner::computeFootPrints ( CkwsPathShPtr i_path, footprintOfParam_t & o_footPrintOfParam)
+    Planner::computeFootPrints (CkwsPathConstShPtr i_path,
+				footprintOfParam_t & o_footPrintOfParam)
     {
       
       std::cout << "Computing footprints..." << std::endl;
@@ -579,7 +580,8 @@ namespace hpp
     }
 
     CkwsPathShPtr  
-    Planner::animatePath ( CkwsPathShPtr i_path ,  footprintOfParam_t & i_footPrintOfParam )
+    Planner::animatePath (CkwsPathConstShPtr i_path ,
+			  footprintOfParam_t & i_footPrintOfParam )
     {
       CkwsPathShPtr newPath = CkwsPath::create(humanoidRobot_);
 
@@ -939,7 +941,7 @@ namespace hpp
     }
 
     ChppGikFootprint * 
-    Planner::findNextFootPrint(CkwsPathShPtr i_path, 
+    Planner::findNextFootPrint(CkwsPathConstShPtr i_path, 
 			       double & param, 
 			       const ChppGikFootprint * currentFootPrint,
 			       bool isRightFoot)
@@ -988,7 +990,7 @@ namespace hpp
     }
 
     ChppGikFootprint * 
-    Planner::addLastFootPrint(CkwsPathShPtr i_path, 
+    Planner::addLastFootPrint(CkwsPathConstShPtr i_path, 
 			      const ChppGikFootprint * currentFootPrint,
 			      bool isRightFoot)
     {
@@ -1025,7 +1027,7 @@ namespace hpp
       return res;
     }
 
-    CkwsPathShPtr Planner::animateWholePath(CkwsPathShPtr i_path) {
+    CkwsPathShPtr Planner::animateWholePath(CkwsPathConstShPtr i_path) {
       
       footprintOfParam_t allFootprints;
       footprintOfParam_t::iterator it;
