@@ -24,7 +24,7 @@
 # include <KineoModel/kppConfigComponent.h>
 # include <jrl/mal/matrixabstractlayer.hh>
 # include <hpp/gik/constraint/configuration-constraint.hh>
-
+# include <hpp/model/humanoid-robot.hh>
 
 # include <hpp/wholebody-step-planner/config-motion-constraint.hh>
 
@@ -32,8 +32,10 @@ namespace hpp
 {
   namespace wholeBodyStepPlanner
   {
+    using hpp::model::HumanoidRobotShPtr;
+
     ChppGikConfigMotionConstraint::
-    ChppGikConfigMotionConstraint(const hpp::model::HumanoidRobotShPtr humanoidRobot,
+    ChppGikConfigMotionConstraint(const HumanoidRobotShPtr humanoidRobot,
 				  const double startTime,
 				  const double endTime,
 				  const CkwsPathConstShPtr inPath,
@@ -48,7 +50,8 @@ namespace hpp
       maskVector_(maskVector)
     {
       MAL_VECTOR_DIM(jrlConfig, double, humanoidRobot_->numberDof());
-      configConstraint_ = new ChppGikConfigurationConstraint(*humanoidRobot_,jrlConfig,maskVector);
+      configConstraint_ = new ChppGikConfigurationConstraint
+	(*humanoidRobot_,jrlConfig,maskVector);
     }
       
     ChppGikConfigMotionConstraint::~ChppGikConfigMotionConstraint()

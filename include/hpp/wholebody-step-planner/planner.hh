@@ -22,7 +22,7 @@
 
 # include <fstream>
 # include <vector>
-# include <map> 
+# include <map>
 
 # include <KineoUtility/kitDefine.h>
 
@@ -74,7 +74,7 @@ namespace hpp
 
       CkwsPathShPtr animateWholePath (CkwsPathConstShPtr i_path);
 
-  
+
       CkwsPathShPtr findDynamicPath ( CkwsPathConstShPtr i_path );
 
       void setFootPrintLimits(double minX,
@@ -83,40 +83,40 @@ namespace hpp
 			      double maxY,
 			      double minTheta,
 			      double maxTheta);
-      
+
       ktStatus writeSeqplayFiles ();
 
     protected:
 
-      ChppGikFootprint * findNextFootPrint(CkwsPathConstShPtr i_path, 
-					   double & param, 
+      ChppGikFootprint * findNextFootPrint(CkwsPathConstShPtr i_path,
+					   double & param,
 					   const ChppGikFootprint * currentFootPrint,
 					   bool isRightFoot);
 
-      ChppGikFootprint * addLastFootPrint(CkwsPathConstShPtr i_path, 
+      ChppGikFootprint * addLastFootPrint(CkwsPathConstShPtr i_path,
 					  const ChppGikFootprint * currentFootPrint,
 					  bool isRightFoot);
 
       void freeFootPrints(footprintOfParam_t & footPrintOfParam);
 
-      ktStatus convertGikRobotMotionToKineoPath(ChppRobotMotion * i_motion, 
+      ktStatus convertGikRobotMotionToKineoPath(ChppRobotMotion * i_motion,
 						CkwsPathShPtr o_path);
-      
+
       ktStatus
       kwsToOpenHrpDofValues (const std::vector<double>& inKwsDofVector,
 			     std::vector<double>& outOpenHrpDofVector);
 
-      ChppGikFootprint * footPrintFromConfig(CkwsConfig & cfg, 
+      ChppGikFootprint * footPrintFromConfig(CkwsConfig & cfg,
 					     bool isRightFoot);
 
       bool successiveFootPrints(const ChppGikFootprint * ft1,
 				const ChppGikFootprint * ft2,
 				bool isRightFoot);
 
-      
- 
+
+
     private:
-      
+
       hpp::model::HumanoidRobotShPtr humanoidRobot_;
       ChppGikStandingRobot * gikStandingRobot_;
       double samplingPeriod_;
@@ -128,7 +128,7 @@ namespace hpp
       double zmpEndShiftTime_;
       double footFlightTime_;
       double stepHeight_;
-      
+
       /* Gik constraints allocated only once */
       ChppGikPlaneConstraint * waistPlaneConstraint_;
       ChppGikParallelConstraint* waistParallelConstraint_;

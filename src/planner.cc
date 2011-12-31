@@ -96,8 +96,8 @@ namespace hpp
        rpyFile_
        (debug::getFilename ("trajectory.rpy", "hpp-wholebody-step-planner").c_str ())
     {
-      std::cout << "ParamPrecision: " 
-		<<  paramPrecision_ 
+      std::cout << "ParamPrecision: "
+		<<  paramPrecision_
 		<< std::endl;
     }
 
@@ -116,7 +116,7 @@ namespace hpp
     {
       return humanoidRobot_;
     }
-    
+
     hpp::constrained::KwsConstraintShPtr Planner::wholeBodyConstraint ()
     {
       return wholeBodyConstraint_;
@@ -159,21 +159,21 @@ namespace hpp
       property="ComputeVelocity"; value="true";humanoidRobot_->setProperty ( property,value );
       property="ComputeSkewCom"; value="true";humanoidRobot_->setProperty ( property,value );
       property="ComputeCoM"; value="true";humanoidRobot_->setProperty ( property,value );
-  
+
       gikStandingRobot_ = new ChppGikStandingRobot(*humanoidRobot_);
 
       CkwsConfigShPtr halfSittingCfg;
       humanoidRobot_->getCurrentConfig(halfSittingCfg);
- 
+
       /* Building the tasks */
-      waistZ_ = 
+      waistZ_ =
 	MAL_S4x4_MATRIX_ACCESS_I_J(humanoidRobot_->waist()->currentTransformation(),2,3);
 
-      vector3d ZLocalAxis = 
+      vector3d ZLocalAxis =
 	gikStandingRobot_->halfsittingLocalWaistVertical () ;
       vector3d ZWorldAxis ( 0, 0, 1 ) ;
-      
-      waistPlaneConstraint_ = 
+
+      waistPlaneConstraint_ =
 	new ChppGikPlaneConstraint ( *humanoidRobot_,
 				     *(humanoidRobot_->waist()),
 				     vector3d ( 0,0,0 ),
@@ -182,23 +182,23 @@ namespace hpp
 
       waistParallelConstraint_ =
 	new ChppGikParallelConstraint ( *humanoidRobot_,
-					*(humanoidRobot_->waist()), 
-					ZLocalAxis, 
+					*(humanoidRobot_->waist()),
+					ZLocalAxis,
 					ZWorldAxis );
-            
+
       /* Creating kineo constraint */
-      
+
       std::vector<CjrlGikStateConstraint*>  sot;
       hpp::constrained::Planner::buildDoubleSupportSlidingStaticStabilityConstraints(halfSittingCfg,
 										     sot);
       sot.push_back(waistPlaneConstraint_);
       sot.push_back(waistParallelConstraint_);
-      
+
       hpp::constrained::ConfigExtendor * extendor =
 	new hpp::constrained::ConfigExtendor(humanoidRobot_);
       extendor->setConstraints(sot);
 
-      wholeBodyConstraint_ = 
+      wholeBodyConstraint_ =
 	hpp::constrained::KwsConstraint::create("Whole-Body Constraint",
 						extendor);
 
@@ -223,22 +223,22 @@ namespace hpp
       rdmBuilder->diffuseFromProblemStart (true);
       rdmBuilder->diffuseFromProblemGoal (true);
 
-      
+
       steeringMethodIthProblem(0, CkwsSMLinear::create ());
       roadmapBuilderIthProblem (0,rdmBuilder);
-      
-      CkwsLoopOptimizerShPtr optimizer = 
+
+      CkwsLoopOptimizerShPtr optimizer =
 	CkwsRandomOptimizer::create();
       optimizer->penetration (hppProblem (0)->penetration ());
 
-      PathOptimizerShPtr postOptimizer = 
+      PathOptimizerShPtr postOptimizer =
 	PathOptimizer::create();
       postOptimizer->penetration (hppProblem (0)->penetration () / 100);
 
       /* Building wholebody mask, without the free flyer dofs */
       std::vector<bool> wbMask(humanoidRobot_->countDofs(),true);
       for(unsigned int i = 0; i<6; i++) wbMask[i] = false;
-      
+
       postOptimizer->targetConfig(halfSittingCfg);
       postOptimizer->setConfigMask(wbMask);
 
@@ -266,16 +266,16 @@ namespace hpp
     Planner::initAndGoalConfig (CkwsPathConstShPtr inPath)
     {
       assert (inPath->device() == humanoidRobot_);
-      
+
       CkwsConfigShPtr iCfg = inPath->configAtStart();
       CkwsConfigShPtr fCfg = inPath->configAtEnd();
 
       initConfIthProblem(0,iCfg);
       goalConfIthProblem(0,fCfg);
-      
+
       return KD_OK;
     }
-    
+
     ktStatus Planner::generateGoalConfig (double xTarget,double yTarget,double zTarget)
     {
       std::vector<CjrlGikStateConstraint*> sot;
@@ -286,7 +286,7 @@ namespace hpp
       ChppGikMaskFactory maskFactory(&(*humanoidRobot_));
       vectorN weightVector = maskFactory.weightsDoubleSupport ();
 
-      ChppGikPositionConstraint * positionConstraint = 
+      ChppGikPositionConstraint * positionConstraint =
 	new ChppGikPositionConstraint (*humanoidRobot_,
 				       *(humanoidRobot_->rightWrist()),
 				       vector3d(0,0,0),
@@ -298,7 +298,7 @@ namespace hpp
       goalSoc.push_back(positionConstraint);
       goalSoc.push_back(waistPlaneConstraint_);
       goalSoc.push_back(waistParallelConstraint_);
-      hpp::constrained::ConfigExtendor * goalExtendor = 
+      hpp::constrained::ConfigExtendor * goalExtendor =
 	new hpp::constrained::ConfigExtendor(humanoidRobot_);
       goalExtendor->setConstraints(goalSoc);
       goalExtendor->getGikSolver()->weights(weightVector);
@@ -310,7 +310,7 @@ namespace hpp
       }
 
       CkwsConfigShPtr goalCfg = goalConfIthProblem(0);
-      
+
       //Optimize the random goal config
       hpp::constrained::ConfigOptimizer optimizer(humanoidRobot_,
 						  goalExtendor,
@@ -326,7 +326,7 @@ namespace hpp
 	return KD_ERROR;
       }
 
-      // Attach goal config to device 
+      // Attach goal config to device
       std::stringstream ssOpt (std::stringstream::in | std::stringstream::out);
       ssOpt << "optimized goal config ";
       humanoidRobot_->addChildComponent (CkppConfigComponent::create (optimizationPath->configAtEnd (),
@@ -337,7 +337,7 @@ namespace hpp
       return KD_OK;
     }
 
-    CkwsPathShPtr 
+    CkwsPathShPtr
     Planner::findDynamicPath( CkwsPathConstShPtr i_path)
     {
 
@@ -352,25 +352,25 @@ namespace hpp
       MAL_VECTOR_DIM(zeros, double, humanoidRobot_->numberDof());
       for(unsigned int i=0; i<zeros.size(); i++)
 	zeros[i] =0;
-  
-      while ( (pathToAnimate->length() > 0.0) 
+
+      while ( (pathToAnimate->length() > 0.0)
 	      || (pathAtEnd->length() != 0) )
 	{
 
 	  std::cout << "-------------------------------" << std::endl
-		    << "Animating path of length: " 
+		    << "Animating path of length: "
 		    << pathToAnimate->length() << std::endl;
 
-      
+
 	  CkwsPathShPtr animatedPath;
 	  footprintOfParam_t ftprints;
-	    
+
 	  if (computeFootPrints(pathToAnimate,ftprints) != KD_OK)
 	    {
 	      return resultPath;
 	    }
 
-	  std::cout << "Computed " << ftprints.size() 
+	  std::cout << "Computed " << ftprints.size()
 		    << " footprints" << std::endl;
 
 	  /* Initializing the state of the robot before animating */
@@ -393,14 +393,14 @@ namespace hpp
 
 	  animatedPath = animatePath(pathToAnimate,ftprints);
 
-	  if (!animatedPath) 
+	  if (!animatedPath)
 	    {
 	      break;
 	    }
 
 	  animatedPath->validateWithPenetration(0.2);
 
-	  if ((animatedPath->isValid()) && (animatedPath->length())) 
+	  if ((animatedPath->isValid()) && (animatedPath->length()))
 	    {
 
 	      resultFootprints_.push_back( ftprints );
@@ -411,49 +411,49 @@ namespace hpp
 	      if (!resultPath->isEmpty()) {
 		CkwsConfigShPtr endStartCfg = resultPath->configAtEnd();
 		CkwsConfigShPtr startEndCfg = animatedPath->configAtStart();
-	    
+
 		if (!endStartCfg->isEquivalent(*startEndCfg))
 		  {
-		    std::cout << "End Config of start path is not equivalent to start config of end path." 
+		    std::cout << "End Config of start path is not equivalent to start config of end path."
 			      << std::endl;
-		      
-		    CkwsDirectPathShPtr newDP = 
+
+		    CkwsDirectPathShPtr newDP =
 		      humanoidRobot_->steeringMethod()->makeDirectPath(*endStartCfg,*startEndCfg);
-	     
+
 		    resultPath->appendDirectPath ( newDP );
-		      
+
 		  }
 	      }
 	      resultPath->appendPath ( animatedPath );
-	  
+
 	      pathToAnimate = pathAtEnd;
 	      pathAtEnd =  CkwsPath::create(humanoidRobot_) ;
 	    }
-	 
+
 	  else
 	    {
-      
+
 	      std::cout << "Animated path is not valid"
 			<< std::endl;
-	
+
 	      /* Finding first unvalid directPath */
 	      unsigned int i = 0;
 	      unsigned int n = animatedPath->countDirectPaths();
-		
-	      while ( ( i < n ) && 
-		      (animatedPath->directPath(i)->isValid()) ) { 
-		i++; 
+
+	      while ( ( i < n ) &&
+		      (animatedPath->directPath(i)->isValid()) ) {
+		i++;
 	      }
 
-	      std::cout << "First unvalid path: " 
-			<< i << "/" << n 
+	      std::cout << "First unvalid path: "
+			<< i << "/" << n
 			<< std::endl;
 
 	      freeFootPrints(ftprints);
 	      ftprints.clear();
 	      animatedPath->clear();
-	
-	      double halfLength = 
+
+	      double halfLength =
 		n ?  pathToAnimate->length() * i/ (double) n : 0.5 * pathToAnimate->length()  ;
 
 	      /* Attaching the constraint to the device before interpolating, to avoid flying configs */
@@ -479,7 +479,7 @@ namespace hpp
 	      pathAtEnd = newPathAtEnd ;
 	    }
 	}
-		
+
 
       /* Reinitializing robot state before animating the whole path */
       i_path->getConfigAtStart(currentCfg);
@@ -491,18 +491,18 @@ namespace hpp
       CkwsPathShPtr wholeAnimatedPath = animateWholePath( i_path );
 
       if (wholeAnimatedPath) hppProblem(0)->addPath ( wholeAnimatedPath) ;
-	
+
 
 
       return resultPath;
     }
 
 
-    ktStatus 
+    ktStatus
     Planner::computeFootPrints (CkwsPathConstShPtr i_path,
 				footprintOfParam_t & o_footPrintOfParam)
     {
-      
+
       std::cout << "Computing footprints..." << std::endl;
 
       bool isRightFoot = true;
@@ -527,7 +527,7 @@ namespace hpp
 		    << std::endl;
 	  return KD_ERROR;
 	}
-      
+
       if (!supportPol->isDoubleSupport())
 	{
 	  std::cerr << "Robot is not in a double support configuration when entering Planner::computeFootPrints()"
@@ -539,14 +539,14 @@ namespace hpp
 
       while ( currentDist < length )
 	{
-	  std::cout << "Computing footprint at length: " 
+	  std::cout << "Computing footprint at length: "
 		    << currentDist << std::endl;
 
-	  ChppGikFootprint * newFootPrint = 
+	  ChppGikFootprint * newFootPrint =
 	    findNextFootPrint(i_path,currentDist,currentFootPrint,isRightFoot);
 	  assert (newFootPrint);
 
-	  std::cout << "Found footprint: " 
+	  std::cout << "Found footprint: "
 		    << newFootPrint->x() << " , "
 	    	    << newFootPrint->y() << " , "
 		    << newFootPrint->th() << " , "
@@ -570,7 +570,7 @@ namespace hpp
     }
 
 
-    void 
+    void
     Planner::freeFootPrints(footprintOfParam_t & footPrintOfParam)
     {
       footprintOfParam_t::iterator it;
@@ -579,7 +579,7 @@ namespace hpp
       footPrintOfParam.clear();
     }
 
-    CkwsPathShPtr  
+    CkwsPathShPtr
     Planner::animatePath (CkwsPathConstShPtr i_path ,
 			  footprintOfParam_t & i_footPrintOfParam )
     {
@@ -599,12 +599,12 @@ namespace hpp
       double footFlightTime = footFlightTime_;
       double stepHeight = stepHeight_;
       double samplingPeriod = samplingPeriod_;
- 
-      if ( i_footPrintOfParam.size() <= 2) //Smaller steps 
+
+      if ( i_footPrintOfParam.size() <= 2) //Smaller steps
 	{
-	  ChppGikSupportPolygon * supportPolygon = 
-	    gikStandingRobot_->supportPolygon();	  
-	  const ChppGikFootprint * leftFootprint = 
+	  ChppGikSupportPolygon * supportPolygon =
+	    gikStandingRobot_->supportPolygon();
+	  const ChppGikFootprint * leftFootprint =
 	    supportPolygon->leftFootprint();
 
 	  double startX = leftFootprint->x();
@@ -616,9 +616,9 @@ namespace hpp
 	  double endX = (*it).second->x();
 	  double endY = (*it).second->y();
 	  double endTh = (*it).second->th();
-	  
+
 	  double dTh = abs (endTh - startTh);
-	  if (dTh > M_PI) 
+	  if (dTh > M_PI)
 	    dTh = abs(atan2( sin (endTh - startTh) , cos (endTh - startTh))) ;
 
 	  double deltaX = abs ( (endX - startX) /  maxX_ );
@@ -668,7 +668,7 @@ namespace hpp
 
       /* Creating generic task */
       ChppGikGenericTask genericTask( gikStandingRobot_ , samplingPeriod );
-   
+
       /* Iterating over footsteps */
       bool isRightFoot = true;
       double lastParam = 0.;
@@ -690,7 +690,7 @@ namespace hpp
 	  double stepDuration = stepElement->duration();
 	  time+= stepDuration;
 
-	  // When the foot reaches the ground, the configuration to approach 
+	  // When the foot reaches the ground, the configuration to approach
 	  // is the one halfway between the two footsteps
 	  double currentParam = (lastParam + (*it).first) /2.;
 	  paramOfTime[time] = currentParam;
@@ -700,13 +700,13 @@ namespace hpp
 
 	  genericTask.addElement( stepElement );
 	}
-      
+
       std::cout << "Total walking time: "  << time << std::endl;
 
       time += 2;
 
       paramOfTime[time] = i_path->length();
-   
+
       //Constraint on the waist height
       ChppGikInterpolatedElement heightElem ( gikStandingRobot_->robot(),
 					      waistPlaneConstraint_,
@@ -728,7 +728,7 @@ namespace hpp
       //Config Constraint
       vectorN ubMaskVector = gikStandingRobot_->maskFactory()->upperBodyMask();
       vectorN wbMaskVector = gikStandingRobot_->maskFactory()->wholeBodyMask();
-      
+
       ChppGikConfigMotionConstraint cfgConstraint(humanoidRobot_,startTime,time,i_path,paramOfTime,ubMaskVector);
       ChppGikPrioritizedMotion cfgElement(&(*humanoidRobot_),4,&cfgConstraint,0.2);
       cfgElement.workingJoints(ubMaskVector);
@@ -736,12 +736,12 @@ namespace hpp
 
       double configTaskDuration = 3;
       CkwsConfigShPtr endCfg = i_path->configAtEnd();
-      std::vector<double> kineoTargetCfg; 
+      std::vector<double> kineoTargetCfg;
       endCfg->getDofValues(kineoTargetCfg);
       MAL_VECTOR_DIM(jrlTargetCfg, double, humanoidRobot_->numberDof());
       humanoidRobot_->kwsToJrlDynamicsDofValues(kineoTargetCfg,jrlTargetCfg);
       ChppGikConfigurationConstraint configTask(*(gikStandingRobot_->robot()), jrlTargetCfg, wbMaskVector);
-      ChppGikInterpolatedElement interpolatedCfgElement(gikStandingRobot_->robot(), 
+      ChppGikInterpolatedElement interpolatedCfgElement(gikStandingRobot_->robot(),
 							&configTask,
 							1,
 							time,
@@ -749,13 +749,13 @@ namespace hpp
 							samplingPeriod);
 
       genericTask.addElement( &interpolatedCfgElement );
-      
-  
+
+
       std::cout << "Solving the task" << std::endl;
 
       //solving the task
       bool isSolved = genericTask.solve();
-      
+
 
       if (isSolved)
 	{
@@ -766,7 +766,7 @@ namespace hpp
 	      convertGikRobotMotionToKineoPath(&motion,newPath);
 	    }
 	}
-      else 
+      else
 	{
 	  std::cout << "Failed to solve generic task"
 		    << std::endl;
@@ -780,17 +780,17 @@ namespace hpp
     {
       double x,y,theta;
       humanoidRobot_->hppSetCurrentConfig(cfg);
-      
+
       matrix4d absoluteFootTransform;
 
       if (isRightFoot)
 	{
-	  absoluteFootTransform = 
+	  absoluteFootTransform =
 	    humanoidRobot_->rightAnkle()->currentTransformation();
 	}
       else
 	{
-	  absoluteFootTransform = 
+	  absoluteFootTransform =
 	    humanoidRobot_->leftAnkle()->currentTransformation();
 	}
 
@@ -803,8 +803,8 @@ namespace hpp
       return footPrint;
     }
 
-    ktStatus 
-    Planner::convertGikRobotMotionToKineoPath(ChppRobotMotion * i_motion, 
+    ktStatus
+    Planner::convertGikRobotMotionToKineoPath(ChppRobotMotion * i_motion,
 					      CkwsPathShPtr o_path)
     {
       o_path->clear();
@@ -812,7 +812,7 @@ namespace hpp
 
       if (!motionSample)
 	{
-	  std::cerr << "ERROR: convertGikRobotMotionToKineoPath: Empty motion sample" 
+	  std::cerr << "ERROR: convertGikRobotMotionToKineoPath: Empty motion sample"
 		    << std::endl;
 	  return KD_ERROR;
 	}
@@ -847,7 +847,7 @@ namespace hpp
     {
       if (validGikMotion_.size () == 0)
 	{
-	  std::cerr << "ERROR: writeSeqplayFiles: Empty motion vector" 
+	  std::cerr << "ERROR: writeSeqplayFiles: Empty motion vector"
 		    << std::endl;
 	  return KD_ERROR;
 	}
@@ -855,7 +855,7 @@ namespace hpp
 
       std::vector<double> kineoCfg(humanoidRobot_->countDofs ());
       std::vector<double> openHrpCfg(humanoidRobot_->countDofs ());
-      
+
       for (std::vector<ChppRobotMotion*>::iterator it = validGikMotion_.begin ();
 	   it < validGikMotion_.end (); it++)
 	{
@@ -864,18 +864,18 @@ namespace hpp
 		    << std::endl;
 
 	  const ChppRobotMotionSample * motionSample = (*it)->firstSample();
-	  
+
 	  if (!motionSample)
 	    {
-	      std::cerr << "ERROR: writeSeqplayFiles: Empty motion sample" 
+	      std::cerr << "ERROR: writeSeqplayFiles: Empty motion sample"
 			<< std::endl;
 	      return KD_ERROR;
 	    }
-	 
+
 	  // Connect two motion files with a 5ms gap between end and start
 	  // since speed and ZMP are (theoretically) null.
-	  timestamp_ += 0.005; 
-	  
+	  timestamp_ += 0.005;
+
 	  while (motionSample)
 	    {
 	      humanoidRobot_->jrlDynamicsToKwsDofValues(motionSample->configuration, kineoCfg);
@@ -886,7 +886,7 @@ namespace hpp
 	      	       << motionSample->ZMPwstPla[0] << " "
 	      	       << motionSample->ZMPwstPla[1] << " "
 		       << motionSample->ZMPwstPla[2] << "\n";
-	      
+
 	      rpyFile_ << timestamp_ << " "
 		       << motionSample->configuration[3] << " "
 		       << motionSample->configuration[4] << " "
@@ -896,26 +896,26 @@ namespace hpp
 	      for (unsigned int dof = 6; dof < humanoidRobot_->countDofs (); dof++)
 		posFile_ << openHrpCfg[dof] << " ";
 	      posFile_ << "\n";
-	      
+
 	      motionSample = (*it)->nextSample() ;
 	      timestamp_ += (*it)->samplingPeriod ();
 	    }
 	}
-      
+
       posFile_.close ();
       zmpFile_.close ();
       rpyFile_.close ();
 
       return KD_OK;
     }
-    
+
     ktStatus
     Planner::kwsToOpenHrpDofValues (const std::vector<double>& inKwsDofVector,
 				    std::vector<double>& outOpenHrpDofVector)
     {
       if (outOpenHrpDofVector.size () != inKwsDofVector.size ())
 	return KD_ERROR;
-      
+
       for (unsigned int i = 0; i < 29; i++)
 	outOpenHrpDofVector[i] = inKwsDofVector[i];
 
@@ -934,19 +934,19 @@ namespace hpp
       outOpenHrpDofVector[39] = inKwsDofVector[32];
       outOpenHrpDofVector[40] = inKwsDofVector[33];
 
-      for (unsigned int i = 41 ; i < 46; i++) 
+      for (unsigned int i = 41 ; i < 46; i++)
 	outOpenHrpDofVector[i] = inKwsDofVector[i];
 
       return KD_OK;
     }
 
-    ChppGikFootprint * 
-    Planner::findNextFootPrint(CkwsPathConstShPtr i_path, 
-			       double & param, 
+    ChppGikFootprint *
+    Planner::findNextFootPrint(CkwsPathConstShPtr i_path,
+			       double & param,
 			       const ChppGikFootprint * currentFootPrint,
 			       bool isRightFoot)
     {
-  
+
 
       CkwsConfig cfg(humanoidRobot_);
       double deltaParam = 1.;
@@ -956,29 +956,29 @@ namespace hpp
       double dmax = i_path->length();
 
       while ( (precision > paramPrecision_)
-	      && (param + deltaParam - precision < dmax) ) 
+	      && (param + deltaParam - precision < dmax) )
 	// Invariant: the footstep at param: (param + deltaParam - precision) is valid
 	{
-	  if (newFootPrint) { 
+	  if (newFootPrint) {
 	    delete newFootPrint;
 	    newFootPrint = NULL;
 	  }
 	  newParam = param + deltaParam;
 	  i_path->getConfigAtDistance(newParam, cfg);
 	  newFootPrint = footPrintFromConfig(cfg,isRightFoot);
-     
+
 	  if ( successiveFootPrints(currentFootPrint, newFootPrint,isRightFoot) )
 	    {
 	      deltaParam += precision;
 	    }
-	  else 
+	  else
 	    {
 	      precision = precision /2. ;
 	      deltaParam -= precision ;
 	    }
 	}
       assert ( deltaParam - precision > 0);
-      if (newFootPrint) { 
+      if (newFootPrint) {
 	delete newFootPrint;
 	newFootPrint = NULL;
       }
@@ -989,8 +989,8 @@ namespace hpp
       return newFootPrint;
     }
 
-    ChppGikFootprint * 
-    Planner::addLastFootPrint(CkwsPathConstShPtr i_path, 
+    ChppGikFootprint *
+    Planner::addLastFootPrint(CkwsPathConstShPtr i_path,
 			      const ChppGikFootprint * currentFootPrint,
 			      bool isRightFoot)
     {
@@ -1001,7 +1001,7 @@ namespace hpp
     }
 
 
-    bool 
+    bool
     Planner::successiveFootPrints(const ChppGikFootprint * ft1,
 				  const ChppGikFootprint * ft2,
 				  bool isRightFoot)
@@ -1011,7 +1011,7 @@ namespace hpp
       double minTheta = isRightFoot ? minTheta_ : -maxTheta_;
       double maxTheta = isRightFoot ? maxTheta_ : -minTheta_;
 
-      ChppGikFootprint * ft2Local = 
+      ChppGikFootprint * ft2Local =
 	new ChppGikFootprint(ft2->x(),ft2->y(),ft2->th());
       ChppGikFootprint::makeRelative(ft1,ft2Local);
 
@@ -1028,7 +1028,7 @@ namespace hpp
     }
 
     CkwsPathShPtr Planner::animateWholePath(CkwsPathConstShPtr i_path) {
-      
+
       footprintOfParam_t allFootprints;
       footprintOfParam_t::iterator it;
       double length = 0;
@@ -1067,9 +1067,9 @@ namespace hpp
 
       std::cout << "Footprints: "  << std::endl;
 
-      for ( it = allFootprints.begin() ; it != allFootprints.end() ; it++) 
+      for ( it = allFootprints.begin() ; it != allFootprints.end() ; it++)
 	{
-	  std::cout << "\tat length " << (*it).first 
+	  std::cout << "\tat length " << (*it).first
 		    << " : "
 		    << (*it).second->x() << ","
 		    << (*it).second->y() << ","
@@ -1084,13 +1084,13 @@ namespace hpp
       double startTime = 0.;
       double time = 1.6;
       paramOfTime[time] = 0.;
-  
+
       /* Footstep parameters */
       double samplingPeriod = 5e-3;
 
       /* Creating generic task */
       ChppGikGenericTask genericTask( gikStandingRobot_ , samplingPeriod );
-   
+
       /* Iterating over footsteps */
       bool isRightFoot = true;
       double lastParam = 0.;
@@ -1120,7 +1120,7 @@ namespace hpp
 	  double stepDuration = stepElement->duration();
 	  time+= stepDuration;
 
-	  // When the foot reaches the ground, the configuration to approach 
+	  // When the foot reaches the ground, the configuration to approach
 	  // is the one halfway between the two footsteps
 	  double currentParam = (lastParam + (*it).first) /2.;
 	  paramOfTime[time] = currentParam;
@@ -1134,7 +1134,7 @@ namespace hpp
 
       time += 2;
       paramOfTime[time] = i_path->length();
-   
+
       //Constraint on the waist height
       ChppGikInterpolatedElement heightElem ( gikStandingRobot_->robot(),
 					      waistPlaneConstraint_,
@@ -1157,27 +1157,28 @@ namespace hpp
       vectorN ubMaskVector = gikStandingRobot_->maskFactory()->upperBodyMask();
       vectorN wbMaskVector = gikStandingRobot_->maskFactory()->wholeBodyMask();
 
-      //Removing ff dofs from upper body mask vector 
+      //Removing ff dofs from upper body mask vector
       for(unsigned int i = 0;i<6;i++)
 	ubMaskVector[i] = 0;
 
 
-      ChppGikConfigMotionConstraint cfgConstraint(humanoidRobot_,startTime,time,i_path,paramOfTime,ubMaskVector);
+      ChppGikConfigMotionConstraint cfgConstraint
+	(humanoidRobot_,startTime,time,i_path,paramOfTime,ubMaskVector);
       ChppGikPrioritizedMotion cfgElement(&(*humanoidRobot_),4,&cfgConstraint,0.2);
       cfgElement.workingJoints(ubMaskVector);
       genericTask.addElement( &cfgElement );
-      
+
       std::cout << "Solving the task" << std::endl;
 
       // Interpolated config task
       double configTaskDuration = 3;
       CkwsConfigShPtr endCfg = i_path->configAtEnd();
-      std::vector<double> kineoTargetCfg; 
+      std::vector<double> kineoTargetCfg;
       endCfg->getDofValues(kineoTargetCfg);
       MAL_VECTOR_DIM(jrlTargetCfg, double, humanoidRobot_->numberDof());
       humanoidRobot_->kwsToJrlDynamicsDofValues(kineoTargetCfg,jrlTargetCfg);
       ChppGikConfigurationConstraint configTask(*(gikStandingRobot_->robot()), jrlTargetCfg, wbMaskVector);
-      ChppGikInterpolatedElement interpolatedCfgElement(gikStandingRobot_->robot(), 
+      ChppGikInterpolatedElement interpolatedCfgElement(gikStandingRobot_->robot(),
 							&configTask,
 							1,
 							time,
@@ -1185,12 +1186,12 @@ namespace hpp
 							samplingPeriod);
 
       genericTask.addElement( &interpolatedCfgElement );
-      
+
 
 
       //solving the task
       bool isSolved = genericTask.solve();
-      
+
 
       if (isSolved)
 	{
@@ -1204,7 +1205,7 @@ namespace hpp
 	      convertGikRobotMotionToKineoPath(&motion,newPath);
 	    }
 	}
-      else 
+      else
 	{
 	  std::cout << "Failed to solve generic task"
 		    << std::endl;
@@ -1218,7 +1219,7 @@ namespace hpp
 
 	}
       return newPath;
-	  
+
     }
 
     void Planner::setFootPrintLimits(double minX,
@@ -1248,24 +1249,24 @@ namespace hpp
 	{
 	  return res;
 	}
-      
+
 
       /*
-	CkwsPathShPtr resultPath = 
+	CkwsPathShPtr resultPath =
 	getPath (0,getNbPaths (0) - 1);
 
 	if (!resultPath)
 	{
 	return KD_ERROR;
 	}
-       
-      
-	CkwsPathShPtr animatedPath = 
+
+
+	CkwsPathShPtr animatedPath =
 	findDynamicPath ( resultPath );
 
 	if (! animatedPath )
 	return KD_ERROR;
-      
+
 	hppProblem(0)->addPath ( animatedPath);
       */
       return KD_OK;

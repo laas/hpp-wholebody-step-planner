@@ -26,7 +26,7 @@
 # include <KineoUtility/kitDefine.h>
 # include <KineoWorks2/kwsPath.h>
 # include <gikTask/jrlGikMotionConstraint.h>
-# include <hpp/model/humanoid-robot.hh>
+# include <hpp/model/fwd.hh>
 
 class ChppGikConfigurationConstraint;
 
@@ -35,10 +35,11 @@ namespace hpp
 {
   namespace wholeBodyStepPlanner
   {
+    using hpp::model::HumanoidRobotShPtr;
     class ChppGikConfigMotionConstraint : public CjrlGikMotionConstraint
     {
     public:
-      ChppGikConfigMotionConstraint(const hpp::model::HumanoidRobotShPtr humanoidRobot,
+      ChppGikConfigMotionConstraint(const HumanoidRobotShPtr humanoidRobot,
 				    const double startTime,
 				    const double endTime,
 				    const CkwsPathConstShPtr inPath,
@@ -65,11 +66,11 @@ namespace hpp
       double endTime_;
       CkwsPathConstShPtr wbPath_;
       std::map<double,double> paramOfTime_;
-      hpp::model::HumanoidRobotShPtr humanoidRobot_;
+      HumanoidRobotShPtr humanoidRobot_;
       vectorN maskVector_;
       
-    };
-  }
-}
+    }; // class ChppGikConfigMotionConstraint
+  } // namespace wholeBodyStepPlanner
+} // namespace hpp
 
 #endif
