@@ -57,8 +57,24 @@ namespace hpp
 
       hpp::constrained::KwsConstraintShPtr wholeBodyConstraint ();
 
+      /// Initialize initial and goal configurations from a path
       ktStatus initAndGoalConfig (CkwsPathConstShPtr inPath);
 
+      /// Generate a goal configuration for the right wrist
+      ///
+      /// \param xTarget, yTarget, zTarget Requested position for the right
+      /// wrist.
+      ///
+      /// Build a vector of constraints containing
+      /// \li double support static stability constraints,
+      /// \li the rightwrist position constraint,
+      /// \li a constraint for the waist to stay in a plane,
+      /// \li a constraint for the waist orientation to remain horizontal.
+      /// Initialize hpp::constrained::Planner::goalConfigGenerator_ with these
+      /// constraints. Call
+      /// hpp::constrained::Planner::generateGoalConfigurations to generate
+      /// one goal configuration, and optimize the goal configuration using
+      /// distance to robot configuration at beginning of function call.
       ktStatus generateGoalConfig (double xTarget,double yTarget,double zTarget);
 
       virtual ktStatus initializeProblem();
@@ -120,6 +136,8 @@ namespace hpp
       hpp::model::HumanoidRobotShPtr humanoidRobot_;
       ChppGikStandingRobot * gikStandingRobot_;
       double samplingPeriod_;
+      /// Set of constraints enforcing static stability by calling
+      /// hpp::constrained::PlannerbuildDoubleSupportSlidingStaticStabilityConstraints.
       hpp::constrained::KwsConstraintShPtr wholeBodyConstraint_;
 
       /* Footstep parameters */

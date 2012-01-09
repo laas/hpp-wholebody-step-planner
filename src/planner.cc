@@ -276,7 +276,8 @@ namespace hpp
       return KD_OK;
     }
 
-    ktStatus Planner::generateGoalConfig (double xTarget,double yTarget,double zTarget)
+    ktStatus Planner::generateGoalConfig (double xTarget,double yTarget,
+					  double zTarget)
     {
       std::vector<CjrlGikStateConstraint*> sot;
 
@@ -329,8 +330,9 @@ namespace hpp
       // Attach goal config to device
       std::stringstream ssOpt (std::stringstream::in | std::stringstream::out);
       ssOpt << "optimized goal config ";
-      humanoidRobot_->addChildComponent (CkppConfigComponent::create (optimizationPath->configAtEnd (),
-								      ssOpt.str ()));
+      humanoidRobot_->addChildComponent
+	(CkppConfigComponent::create (optimizationPath->configAtEnd (),
+				      ssOpt.str ()));
 
       std::cout << "Goal config found and optimized." << std::endl;
 
