@@ -329,15 +329,6 @@ namespace hpp
 	return KD_ERROR;
       }
 
-      // Attach goal config to device
-      std::stringstream ssOpt (std::stringstream::in | std::stringstream::out);
-      ssOpt << "optimized goal config ";
-      humanoidRobot_->addChildComponent
-	(CkppConfigComponent::create (optimizationPath->configAtEnd (),
-				      ssOpt.str ()));
-
-      std::cout << "Goal config found and optimized." << std::endl;
-
       return KD_OK;
     }
 
