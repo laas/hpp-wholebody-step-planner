@@ -287,16 +287,18 @@ namespace hpp
       ChppGikMaskFactory maskFactory(&(*humanoidRobot_));
       vectorN weightVector = maskFactory.weightsDoubleSupport ();
 
-      ChppGikPositionConstraint * positionConstraint =
+      vector3d handCenter;
+      humanoidRobot_->rightHand()->getCenter (handCenter);
+      ChppGikPositionConstraint * rightHandConstraint =
 	new ChppGikPositionConstraint (*humanoidRobot_,
 				       *(humanoidRobot_->rightWrist()),
-				       vector3d(0,0,0),
+				       handCenter,
 				       vector3d(xTarget,yTarget,zTarget));
 
       /* Initialize goal manifold stack of constraints */
       std::vector<CjrlGikStateConstraint*>  goalSoc;
       buildDoubleSupportStaticStabilityConstraints(halfSittingConfig,goalSoc);
-      goalSoc.push_back(positionConstraint);
+      goalSoc.push_back(rightHandConstraint);
       goalSoc.push_back(waistPlaneConstraint_);
       goalSoc.push_back(waistParallelConstraint_);
       hpp::constrained::ConfigExtendor * goalExtendor =
