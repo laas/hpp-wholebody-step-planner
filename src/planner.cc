@@ -23,7 +23,8 @@
 # include <KineoWorks2/kwsDiffusingRdmBuilder.h>
 # include <KineoWorks2/kwsRandomOptimizer.h>
 
-#include <KineoModel/kppConfigComponent.h>
+# include <KineoModel/kppConfigComponent.h>
+# include <KineoModel/kppSMLinearComponent.h>
 
 # include <jrl/mal/matrixabstractlayer.hh>
 # include <kwsPlus/roadmap/kwsPlusLTRdmBuilder.h>
@@ -224,7 +225,7 @@ namespace hpp
       rdmBuilder->diffuseFromProblemGoal (true);
 
 
-      steeringMethodIthProblem(0, CkwsSMLinear::create ());
+      steeringMethodIthProblem(0, CkppSMLinearComponent::create ());
       roadmapBuilderIthProblem (0,rdmBuilder);
 
       CkwsLoopOptimizerShPtr optimizer =
