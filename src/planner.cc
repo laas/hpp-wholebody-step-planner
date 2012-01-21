@@ -1247,24 +1247,23 @@ namespace hpp
 	}
 
 
-      /*
-	CkwsPathShPtr resultPath =
+      CkwsPathShPtr resultPath =
 	getPath (0,getNbPaths (0) - 1);
 
-	if (!resultPath)
+      if (!resultPath)
 	{
-	return KD_ERROR;
+	  return KD_ERROR;
 	}
 
 
-	CkwsPathShPtr animatedPath =
+      CkwsPathShPtr animatedPath =
 	findDynamicPath ( resultPath );
 
-	if (! animatedPath )
+      if (! animatedPath )
 	return KD_ERROR;
 
-	hppProblem(0)->addPath ( animatedPath);
-      */
+      hppProblem(0)->addPath ( animatedPath);
+
       return KD_OK;
     }
 
