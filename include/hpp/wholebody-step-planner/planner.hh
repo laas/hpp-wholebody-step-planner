@@ -60,10 +60,11 @@ namespace hpp
       /// Initialize initial and goal configurations from a path
       ktStatus initAndGoalConfig (CkwsPathConstShPtr inPath);
 
-      /// Generate a goal configuration for the right wrist
+      /// Generate goal configurations for the right wrist
       ///
       /// \param xTarget, yTarget, zTarget Requested position for the right
       /// wrist.
+      /// \param nbConfig Number of goal configurations to generate.
       ///
       /// Build a vector of constraints containing
       /// \li double support static stability constraints,
@@ -75,7 +76,8 @@ namespace hpp
       /// hpp::constrained::Planner::generateGoalConfigurations to generate
       /// one goal configuration, and optimize the goal configuration using
       /// distance to robot configuration at beginning of function call.
-      ktStatus generateGoalConfig (double xTarget,double yTarget,double zTarget);
+      ktStatus generateGoalConfig (double xTarget, double yTarget,
+				   double zTarget, unsigned int nbConfig);
 
       virtual ktStatus initializeProblem();
 

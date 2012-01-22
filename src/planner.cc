@@ -278,7 +278,7 @@ namespace hpp
     }
 
     ktStatus Planner::generateGoalConfig (double xTarget,double yTarget,
-					  double zTarget)
+					  double zTarget, unsigned int nbConfig)
     {
       std::vector<CjrlGikStateConstraint*> sot;
 
@@ -308,7 +308,7 @@ namespace hpp
       goalExtendor->getGikSolver()->weights(weightVector);
       goalConfigGenerator_ = goalExtendor;
 
-      if (generateGoalConfigurations(0,1) != KD_OK) {
+      if (generateGoalConfigurations(0, nbConfig) != KD_OK) {
 	std::cout << "Failed to generate a goal configuration" <<std::endl;
 	return KD_ERROR;
       }
