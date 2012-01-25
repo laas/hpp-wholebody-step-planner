@@ -53,7 +53,7 @@ namespace hpp
       configConstraint_ = new ChppGikConfigurationConstraint
 	(*humanoidRobot_,jrlConfig,maskVector);
     }
-      
+
     ChppGikConfigMotionConstraint::~ChppGikConfigMotionConstraint()
     {
       if ( configConstraint_ ) {
@@ -62,26 +62,26 @@ namespace hpp
       }
     }
 
-    CjrlDynamicRobot* 
+    CjrlDynamicRobot*
     ChppGikConfigMotionConstraint::robot()
     {
       return &(*humanoidRobot_);
     }
 
-    CjrlGikMotionConstraint* 
-    ChppGikConfigMotionConstraint::clone() const 
+    CjrlGikMotionConstraint*
+    ChppGikConfigMotionConstraint::clone() const
     {
-      ChppGikConfigMotionConstraint * ret = 
-	new ChppGikConfigMotionConstraint(humanoidRobot_, 
-					  startTime_, 
-					  endTime_, 
+      ChppGikConfigMotionConstraint * ret =
+	new ChppGikConfigMotionConstraint(humanoidRobot_,
+					  startTime_,
+					  endTime_,
 					  wbPath_,
 					  paramOfTime_,
 					  maskVector_);
       return ret;
     }
 
-    CjrlGikStateConstraint* 
+    CjrlGikStateConstraint*
     ChppGikConfigMotionConstraint::stateConstraintAtTime(double inTime)
     {
       if (inTime > endTime_)
@@ -90,10 +90,10 @@ namespace hpp
       double time_i,time_f;
       double dist_i,dist_f;
       double dist;
-   
+
       std::map<double,double>::iterator it =  paramOfTime_.lower_bound(inTime);
 
-    
+
       if (it == paramOfTime_.end() )
 	{
 	  it--;
@@ -110,7 +110,7 @@ namespace hpp
 	  it--;
 	  time_i = (*it).first;
 	  dist_i = (*it).second;
-	  dist = dist_i + (dist_f - dist_i) * (inTime - time_i) / (time_f - time_i);
+	  dist = dist_i + (dist_f - dist_i)*(inTime - time_i)/(time_f - time_i);
 	}
 
       CkwsConfig kineoCfg(humanoidRobot_);
@@ -126,19 +126,19 @@ namespace hpp
       return configConstraint_;
     }
 
-    void 
+    void
     ChppGikConfigMotionConstraint::startTime(double inStartTime)
     {
       startTime_ = inStartTime;
     }
 
-    double 
+    double
     ChppGikConfigMotionConstraint::startTime()
     {
       return startTime_;
     }
 
-    double 
+    double
     ChppGikConfigMotionConstraint::endTime()
     {
       return endTime_;

@@ -20,7 +20,7 @@
 #ifndef CHPP_GIK_CONFIG_MOTION_CONSTRAINT
 #define CHPP_GIK_CONFIG_MOTION_CONSTRAINT
 
-# include <map> 
+# include <map>
 
 # include <jrl/mal/matrixabstractlayer.hh>
 # include <KineoUtility/kitDefine.h>
@@ -36,24 +36,38 @@ namespace hpp
   namespace wholeBodyStepPlanner
   {
     using hpp::model::HumanoidRobotShPtr;
+    /// Time varying configuration constraint defined by a Kite path
     class ChppGikConfigMotionConstraint : public CjrlGikMotionConstraint
     {
     public:
+      /// Constructor
+
+      /// \param humanoidRobot: Robot,
+      /// \param startTime, endTime Interval of definition
+      /// \param inPath Path from Kitelab
+      /// \param paramOfTime Mapping from time to parameter on Kite path,
+      /// \param maskVector Mask defining active degrees of freedom.
       ChppGikConfigMotionConstraint(const HumanoidRobotShPtr humanoidRobot,
 				    const double startTime,
 				    const double endTime,
 				    const CkwsPathConstShPtr inPath,
 				    const std::map<double,double> & paramOfTime,
 				    const vectorN maskVector);
-      
+
       ~ChppGikConfigMotionConstraint();
 
       virtual CjrlDynamicRobot* robot();
 
       virtual CjrlGikMotionConstraint* clone() const;
 
+      /// hpp-gik configuration constraint at given time
+
+      /// Return the configuration constraint corresponding to a given time
+      /// along the input Kite path. Parameter along Kite path is obtained
+      /// from a mapping from time to Kite parameter given at construction.
+      /// \sa ChppGikConfigMotionConstraint::ChppGikConfigMotionConstraint.
       virtual CjrlGikStateConstraint* stateConstraintAtTime(double inTime);
-      
+
       virtual void startTime(double inStartTime);
 
       virtual double startTime();
@@ -68,7 +82,7 @@ namespace hpp
       std::map<double,double> paramOfTime_;
       HumanoidRobotShPtr humanoidRobot_;
       vectorN maskVector_;
-      
+
     }; // class ChppGikConfigMotionConstraint
   } // namespace wholeBodyStepPlanner
 } // namespace hpp

@@ -20,7 +20,7 @@
 #ifndef CHPP_GIK_POSITION_MOTION_CONSTRAINT
 #define CHPP_GIK_POSITION_MOTION_CONSTRAINT
 
-# include <map> 
+# include <map>
 
 # include <jrl/mal/matrixabstractlayer.hh>
 # include <KineoUtility/kitDefine.h>
@@ -34,24 +34,39 @@ namespace hpp
 {
   namespace wholeBodyStepPlanner
   {
+    /// Time varying position constraint for a joint defined by a Kite path
     class ChppGikPositionMotionConstraint : public CjrlGikMotionConstraint
     {
     public:
-      ChppGikPositionMotionConstraint(const hpp::model::HumanoidRobotShPtr humanoidRobot,
-				      const double startTime,
-				      const double endTime,
-				      const CkwsPathShPtr inPath,
-				      const std::map<double,double> & paramOfTime,
-				      const hpp::model::JointShPtr constrainedJoint);
-      
+      /// Constructor
+
+      /// \param humanoidRobot: Robot,
+      /// \param startTime, endTime Interval of definition
+      /// \param inPath Path from Kitelab
+      /// \param paramOfTime Mapping from time to parameter on Kite path,
+      /// \param constrainedJoint Joint the position of which is constrained.
+      ChppGikPositionMotionConstraint
+      (const hpp::model::HumanoidRobotShPtr humanoidRobot,
+       const double startTime,
+       const double endTime,
+       const CkwsPathShPtr inPath,
+       const std::map<double,double> & paramOfTime,
+       const hpp::model::JointShPtr constrainedJoint);
+
       ~ChppGikPositionMotionConstraint();
 
       virtual CjrlDynamicRobot* robot();
 
       virtual CjrlGikMotionConstraint* clone() const;
 
+      /// hpp-gik position constraint at given time
+
+      /// Return the position constraint corresponding to a given time
+      /// along the input Kite path. Parameter along Kite path is obtained
+      /// from a mapping from time to Kite parameter given at construction.
+      /// \sa ChppGikPositionMotionConstraint::ChppGikPositionMotionConstraint.
       virtual CjrlGikStateConstraint* stateConstraintAtTime(double inTime);
-      
+
       virtual void startTime(double inStartTime);
 
       virtual double startTime();
@@ -66,7 +81,6 @@ namespace hpp
       std::map<double,double> paramOfTime_;
       hpp::model::HumanoidRobotShPtr humanoidRobot_;
       hpp::model::JointShPtr joint_;
-      
     };
   }
 }

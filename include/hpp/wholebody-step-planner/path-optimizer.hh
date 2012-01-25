@@ -31,19 +31,45 @@ namespace hpp
   {
     KIT_PREDEF_CLASS(PathOptimizer);
 
+    /// Path optimizer that optimize configurations between direct paths
+
+    /// Iteratively tries to make configurations linking successive direct paths
+    /// tend toward a target configuration.
+
+    /// See PathOptimizer::doOptimizeOneStep and PathOptimizer::optimizeConfig
+    /// for more details.
     class PathOptimizer : public CkwsLoopOptimizer
     {
     public:
       ~PathOptimizer();
 
       static PathOptimizerShPtr create();
-      
+
+      /// One step of optimization
+
+      /// Loop over the pairs of successive direct paths. For each pair of
+      /// successive direct,
+      /// \li optimize the configuration linking the direct paths,
+      /// \li build and validate new direct paths going to and starting from
+      /// the optimized configuration,
+      /// \li replace both direct paths if both are valid.
       virtual ktStatus doOptimizeOneStep(const CkwsPathShPtr & io_path);
 
+      /// Set target configuration
       void targetConfig (CkwsConfigShPtr targetCfg);
 
+      /// Get first last valid config in the direction of target configuration.
+
+      /// Build a direct path from input configuration to target configuration,
+      /// validate discretized configurations (step = 0.01) along direct path
+      /// and return the last valid configuration. Only degrees of freedom
+      /// specified by mask are considered (see PathOptimizer::setConfigMask).
+      /// \return KD_ERROR if target configuration is not set, fail to create
+      /// direct path between input and target configuration, input
+      /// configuration is not valid.
       ktStatus optimizeConfig (CkwsConfig & io_cfg);
 
+      /// Define which degrees of freedom are active.
       ktStatus setConfigMask(std::vector<bool> & i_mask);
 
     protected:

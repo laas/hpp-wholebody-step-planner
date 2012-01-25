@@ -43,6 +43,10 @@ namespace hpp
 {
   namespace wholeBodyStepPlanner
   {
+    namespace roboptim {
+      KIT_PREDEF_CLASS (PathOptimizer)
+    } // namespace roboptim
+
     class Planner : public hpp::constrained::Planner
     {
     public:
@@ -139,8 +143,12 @@ namespace hpp
       ChppGikStandingRobot * gikStandingRobot_;
       double samplingPeriod_;
       /// Set of constraints enforcing static stability by calling
-      /// hpp::constrained::PlannerbuildDoubleSupportSlidingStaticStabilityConstraints.
+      /// hpp::constrained::Planner::
+      /// buildDoubleSupportSlidingStaticStabilityConstraints.
       hpp::constrained::KwsConstraintShPtr wholeBodyConstraint_;
+
+      /// Numeric optimizer called before generating steps
+      roboptim::PathOptimizerShPtr numericOptimizer_;
 
       /* Footstep parameters */
       double zmpEndCoeff_;
@@ -169,14 +177,11 @@ namespace hpp
       /* Precision threshold for path exploration */
       double paramPrecision_;
 
-
       /* step parameters for each footprint */
-
       std::map < ChppGikFootprint *, double> stepFracOfFootprint_;
       std::vector  < footprintOfParam_t > resultFootprints_;
 
-
-      /* Valid Gik motions to be outputted */
+      /* Valid Gik motions to be produced as output */
       ChppRobotMotion * currentGikMotion_;
       std::vector<ChppRobotMotion*> validGikMotion_;
 

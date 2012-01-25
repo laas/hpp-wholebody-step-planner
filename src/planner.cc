@@ -123,12 +123,6 @@ namespace hpp
       return wholeBodyConstraint_;
     }
 
-    /*
-      CtlcGraspBallGoalGeneratorShPtr Planner::getGoalTask()
-      {
-      return goalConfigGenerator_;
-      }
-    */
     ktStatus
     Planner::initializeProblem()
     {
@@ -151,15 +145,24 @@ namespace hpp
 	}
 
       std::string property,value;
-      property="ComputeZMP"; value="true";humanoidRobot_->setProperty ( property,value );
-      property="TimeStep"; value="0.005";humanoidRobot_->setProperty ( property,value );
-      property="ComputeAccelerationCoM"; value="true";humanoidRobot_->setProperty ( property,value );
-      property="ComputeBackwardDynamics"; value="false";humanoidRobot_->setProperty ( property,value );
-      property="ComputeMomentum"; value="true";humanoidRobot_->setProperty ( property,value );
-      property="ComputeAcceleration"; value="true";humanoidRobot_->setProperty ( property,value );
-      property="ComputeVelocity"; value="true";humanoidRobot_->setProperty ( property,value );
-      property="ComputeSkewCom"; value="true";humanoidRobot_->setProperty ( property,value );
-      property="ComputeCoM"; value="true";humanoidRobot_->setProperty ( property,value );
+      property="ComputeZMP"; value="true";
+      humanoidRobot_->setProperty ( property,value );
+      property="TimeStep"; value="0.005";
+      humanoidRobot_->setProperty ( property,value );
+      property="ComputeAccelerationCoM";
+      value="true";humanoidRobot_->setProperty ( property,value );
+      property="ComputeBackwardDynamics"; value="false";
+      humanoidRobot_->setProperty ( property,value );
+      property="ComputeMomentum"; value="true";
+      humanoidRobot_->setProperty ( property,value );
+      property="ComputeAcceleration"; value="true";
+      humanoidRobot_->setProperty ( property,value );
+      property="ComputeVelocity"; value="true";
+      humanoidRobot_->setProperty ( property,value );
+      property="ComputeSkewCom"; value="true";
+      humanoidRobot_->setProperty ( property,value );
+      property="ComputeCoM"; value="true";
+      humanoidRobot_->setProperty ( property,value );
 
       gikStandingRobot_ = new ChppGikStandingRobot(*humanoidRobot_);
 
@@ -167,12 +170,12 @@ namespace hpp
       humanoidRobot_->getCurrentConfig(halfSittingCfg);
 
       /* Building the tasks */
-      waistZ_ =
-	MAL_S4x4_MATRIX_ACCESS_I_J(humanoidRobot_->waist()->currentTransformation(),2,3);
+      waistZ_ =	MAL_S4x4_MATRIX_ACCESS_I_J
+	(humanoidRobot_->waist()->currentTransformation(),2,3);
 
       vector3d ZLocalAxis =
-	gikStandingRobot_->halfsittingLocalWaistVertical () ;
-      vector3d ZWorldAxis ( 0, 0, 1 ) ;
+	gikStandingRobot_->halfsittingLocalWaistVertical ();
+      vector3d ZWorldAxis ( 0, 0, 1 );
 
       waistPlaneConstraint_ =
 	new ChppGikPlaneConstraint ( *humanoidRobot_,
@@ -189,9 +192,9 @@ namespace hpp
 
       /* Creating kineo constraint */
 
-      std::vector<CjrlGikStateConstraint*>  sot;
-      hpp::constrained::Planner::buildDoubleSupportSlidingStaticStabilityConstraints(halfSittingCfg,
-										     sot);
+      std::vector<CjrlGikStateConstraint*> sot;
+      hpp::constrained::Planner::
+	buildDoubleSupportSlidingStaticStabilityConstraints(halfSittingCfg,sot);
       sot.push_back(waistPlaneConstraint_);
       sot.push_back(waistParallelConstraint_);
 
@@ -203,37 +206,21 @@ namespace hpp
 	hpp::constrained::KwsConstraint::create("Whole-Body Constraint",
 						extendor);
 
-      /* Initializing goal config generator */
-      /*
-	goalConfigGenerator_ =
-	CtlcGraspBallGoalGenerator::create(gikManager_, humanoidRobot_);
-	if(!goalConfigGenerator_) {
-	std::cerr <<
-	(":initializeProblem: Creating the attWholeBodyConfigGenerator failed.") << std::endl;
-	return KD_ERROR;
-	}
-      */
-
       /* initializing the motion planning problem */
 
       CkwsRoadmapShPtr roadmap = CkwsRoadmap::create(humanoidRobot_);
-      //CkwsDiffusingRdmBuilderShPtr rdmBuilder = CkwsDiffusingRdmBuilder::create(roadmap);
-      //	CkwsPlusLTRdmBuilder< CkwsDiffusingRdmBuilder >::create (roadmap, 0.1);
       CkwsDiffusingRdmBuilderShPtr rdmBuilder =
 	hpp::constrained::DiffusingRoadmapBuilder::create(roadmap,extendor);
       rdmBuilder->diffuseFromProblemStart (true);
       rdmBuilder->diffuseFromProblemGoal (true);
 
-
       steeringMethodIthProblem(0, CkppSMLinearComponent::create ());
       roadmapBuilderIthProblem (0,rdmBuilder);
 
-      CkwsLoopOptimizerShPtr optimizer =
-	CkwsRandomOptimizer::create();
+      CkwsLoopOptimizerShPtr optimizer = CkwsRandomOptimizer::create();
       optimizer->penetration (hppProblem (0)->penetration ());
 
-      PathOptimizerShPtr postOptimizer =
-	PathOptimizer::create();
+      PathOptimizerShPtr postOptimizer = PathOptimizer::create();
       postOptimizer->penetration (hppProblem (0)->penetration () / 100);
 
       /* Building wholebody mask, without the free flyer dofs */
@@ -251,18 +238,7 @@ namespace hpp
 
       return KD_OK;
     }
-    /*
-      ktStatus Planner::goalWaistConfig (CkwsPathShPtr inPath)
-      {
-      assert (inPath->device() == humanoidRobot_);
 
-      CkwsConfigShPtr fCfg = inPath->configAtEnd ();
-      goalConfigGenerator_->setGoalBoxPosition (fCfg->dofValue (0),
-      fCfg->dofValue (1),
-      fCfg->dofValue (5));
-      return KD_OK;
-      }
-    */
     ktStatus
     Planner::initAndGoalConfig (CkwsPathConstShPtr inPath)
     {
@@ -282,8 +258,8 @@ namespace hpp
     {
       std::vector<CjrlGikStateConstraint*> sot;
 
-      CkwsConfigShPtr halfSittingConfig;
-      humanoidRobot_->getCurrentConfig(halfSittingConfig);
+      CkwsConfigShPtr initialConfig;
+      humanoidRobot_->getCurrentConfig(initialConfig);
       /* Build gik solver weights */
       ChppGikMaskFactory maskFactory(&(*humanoidRobot_));
       vectorN weightVector = maskFactory.weightsDoubleSupport ();
@@ -296,9 +272,9 @@ namespace hpp
 				       handCenter,
 				       vector3d(xTarget,yTarget,zTarget));
 
-      /* Initialize goal manifold stack of constraints */
+      // Initialize goal manifold stack of constraints
       std::vector<CjrlGikStateConstraint*>  goalSoc;
-      buildDoubleSupportStaticStabilityConstraints(halfSittingConfig,goalSoc);
+      buildDoubleSupportStaticStabilityConstraints(initialConfig,goalSoc);
       goalSoc.push_back(rightHandConstraint);
       goalSoc.push_back(waistPlaneConstraint_);
       goalSoc.push_back(waistParallelConstraint_);
@@ -314,11 +290,10 @@ namespace hpp
       }
 
       CkwsConfigShPtr goalCfg = goalConfIthProblem(0);
-
       //Optimize the random goal config
       hpp::constrained::ConfigOptimizer optimizer(humanoidRobot_,
 						  goalExtendor,
-						  halfSittingConfig);
+						  initialConfig);
 
       CkwsPathShPtr optimizationPath =
 	optimizer.optimizeConfig(goalCfg);

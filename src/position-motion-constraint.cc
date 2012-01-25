@@ -32,12 +32,14 @@ namespace hpp
 {
   namespace wholeBodyStepPlanner
   {
-    ChppGikPositionMotionConstraint::ChppGikPositionMotionConstraint(const hpp::model::HumanoidRobotShPtr humanoidRobot,
-								     const double startTime,
-								     const double endTime,
-								     const CkwsPathShPtr inPath,
-								     const std::map<double,double> & paramOfTime,
-								     hpp::model::JointShPtr constrainedJoint):
+    ChppGikPositionMotionConstraint::
+    ChppGikPositionMotionConstraint
+    (const hpp::model::HumanoidRobotShPtr humanoidRobot,
+     const double startTime,
+     const double endTime,
+     const CkwsPathShPtr inPath,
+     const std::map<double,double>& paramOfTime,
+     hpp::model::JointShPtr constrainedJoint):
       positionConstraint_(NULL),
       startTime_(startTime),
       endTime_(endTime),
@@ -47,7 +49,9 @@ namespace hpp
       joint_(constrainedJoint)
     {
       vector3d target(0,0,0);
-      positionConstraint_ = new ChppGikPositionConstraint(*humanoidRobot_,*(constrainedJoint->jrlJoint()),vector3d(0,0,0),target);
+      positionConstraint_ = new ChppGikPositionConstraint
+	(*humanoidRobot_,*(constrainedJoint->jrlJoint()),
+	 vector3d(0,0,0),target);
     }
 
     ChppGikPositionMotionConstraint::~ChppGikPositionMotionConstraint()
@@ -58,26 +62,26 @@ namespace hpp
       }
     }
 
-    CjrlDynamicRobot* 
+    CjrlDynamicRobot*
     ChppGikPositionMotionConstraint::robot()
     {
       return &(*humanoidRobot_);
     }
 
-    CjrlGikMotionConstraint* 
-    ChppGikPositionMotionConstraint::clone() const 
+    CjrlGikMotionConstraint*
+    ChppGikPositionMotionConstraint::clone() const
     {
-      ChppGikPositionMotionConstraint * ret = 
-	new ChppGikPositionMotionConstraint(humanoidRobot_, 
-					    startTime_, 
-					    endTime_, 
+      ChppGikPositionMotionConstraint * ret =
+	new ChppGikPositionMotionConstraint(humanoidRobot_,
+					    startTime_,
+					    endTime_,
 					    wbPath_,
 					    paramOfTime_,
 					    joint_);
       return ret;
     }
 
-    CjrlGikStateConstraint* 
+    CjrlGikStateConstraint*
     ChppGikPositionMotionConstraint::stateConstraintAtTime(double inTime)
     {
       if (inTime > endTime_)
@@ -86,10 +90,10 @@ namespace hpp
       double time_i,time_f;
       double dist_i,dist_f;
       double dist;
-   
+
       std::map<double,double>::iterator it =  paramOfTime_.lower_bound(inTime);
 
-    
+
       if (it == paramOfTime_.end() )
 	{
 	  it--;
@@ -106,7 +110,7 @@ namespace hpp
 	  it--;
 	  time_i = (*it).first;
 	  dist_i = (*it).second;
-	  dist = dist_i + (dist_f - dist_i) * (inTime - time_i) / (time_f - time_i);
+	  dist = dist_i + (dist_f - dist_i)*(inTime - time_i)/(time_f - time_i);
 	}
 
       CkwsConfig kineoCfg(humanoidRobot_);
@@ -118,27 +122,25 @@ namespace hpp
       vector3d target(jointT(0,3),jointT(1,3),jointT(2,3));
 
       positionConstraint_->worldTarget(target);
-
       return positionConstraint_;
     }
 
-    void 
+    void
     ChppGikPositionMotionConstraint::startTime(double inStartTime)
     {
       startTime_ = inStartTime;
     }
 
-    double 
+    double
     ChppGikPositionMotionConstraint::startTime()
     {
       return startTime_;
     }
 
-    double 
+    double
     ChppGikPositionMotionConstraint::endTime()
     {
       return endTime_;
     }
-
   }
 }
