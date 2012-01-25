@@ -22,6 +22,7 @@
 # include <KineoWorks2/kwsRoadmap.h>
 # include <KineoWorks2/kwsDiffusingRdmBuilder.h>
 # include <KineoWorks2/kwsRandomOptimizer.h>
+# include <KineoWorks2/kwsMultiplePlanner.h>
 
 # include <KineoModel/kppConfigComponent.h>
 # include <KineoModel/kppSMLinearComponent.h>
@@ -44,13 +45,14 @@
 # include <hpp/constrained/config-extendor.hh>
 # include <hpp/constrained/roadmap-builder.hh>
 # include <hpp/constrained/config-optimizer.hh>
+# include <hpp/constrained/goal-config-generator.hh>
 # include <hpp/constrained/planner/planner.hh>
 
 # include <hpp/wholebody-step-planner/planner.hh>
 # include <hpp/wholebody-step-planner/config-motion-constraint.hh>
 # include <hpp/wholebody-step-planner/path-optimizer.hh>
 
-
+# include "../src/roboptim/path-optimizer.hh"
 
 # define PARAM_PRECISION 0.01
 # define TASK_PRECISION 1e-4
@@ -230,9 +232,14 @@ namespace hpp
       postOptimizer->targetConfig(halfSittingCfg);
       postOptimizer->setConfigMask(wbMask);
 
-      //optimizer->postOptimizer(postOptimizer);
-
-      pathOptimizerIthProblem(0,optimizer);
+      numericOptimizer_ = roboptim::PathOptimizer::create (sot);
+      assert (numericOptimizer_);
+      std::vector<CkwsPathPlannerShPtr> optVector;
+      optVector.push_back (optimizer);
+      optVector.push_back (postOptimizer);
+      CkwsMultiplePlannerShPtr combinedOptimizer =
+	CkwsMultiplePlanner::create (optVector);
+      pathOptimizerIthProblem(0, combinedOptimizer);
 
       hppProblem (0)->alwaysOptimize (true);
 

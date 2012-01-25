@@ -21,6 +21,8 @@ SET(SOURCES
   position-motion-constraint.cc
   rotation-motion-constraint.cc
   path-optimizer.cc
+  roboptim/path-optimizer.hh
+  roboptim/path-optimizer.cc
 )
 
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${SOURCES})
