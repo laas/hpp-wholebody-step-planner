@@ -32,6 +32,7 @@
 # include <hpp/gik/task/generic-task.hh>
 
 # include <hpp/util/debug.hh>
+# include <hpp/model/joint.hh>
 
 # include <hpp/gik/robot/foot-print-related.hh>
 # include <hpp/gik/robot/robot-motion.hh>
@@ -285,17 +286,37 @@ namespace hpp
       goalSoc.push_back(rightHandConstraint);
       goalSoc.push_back(waistPlaneConstraint_);
       goalSoc.push_back(waistParallelConstraint_);
-      hpp::constrained::ConfigExtendor * goalExtendor =
-	new hpp::constrained::ConfigExtendor(humanoidRobot_);
-      goalExtendor->setConstraints(goalSoc);
-      goalExtendor->getGikSolver()->weights(weightVector);
-      goalConfigGenerator_ = goalExtendor;
+      hpp::constrained::GoalConfigGenerator* goalConfigGenerator =
+	new hpp::constrained::GoalConfigGenerator (humanoidRobot_);
+      goalConfigGenerator->setConstraints(goalSoc);
+      hppDout (info, "weights: " << weightVector);
+      goalConfigGenerator->getGikSolver()->weights(weightVector);
+      setGoalConfigGenerator (goalConfigGenerator);
 
+      assert (numericOptimizer_);
+      numericOptimizer_->setGoalConstraints (goalSoc);
+
+      // Before calling the general implementation, put the robot close
+      // to the target
+      unsigned int rank =
+	humanoidRobot_->getRootJoint ()->jrlJoint ()->rankInConfiguration ();
+      std::vector <double> dofValues;
+      initialConfig->getDofValues (dofValues);
+      dofValues [rank+0] = xTarget;
+      dofValues [rank+1] = yTarget;
+      CkwsConfig config (humanoidRobot_, dofValues);
+      humanoidRobot_->hppSetCurrentConfig (config,
+					   hpp::model::Device::GEOMETRIC);
       if (generateGoalConfigurations(0, nbConfig) != KD_OK) {
-	std::cout << "Failed to generate a goal configuration" <<std::endl;
+	hppDout (error, "Failed to generate a goal configuration");
 	return KD_ERROR;
       }
 
+      // Initialize config extendor for configuration optimizer
+      hpp::constrained::ConfigExtendor* goalExtendor =
+	new hpp::constrained::ConfigExtendor (humanoidRobot_);
+      goalExtendor->setConstraints(goalSoc);
+      goalExtendor->getGikSolver()->weights(weightVector);
       CkwsConfigShPtr goalCfg = goalConfIthProblem(0);
       //Optimize the random goal config
       hpp::constrained::ConfigOptimizer optimizer(humanoidRobot_,
