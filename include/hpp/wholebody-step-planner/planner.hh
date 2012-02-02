@@ -50,7 +50,7 @@ namespace hpp
     class Planner : public hpp::constrained::Planner
     {
     public:
-
+      typedef unsigned int size_type;
       typedef std::map<double,ChppGikFootprint *> footprintOfParam_t;
 
       Planner(double samplingPeriod);

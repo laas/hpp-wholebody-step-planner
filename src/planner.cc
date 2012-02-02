@@ -69,7 +69,7 @@ namespace hpp
 {
   namespace wholeBodyStepPlanner
   {
-
+    static Planner::size_type robotId=0;
     Planner::Planner(double samplingPeriod )
       :humanoidRobot_(),
        gikStandingRobot_(NULL),
@@ -317,7 +317,7 @@ namespace hpp
 	optimizer.optimizeConfig(goalCfg);
 
       if (!optimizationPath->isEmpty())
-	hppProblem(0)->addPath(optimizationPath);
+	hppProblem(robotId)->addPath(optimizationPath);
       else {
 	hppDout (error, "Failed to optimize goal config");
 	return KD_ERROR;
@@ -475,7 +475,7 @@ namespace hpp
       humanoidRobot_->computeForwardKinematics();
       CkwsPathShPtr wholeAnimatedPath = animateWholePath( i_path );
 
-      if (wholeAnimatedPath) hppProblem(0)->addPath ( wholeAnimatedPath) ;
+      if (wholeAnimatedPath) hppProblem(robotId)->addPath ( wholeAnimatedPath) ;
 
 
 
@@ -1189,7 +1189,7 @@ namespace hpp
 	    {
 	      convertGikRobotMotionToKineoPath(&motion,newPath);
 	    }
-	  hppProblem(0)->addPath (newPath);
+	  hppProblem(robotId)->addPath (newPath);
 
 	}
       return newPath;
@@ -1216,28 +1216,29 @@ namespace hpp
     {
 
       humanoidRobot_->userConstraints()->add(wholeBodyConstraint_);
-      ktStatus res =  solveOneProblem(0);
+      ktStatus res =  solveOneProblem (robotId);
       humanoidRobot_->userConstraints()->remove(wholeBodyConstraint_);
 
       if ( res != KD_OK ) return res;
       hppDout (info, "solveOneProblem succeeded.");
       CkwsPathShPtr resultPath =
-	getPath (0,getNbPaths (0) - 1);
+	getPath (robotId ,getNbPaths (robotId) - 1);
+      if (!resultPath) return KD_ERROR;
 
-      if (!resultPath)
-	{
-	  return KD_ERROR;
+      // Numerically optimize path before animation
+      if (numericOptimizer_) {
+	if (numericOptimizer_->optimizePath (resultPath) == KD_OK) {
+	  hppProblem (robotId)->addPath (resultPath);
 	}
-
-
-      CkwsPathShPtr animatedPath =
-	findDynamicPath ( resultPath );
+      }
+#if 0
+      CkwsPathShPtr animatedPath = findDynamicPath ( resultPath );
 
       if (! animatedPath )
 	return KD_ERROR;
 
-      hppProblem(0)->addPath ( animatedPath);
-
+      hppProblem (robotId)->addPath ( animatedPath);
+#endif
       return KD_OK;
     }
 
