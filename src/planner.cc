@@ -130,22 +130,14 @@ namespace hpp
     Planner::initializeProblem()
     {
 
-      std::cout <<  "Initialize problem(): paramPrecision: "
-		<< paramPrecision_ << std::endl;
+      hppDout(info, "Initialize problem(): paramPrecision: "
+	      << paramPrecision_);
 
-      unsigned nbRobots = getNbHppProblems ();
-      if (nbRobots < 1)
-	{
-	  return KD_ERROR;
-	}
-
+      assert (getNbHppProblems () >= 1);
       humanoidRobot_ = KIT_DYNAMIC_PTR_CAST
 	(hpp::model::HumanoidRobot, robotIthProblem (0));
 
-      if (!humanoidRobot_)
-	{
-	  return KD_ERROR;
-	}
+      assert (humanoidRobot_);
 
       std::string property,value;
       property="ComputeZMP"; value="true";
