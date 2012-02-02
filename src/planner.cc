@@ -210,7 +210,7 @@ namespace hpp
       rdmBuilder->diffuseFromProblemGoal (true);
 
       steeringMethodIthProblem(0, CkppSMLinearComponent::create ());
-      roadmapBuilderIthProblem (0,rdmBuilder);
+      roadmapBuilderIthProblem (0, rdmBuilder, true);
 
       CkwsLoopOptimizerShPtr optimizer = CkwsRandomOptimizer::create();
       optimizer->penetration (hppProblem (0)->penetration ());
