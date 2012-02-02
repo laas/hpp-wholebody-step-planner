@@ -100,9 +100,7 @@ namespace hpp
        rpyFile_
        (debug::getFilename ("trajectory.rpy", "hpp-wholebody-step-planner").c_str ())
     {
-      std::cout << "ParamPrecision: "
-		<<  paramPrecision_
-		<< std::endl;
+      hppDout (info, "ParamPrecision: " <<  paramPrecision_);
     }
 
     Planner::~Planner()
@@ -321,7 +319,7 @@ namespace hpp
       if (!optimizationPath->isEmpty())
 	hppProblem(0)->addPath(optimizationPath);
       else {
-	std::cout << "Failed to optimize goal config" <<std::endl;
+	hppDout (error, "Failed to optimize goal config");
 	return KD_ERROR;
       }
 
@@ -348,9 +346,8 @@ namespace hpp
 	      || (pathAtEnd->length() != 0) )
 	{
 
-	  std::cout << "-------------------------------" << std::endl
-		    << "Animating path of length: "
-		    << pathToAnimate->length() << std::endl;
+	  hppDout (info, "Animating path of length: "
+		   << pathToAnimate->length());
 
 
 	  CkwsPathShPtr animatedPath;
@@ -361,8 +358,7 @@ namespace hpp
 	      return resultPath;
 	    }
 
-	  std::cout << "Computed " << ftprints.size()
-		    << " footprints" << std::endl;
+	  hppDout (info, "Computed " << ftprints.size() << " footprints");
 
 	  /* Initializing the state of the robot before animating */
 	  if (!resultPath->isEmpty()) {
@@ -405,8 +401,8 @@ namespace hpp
 
 		if (!endStartCfg->isEquivalent(*startEndCfg))
 		  {
-		    std::cout << "End Config of start path is not equivalent to start config of end path."
-			      << std::endl;
+		    hppDout (error, "End Config of start path is not equivalent"
+			     " to start config of end path.");
 
 		    CkwsDirectPathShPtr newDP =
 		      humanoidRobot_->steeringMethod()->makeDirectPath(*endStartCfg,*startEndCfg);
@@ -424,8 +420,7 @@ namespace hpp
 	  else
 	    {
 
-	      std::cout << "Animated path is not valid"
-			<< std::endl;
+	      hppDout (error, "Animated path is not valid");
 
 	      /* Finding first unvalid directPath */
 	      unsigned int i = 0;
@@ -436,9 +431,7 @@ namespace hpp
 		i++;
 	      }
 
-	      std::cout << "First unvalid path: "
-			<< i << "/" << n
-			<< std::endl;
+	      hppDout (info, "First unvalid path: " << i << "/" << n);
 
 	      freeFootPrints(ftprints);
 	      ftprints.clear();
@@ -461,8 +454,9 @@ namespace hpp
 	      newPathAtEnd->appendPath(endPath);
 	      if (!pathAtEnd->isEmpty()) {
 		if (newPathAtEnd->appendPath (pathAtEnd) != KD_OK ){
-		  std::cerr << "FindDynamicPath(): ERROR: failed to add second part of the path to the agregator."
-			    << std::endl ;
+		  hppDout (error,
+			   "Failed to add second part of the path to"
+			   " the agregator.");
 		  return resultPath;
 		}
 	      }
@@ -494,7 +488,7 @@ namespace hpp
 				footprintOfParam_t & o_footPrintOfParam)
     {
 
-      std::cout << "Computing footprints..." << std::endl;
+      hppDout (info, "Computing footprints...");
 
       bool isRightFoot = true;
       double currentDist = 0.;
@@ -514,15 +508,13 @@ namespace hpp
 
       if(!supportPol)
 	{
-	  std::cerr << "No support Polygon found when entering Planner::computeFootPrints()"
-		    << std::endl;
+	  hppDout (error, "No support Polygon found.");
 	  return KD_ERROR;
 	}
 
       if (!supportPol->isDoubleSupport())
 	{
-	  std::cerr << "Robot is not in a double support configuration when entering Planner::computeFootPrints()"
-		    << std::endl;
+	  hppDout (error, "Robot is not in a double support configuration.");
 	  return KD_ERROR;
 	}
 
@@ -530,18 +522,16 @@ namespace hpp
 
       while ( currentDist < length )
 	{
-	  std::cout << "Computing footprint at length: "
-		    << currentDist << std::endl;
+	  hppDout (info, "Computing footprint at length: " << currentDist);
 
 	  ChppGikFootprint * newFootPrint =
 	    findNextFootPrint(i_path,currentDist,currentFootPrint,isRightFoot);
 	  assert (newFootPrint);
 
-	  std::cout << "Found footprint: "
+	  hppDout (info, "Found footprint: "
 		    << newFootPrint->x() << " , "
 	    	    << newFootPrint->y() << " , "
-		    << newFootPrint->th() << " , "
-		    << std::endl;
+		   << newFootPrint->th() << " , ");
 
 	  double dist = currentDist;
 	  if (currentDist>= length) {
@@ -608,23 +598,22 @@ namespace hpp
 	  double endY = (*it).second->y();
 	  double endTh = (*it).second->th();
 
-	  double dTh = abs (endTh - startTh);
+	  double dTh = fabs (endTh - startTh);
 	  if (dTh > M_PI)
-	    dTh = abs(atan2( sin (endTh - startTh) , cos (endTh - startTh))) ;
+	    dTh = fabs(atan2( sin (endTh - startTh) , cos (endTh - startTh))) ;
 
-	  double deltaX = abs ( (endX - startX) /  maxX_ );
-	  double deltaY = abs ( (endY - startY) /  maxY_ );
+	  double deltaX = fabs ( (endX - startX) /  maxX_ );
+	  double deltaY = fabs ( (endY - startY) /  maxY_ );
 	  deltaY = 0;
 	  double deltaTh = dTh  /  maxTheta_ ;
 
 	  double stepFrac = std::max ( std::max ( deltaX , deltaY ),
 				       deltaTh );
 
-	  std::cout << "  deltaX: " << deltaX
-		    << "  deltaY: " << deltaY
-		    << "  deltaTh: " << deltaTh
-		    << "  stepFrac: " <<  stepFrac
-		    << std::endl ;
+	  hppDout (info, "  deltaX: " << deltaX
+		   << "  deltaY: " << deltaY
+		   << "  deltaTh: " << deltaTh
+		   << "  stepFrac: " <<  stepFrac);
 
 	  stepFrac = sqrt(stepFrac);
 
@@ -643,15 +632,15 @@ namespace hpp
       zmpEndShiftTime =  ((int) (zmpEndShiftTime /  samplingPeriod) +1) * samplingPeriod ;
 
 
-      std::cout << "Step parameters: " << std::endl
-		<< "\t footFlightTime: " << footFlightTime << std::endl
-		<< "\t stepHeight: " << stepHeight << std::endl
-		<< "\t zmpStartShiftTime: "<< zmpStartShiftTime << std::endl
-		<< "\t zmpEndShiftTime: " << zmpEndShiftTime << std::endl
-		<< "\t sampling period: " << samplingPeriod << std::endl ;
+      hppDout (info, "Step parameters: " << std::endl
+	       << "\t footFlightTime: " << footFlightTime << std::endl
+	       << "\t stepHeight: " << stepHeight << std::endl
+	       << "\t zmpStartShiftTime: "<< zmpStartShiftTime << std::endl
+	       << "\t zmpEndShiftTime: " << zmpEndShiftTime << std::endl
+	       << "\t sampling period: " << samplingPeriod);
 
       if ( footFlightTime < 0.1 ) {
-	std::cerr << "ERROR: foot flight time too short." << std::endl;
+	hppDout (error, "Foot flight time too short.");
 	newPath.reset();
 	return newPath;
       }
@@ -692,7 +681,7 @@ namespace hpp
 	  genericTask.addElement( stepElement );
 	}
 
-      std::cout << "Total walking time: "  << time << std::endl;
+      hppDout (info, "Total walking time: "  << time);
 
       time += 2;
 
@@ -742,7 +731,7 @@ namespace hpp
       genericTask.addElement( &interpolatedCfgElement );
 
 
-      std::cout << "Solving the task" << std::endl;
+      hppDout (info, "Solving the task");
 
       //solving the task
       bool isSolved = genericTask.solve();
@@ -759,8 +748,7 @@ namespace hpp
 	}
       else
 	{
-	  std::cout << "Failed to solve generic task"
-		    << std::endl;
+	  hppDout (info, "Failed to solve generic task");
 	}
       return newPath;
     }
@@ -803,8 +791,7 @@ namespace hpp
 
       if (!motionSample)
 	{
-	  std::cerr << "ERROR: convertGikRobotMotionToKineoPath: Empty motion sample"
-		    << std::endl;
+	  hppDout (error, "Empty motion sample.");
 	  return KD_ERROR;
 	}
 
@@ -838,11 +825,10 @@ namespace hpp
     {
       if (validGikMotion_.size () == 0)
 	{
-	  std::cerr << "ERROR: writeSeqplayFiles: Empty motion vector"
-		    << std::endl;
+	  hppDout (error, "Empty motion vector.");
 	  return KD_ERROR;
 	}
-      else std::cout << "validGikMotion_ size: " << validGikMotion_.size () << std::endl;
+      else hppDout (info, "validGikMotion_ size: " << validGikMotion_.size ());
 
       std::vector<double> kineoCfg(humanoidRobot_->countDofs ());
       std::vector<double> openHrpCfg(humanoidRobot_->countDofs ());
@@ -850,16 +836,16 @@ namespace hpp
       for (std::vector<ChppRobotMotion*>::iterator it = validGikMotion_.begin ();
 	   it < validGikMotion_.end (); it++)
 	{
-	  std::cout << "start x: " << (*it)->firstSample ()->configuration[0] << " "
-		    << "end x: " << (*it)->lastSample ()->configuration[0] << " "
-		    << std::endl;
+	  hppDout (info, "start x: " << (*it)->firstSample ()->configuration[0]
+		   << " "
+		   << "end x: " << (*it)->lastSample ()->configuration[0]
+		   << " ");
 
 	  const ChppRobotMotionSample * motionSample = (*it)->firstSample();
 
 	  if (!motionSample)
 	    {
-	      std::cerr << "ERROR: writeSeqplayFiles: Empty motion sample"
-			<< std::endl;
+	      hppDout (error, "Empty motion sample.");
 	      return KD_ERROR;
 	    }
 
@@ -1052,20 +1038,18 @@ namespace hpp
 	  length += (*it).first;
 	}
 
-      std::cout << "---------------------" << std::endl
-		<< " Animating Whole Path" << std::endl
-		<< "Length: " << i_path->length() << std::endl;
+      hppDout (info, " Animating Whole Path" << std::endl
+	       << "Length: " << i_path->length());
 
-      std::cout << "Footprints: "  << std::endl;
+      hppDout (info, "Footprints: ");
 
       for ( it = allFootprints.begin() ; it != allFootprints.end() ; it++)
 	{
-	  std::cout << "\tat length " << (*it).first
+	  hppDout (info, "\tat length " << (*it).first
 		    << " : "
 		    << (*it).second->x() << ","
 		    << (*it).second->y() << ","
-		    << (*it).second->th() << ","
-		    << std::endl ;
+		   << (*it).second->th() << ",");
 	}
 
 
@@ -1121,7 +1105,7 @@ namespace hpp
 	  genericTask.addElement( stepElement );
 	}
 
-      std::cout << "Total walking time: "  << time << std::endl;
+      hppDout (info, "Total walking time: "  << time);
 
       time += 2;
       paramOfTime[time] = i_path->length();
@@ -1159,7 +1143,7 @@ namespace hpp
       cfgElement.workingJoints(ubMaskVector);
       genericTask.addElement( &cfgElement );
 
-      std::cout << "Solving the task" << std::endl;
+      hppDout (info, "Solving the task");
 
       // Interpolated config task
       double configTaskDuration = 3;
@@ -1191,15 +1175,14 @@ namespace hpp
 	    {
 	      validGikMotion_.push_back (&motion);
 	      if (writeSeqplayFiles() != KD_OK) {
-		std::cerr << "ERROR in writing seqplay files." << std::endl;
+		hppDout (error, "when writing seqplay files.");
 	      }
 	      convertGikRobotMotionToKineoPath(&motion,newPath);
 	    }
 	}
       else
 	{
-	  std::cout << "Failed to solve generic task"
-		    << std::endl;
+	  hppDout (info, "Failed to solve generic task");
 
 	  ChppRobotMotion  motion =   genericTask.solutionMotion();
 	  if (!motion.empty())
@@ -1236,12 +1219,8 @@ namespace hpp
       ktStatus res =  solveOneProblem(0);
       humanoidRobot_->userConstraints()->remove(wholeBodyConstraint_);
 
-      if ( res != KD_OK )
-	{
-	  return res;
-	}
-
-
+      if ( res != KD_OK ) return res;
+      hppDout (info, "solveOneProblem succeeded.");
       CkwsPathShPtr resultPath =
 	getPath (0,getNbPaths (0) - 1);
 

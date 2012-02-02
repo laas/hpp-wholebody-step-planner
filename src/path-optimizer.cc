@@ -23,6 +23,9 @@
 # include <KineoWorks2/kwsSteeringMethod.h>
 # include <KineoWorks2/kwsValidatorDPCollision.h>
 
+# include <hpp/util/debug.hh>
+# include <kwsIO/kwsioConfig.h>
+
 # include <hpp/wholebody-step-planner/path-optimizer.hh>
 
 # define INTER_PARAM 0.01
@@ -74,6 +77,7 @@ namespace hpp
     ktStatus
     PathOptimizer::optimizeConfig (CkwsConfig & io_cfg)
     {
+      hppDout (info, "input config = " << io_cfg);
       if (!targetCfg_)
 	return KD_ERROR;
 
@@ -115,6 +119,8 @@ namespace hpp
 	return KD_ERROR;
 
       io_cfg = currentCfg;
+      hppDout (info, "output config = " << io_cfg);
+
       return KD_OK;
     }
 
@@ -136,6 +142,7 @@ namespace hpp
       io_path->getConfigAtStart(cfgStart);
 
       // Loop over direct paths starting at second one.
+      hppDout (info, "nb direct path = " << io_path->countDirectPaths());
       for (unsigned int i = 1; i<io_path->countDirectPaths(); i++)
 	{
 	  bool hasBeenReplaced = false;

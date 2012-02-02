@@ -37,6 +37,12 @@ SET(${PROJECT_NAME}_HEADERS
   include/hpp/wholebody-step-planner/fwd.hh
 )
 
+# Activate hpp-util logging if requested
+SET (HPP_DEBUG FALSE CACHE BOOL "trigger hpp-util debug output")
+IF (HPP_DEBUG)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHPP_DEBUG")
+ENDIF()
+
 SETUP_PROJECT()
 
 
