@@ -69,7 +69,8 @@ namespace hpp
 {
   namespace wholeBodyStepPlanner
   {
-    static Planner::size_type robotId=0;
+    Planner::size_type Planner::robotId=0;
+
     Planner::Planner(double samplingPeriod )
       :humanoidRobot_(),
        gikStandingRobot_(NULL),
@@ -276,12 +277,10 @@ namespace hpp
       goalSoc.push_back(rightHandConstraint);
       goalSoc.push_back(waistPlaneConstraint_);
       goalSoc.push_back(waistParallelConstraint_);
-      hpp::constrained::GoalConfigGenerator* goalConfigGenerator =
-	new hpp::constrained::GoalConfigGenerator (humanoidRobot_);
-      goalConfigGenerator->setConstraints(goalSoc);
+      constrained::GoalConfigGeneratorShPtr gcg = goalConfigGenerator (robotId);
+      gcg->setConstraints(goalSoc);
       hppDout (info, "weights: " << weightVector);
-      goalConfigGenerator->getGikSolver()->weights(weightVector);
-      setGoalConfigGenerator (goalConfigGenerator);
+      gcg->getGikSolver()->weights(weightVector);
 
       assert (numericOptimizer_);
       numericOptimizer_->setGoalConstraints (goalSoc);

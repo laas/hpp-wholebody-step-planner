@@ -53,6 +53,8 @@ namespace hpp
       typedef unsigned int size_type;
       typedef std::map<double,ChppGikFootprint *> footprintOfParam_t;
 
+      static size_type robotId;
+
       Planner(double samplingPeriod);
 
       ~Planner();
