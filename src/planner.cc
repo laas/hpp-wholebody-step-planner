@@ -69,6 +69,7 @@ namespace hpp
 {
   namespace wholeBodyStepPlanner
   {
+    KIT_PREDEF_CLASS (ConfigShooterReaching)
     Planner::size_type Planner::robotId=0;
 
     Planner::Planner(double samplingPeriod )
@@ -259,29 +260,29 @@ namespace hpp
 
       CkwsConfigShPtr initialConfig;
       humanoidRobot_->getCurrentConfig(initialConfig);
-      /* Build gik solver weights */
-      ChppGikMaskFactory maskFactory(&(*humanoidRobot_));
-      vectorN weightVector = maskFactory.weightsDoubleSupport ();
 
       vector3d handCenter;
-      humanoidRobot_->rightHand()->getCenter (handCenter);
+      CjrlHand* hand = humanoidRobot_->rightHand();
+      hand->getCenter (handCenter);
+      CjrlJoint* reachingJoint = hand->associatedWrist ();
       ChppGikPositionConstraint * rightHandConstraint =
-	new ChppGikPositionConstraint (*humanoidRobot_,
-				       *(humanoidRobot_->rightWrist()),
+	new ChppGikPositionConstraint (*humanoidRobot_, *reachingJoint,
 				       handCenter,
 				       vector3d(xTarget,yTarget,zTarget));
 
       // Initialize goal manifold stack of constraints
       std::vector<CjrlGikStateConstraint*>  goalSoc;
-      buildDoubleSupportStaticStabilityConstraints(initialConfig,goalSoc);
+      buildDoubleSupportSlidingStaticStabilityConstraints
+	(initialConfig,goalSoc);
       goalSoc.push_back(rightHandConstraint);
       goalSoc.push_back(waistPlaneConstraint_);
       goalSoc.push_back(waistParallelConstraint_);
       constrained::GoalConfigGeneratorShPtr gcg = goalConfigGenerator (robotId);
       gcg->setConstraints(goalSoc);
-      hppDout (info, "weights: " << weightVector);
-      gcg->getGikSolver()->weights(weightVector);
-
+      ConfigShooterReachingShPtr configShooter = ConfigShooterReaching::create
+	(humanoidRobot_, model::Joint::fromJrlJoint (reachingJoint));
+      configShooter->setTarget (xTarget, yTarget, zTarget);
+      gcg->configShooter (configShooter);
       assert (numericOptimizer_);
       numericOptimizer_->setGoalConstraints (goalSoc);
 
@@ -305,7 +306,6 @@ namespace hpp
       hpp::constrained::ConfigExtendor* goalExtendor =
 	new hpp::constrained::ConfigExtendor (humanoidRobot_);
       goalExtendor->setConstraints(goalSoc);
-      goalExtendor->getGikSolver()->weights(weightVector);
       CkwsConfigShPtr goalCfg = goalConfIthProblem(0);
       //Optimize the random goal config
       hpp::constrained::ConfigOptimizer optimizer(humanoidRobot_,
@@ -315,11 +315,10 @@ namespace hpp
       CkwsPathShPtr optimizationPath =
 	optimizer.optimizeConfig(goalCfg);
 
-      if (!optimizationPath->isEmpty())
+      if (optimizationPath)
 	hppProblem(robotId)->addPath(optimizationPath);
       else {
 	hppDout (error, "Failed to optimize goal config");
-	return KD_ERROR;
       }
 
       return KD_OK;
