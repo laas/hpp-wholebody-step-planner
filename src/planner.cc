@@ -19,51 +19,52 @@
 
 #include <sstream>
 
-# include <KineoWorks2/kwsRoadmap.h>
-# include <KineoWorks2/kwsDiffusingRdmBuilder.h>
-# include <KineoWorks2/kwsRandomOptimizer.h>
-# include <KineoWorks2/kwsMultiplePlanner.h>
+#include <KineoWorks2/kwsRoadmap.h>
+#include <KineoWorks2/kwsDiffusingRdmBuilder.h>
+#include <KineoWorks2/kwsRandomOptimizer.h>
+#include <KineoWorks2/kwsMultiplePlanner.h>
 
-# include <KineoModel/kppConfigComponent.h>
-# include <KineoModel/kppSMLinearComponent.h>
+#include <KineoModel/kppConfigComponent.h>
+#include <KineoModel/kppSMLinearComponent.h>
 
-# include <jrl/mal/matrixabstractlayer.hh>
-# include <kwsPlus/roadmap/kwsPlusLTRdmBuilder.h>
-# include <hpp/gik/task/generic-task.hh>
+#include <jrl/mal/matrixabstractlayer.hh>
+#include <kwsPlus/roadmap/kwsPlusLTRdmBuilder.h>
+#include <hpp/gik/task/generic-task.hh>
 
-# include <hpp/util/debug.hh>
-# include <hpp/model/joint.hh>
+#include <hpp/util/debug.hh>
+#include <hpp/model/joint.hh>
 
-# include <hpp/gik/robot/foot-print-related.hh>
-# include <hpp/gik/robot/robot-motion.hh>
-# include <hpp/gik/robot/standing-robot.hh>
-# include <hpp/gik/constraint/parallel-constraint.hh>
-# include <hpp/gik/constraint/plane-constraint.hh>
-# include <hpp/gik/constraint/position-constraint.hh>
-# include <hpp/gik/motionplanner/element/step-element.hh>
-# include <hpp/gik/motionplanner/element/interpolated-element.hh>
+#include <hpp/gik/robot/foot-print-related.hh>
+#include <hpp/gik/robot/robot-motion.hh>
+#include <hpp/gik/robot/standing-robot.hh>
+#include <hpp/gik/constraint/parallel-constraint.hh>
+#include <hpp/gik/constraint/plane-constraint.hh>
+#include <hpp/gik/constraint/position-constraint.hh>
+#include <hpp/gik/motionplanner/element/step-element.hh>
+#include <hpp/gik/motionplanner/element/interpolated-element.hh>
 
-# include <hpp/constrained/config-extendor.hh>
-# include <hpp/constrained/roadmap-builder.hh>
-# include <hpp/constrained/config-optimizer.hh>
-# include <hpp/constrained/goal-config-generator.hh>
-# include <hpp/constrained/planner/planner.hh>
+#include <hpp/constrained/config-extendor.hh>
+#include <hpp/constrained/roadmap-builder.hh>
+#include <hpp/constrained/config-optimizer.hh>
+#include <hpp/constrained/goal-config-generator.hh>
+#include <hpp/constrained/planner/planner.hh>
 
-# include <hpp/wholebody-step-planner/planner.hh>
-# include <hpp/wholebody-step-planner/config-motion-constraint.hh>
-# include <hpp/wholebody-step-planner/path-optimizer.hh>
+#include <hpp/wholebody-step-planner/planner.hh>
+#include <hpp/wholebody-step-planner/config-motion-constraint.hh>
+#include <hpp/wholebody-step-planner/path-optimizer.hh>
 
-# include "../src/roboptim/path-optimizer.hh"
+#include "../src/roboptim/path-optimizer.hh"
+#include <../src/config-shooter-reaching.hh>
 
-# define PARAM_PRECISION 0.01
-# define TASK_PRECISION 1e-4
+#define PARAM_PRECISION 0.01
+#define TASK_PRECISION 1e-4
 
 /* Pattern Generator default parameters */
-# define END_COEFF 0.5
-# define START_SHIFT_TIME 0.1
-# define END_SHIFT_TIME 0.1
-# define FOOT_FILGHT_TIME 1
-# define STEP_HEIGHT 0.05
+#define END_COEFF 0.5
+#define START_SHIFT_TIME 0.1
+#define END_SHIFT_TIME 0.1
+#define FOOT_FILGHT_TIME 1
+#define STEP_HEIGHT 0.05
 
 namespace hpp
 {
