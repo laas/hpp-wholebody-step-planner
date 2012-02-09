@@ -210,6 +210,11 @@ namespace hpp
 	new hpp::constrained::ConfigExtendor(humanoidRobot_);
       extendor->setConstraints(sot);
 
+      /* Build gik solver weights */
+      ChppGikMaskFactory maskFactory(&(*humanoidRobot_));
+      vectorN weightVector = maskFactory.weightsDoubleSupport ();
+      extendor->getGikSolver()->weights(weightVector);
+
       wholeBodyConstraint_ =
 	hpp::constrained::KwsConstraint::create("Whole-Body Constraint",
 						extendor);
