@@ -29,7 +29,7 @@ namespace hpp
 {
   namespace wholeBodyStepPlanner
   {
-    KIT_PREDEF_CLASS(PathOptimizer);
+    KIT_PREDEF_CLASS(PathOptimizer)
 
     /// Path optimizer that optimize configurations between direct paths
 

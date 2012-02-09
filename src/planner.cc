@@ -967,7 +967,7 @@ namespace hpp
 
     ChppGikFootprint *
     Planner::addLastFootPrint(CkwsPathConstShPtr i_path,
-			      const ChppGikFootprint * currentFootPrint,
+			      const ChppGikFootprint*,
 			      bool isRightFoot)
     {
       CkwsConfig cfg(humanoidRobot_);
