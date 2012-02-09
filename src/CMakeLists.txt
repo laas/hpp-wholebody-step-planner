@@ -22,6 +22,7 @@ SET(SOURCES
   position-motion-constraint.cc
   rotation-motion-constraint.cc
   path-optimizer.cc
+  shooter-humanoid.cc
   roboptim/path-optimizer.hh
   roboptim/path-optimizer.cc
 )

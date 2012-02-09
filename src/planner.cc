@@ -27,6 +27,14 @@
 #include <KineoModel/kppConfigComponent.h>
 #include <KineoModel/kppSMLinearComponent.h>
 
+#ifdef HPP_DEBUG
+# include <KineoWorks2/kwsShooterConfigList.h>
+# include <KineoWorks2/kwsShooterConfigSpace.h>
+# include <KineoWorks2/kwsShooterAdaptiveMulti.h>
+# include <KineoWorks2/kwsShooterPath.h>
+# include <KineoWorks2/kwsShooterRoadmapBox.h>
+# include <KineoWorks2/kwsShooterRoadmapNodes.h>
+#endif
 #include <jrl/mal/matrixabstractlayer.hh>
 #include <kwsPlus/roadmap/kwsPlusLTRdmBuilder.h>
 #include <hpp/gik/task/generic-task.hh>
@@ -49,9 +57,10 @@
 #include <hpp/constrained/goal-config-generator.hh>
 #include <hpp/constrained/planner/planner.hh>
 
-#include <hpp/wholebody-step-planner/planner.hh>
-#include <hpp/wholebody-step-planner/config-motion-constraint.hh>
-#include <hpp/wholebody-step-planner/path-optimizer.hh>
+#include "hpp/wholebody-step-planner/planner.hh"
+#include "hpp/wholebody-step-planner/config-motion-constraint.hh"
+#include "hpp/wholebody-step-planner/path-optimizer.hh"
+#include "hpp/wholebody-step-planner/shooter-humanoid.hh"
 
 #include "../src/roboptim/path-optimizer.hh"
 #include <../src/config-shooter-reaching.hh>
@@ -70,6 +79,9 @@ namespace hpp
 {
   namespace wholeBodyStepPlanner
   {
+#ifdef HPP_DEBUG
+    static void logDiffusionShooter (CkwsDiffusionShooterShPtr shooter);
+#endif
     KIT_PREDEF_CLASS (ConfigShooterReaching)
     Planner::size_type Planner::robotId=0;
 
@@ -206,13 +218,19 @@ namespace hpp
 
       CkwsRoadmapShPtr roadmap = CkwsRoadmap::create(humanoidRobot_);
       CkwsDiffusingRdmBuilderShPtr rdmBuilder =
-	hpp::constrained::DiffusingRoadmapBuilder::create(roadmap,extendor);
+	constrained::DiffusingRoadmapBuilder::create(roadmap,extendor);
+      CkwsDiffusionShooterShPtr diffusionShooter =
+	ShooterHumanoid::create (humanoidRobot_, 1.);
+      rdmBuilder->diffusionShooter (diffusionShooter);
+#ifdef HPP_DEBUG
+      logDiffusionShooter (rdmBuilder->diffusionShooter ());
+#endif
       rdmBuilder->diffuseFromProblemStart (true);
       rdmBuilder->diffuseFromProblemGoal (true);
 
       steeringMethodIthProblem(0, CkppSMLinearComponent::create ());
-      roadmapBuilderIthProblem (0, rdmBuilder, true);
-
+      assert (roadmapBuilderIthProblem (0, rdmBuilder, true) == KD_OK);
+      hppDout (info, "Set roadmap builder.");
       CkwsLoopOptimizerShPtr optimizer = CkwsRandomOptimizer::create();
       optimizer->penetration (hppProblem (0)->penetration ());
 
@@ -1241,5 +1259,27 @@ namespace hpp
       return KD_OK;
     }
 
+#ifdef HPP_DEBUG
+    static void logDiffusionShooter (CkwsDiffusionShooterShPtr shooter)
+    {
+      if (KIT_DYNAMIC_PTR_CAST (CkwsShooterConfigList, shooter)) {
+	hppDout (info, "CkwsShooterConfigList");
+      } else if (KIT_DYNAMIC_PTR_CAST (CkwsShooterConfigSpace, shooter)) {
+	hppDout (info, "CkwsShooterConfigSpace");
+      } else if (KIT_DYNAMIC_PTR_CAST (CkwsShooterAdaptiveMulti, shooter)) {
+	hppDout (info, "CkwsShooterAdaptiveMulti");
+      } else if (KIT_DYNAMIC_PTR_CAST (CkwsShooterPath, shooter)) {
+	hppDout (info, "CkwsShooterPath");
+      } else if (KIT_DYNAMIC_PTR_CAST (CkwsShooterRoadmapBox, shooter)) {
+	hppDout (info, "CkwsShooterRoadmapBox");
+      } else if (KIT_DYNAMIC_PTR_CAST (CkwsShooterRoadmapNodes, shooter)) {
+	hppDout (info, "CkwsShooterRoadmapNodes");
+      } else if (KIT_DYNAMIC_PTR_CAST (ShooterHumanoid, shooter)) {
+	hppDout (info, "ShooterHumanoid");
+      } else {
+	hppDout (info, "unknown shooter.");
+      }
+    }
+#endif
   }
 }
