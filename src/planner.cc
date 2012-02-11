@@ -139,78 +139,119 @@ namespace hpp
       return wholeBodyConstraint_;
     }
 
-    ktStatus
-    Planner::initializeProblem()
+    // Perform several initializations
+    //
+    // - Initialize dynamic part of robot and set gikStandingRobot_.
+    // - Get current height of waist and store in waistZ_.
+    // - Return current configuration of robot.
+    //    robot is supposed to be in half-sitting configuration. This
+    //    configuration is then used as an "optimal" configuration for latter
+    //    optimizations.
+    // - get robot local z axis.
+
+    static CkwsConfigShPtr
+    initializeRobot (hpp::model::HumanoidRobotShPtr humanoidRobot,
+		     ChppGikStandingRobot*& gikStandingRobot,
+		     double& waistZ, vector3d& ZLocalAxis)
+    {
+      std::string property,value;
+      property="ComputeZMP"; value="true";
+      humanoidRobot->setProperty ( property,value );
+      property="TimeStep"; value="0.005";
+      humanoidRobot->setProperty ( property,value );
+      property="ComputeAccelerationCoM";
+      value="true";humanoidRobot->setProperty ( property,value );
+      property="ComputeBackwardDynamics"; value="false";
+      humanoidRobot->setProperty ( property,value );
+      property="ComputeMomentum"; value="true";
+      humanoidRobot->setProperty ( property,value );
+      property="ComputeAcceleration"; value="true";
+      humanoidRobot->setProperty ( property,value );
+      property="ComputeVelocity"; value="true";
+      humanoidRobot->setProperty ( property,value );
+      property="ComputeSkewCom"; value="true";
+      humanoidRobot->setProperty ( property,value );
+      property="ComputeCoM"; value="true";
+      humanoidRobot->setProperty ( property,value );
+
+      gikStandingRobot = new ChppGikStandingRobot(*humanoidRobot);
+
+      waistZ = MAL_S4x4_MATRIX_ACCESS_I_J
+	(humanoidRobot->waist()->currentTransformation(),2,3);
+      ZLocalAxis =
+	gikStandingRobot->halfsittingLocalWaistVertical ();
+
+      CkwsConfigShPtr halfSittingCfg;
+      humanoidRobot->getCurrentConfig(halfSittingCfg);
+      return halfSittingCfg;
+    }
+
+    // Define sliding quasi static stability constraints:
+    //   - Right foot on the ground
+    //   - left foot rigidly fixed to right foot,
+    //   - projection the center of mass on the ground,
+    //   - waist height, roll and pitch constant
+    static void initializeStabilityTasks
+    (ChppGikPlaneConstraint*& waistPlaneConstraint,
+     ChppGikParallelConstraint*& waistParallelConstraint,
+     model::HumanoidRobotShPtr& humanoidRobot,
+     double waistZ, vector3d& ZLocalAxis, CkwsConfigShPtr& halfSittingCfg,
+     std::vector<CjrlGikStateConstraint*>& slidingStabilityConstraints)
+    {
+      vector3d ZWorldAxis ( 0, 0, 1 );
+      waistPlaneConstraint =
+	new ChppGikPlaneConstraint ( *humanoidRobot,
+				     *(humanoidRobot->waist()),
+				     vector3d ( 0,0,0 ),
+				     vector3d ( 0, 0, waistZ),
+				     ZWorldAxis ) ;
+
+      waistParallelConstraint =
+	new ChppGikParallelConstraint ( *humanoidRobot,
+					*(humanoidRobot->waist()),
+					ZLocalAxis,
+					ZWorldAxis );
+
+      /* Creating kineo constraint */
+      hpp::constrained::Planner::
+	buildDoubleSupportSlidingStaticStabilityConstraints
+	(halfSittingCfg, slidingStabilityConstraints);
+      slidingStabilityConstraints.push_back (waistPlaneConstraint);
+      slidingStabilityConstraints.push_back (waistParallelConstraint);
+
+    }
+
+    ktStatus Planner::initializeProblem ()
     {
 
       hppDout(info, "Initialize problem(): paramPrecision: "
 	      << paramPrecision_);
 
       assert (getNbHppProblems () >= 1);
-      humanoidRobot_ = KIT_DYNAMIC_PTR_CAST
-	(hpp::model::HumanoidRobot, robotIthProblem (0));
+      assert (humanoidRobot_ = KIT_DYNAMIC_PTR_CAST
+	      (hpp::model::HumanoidRobot, robotIthProblem (0)));
 
-      assert (humanoidRobot_);
+      // Initialize dynamic part of robot and get half-sitting configuration.
+      vector3d ZLocalAxis;
+      CkwsConfigShPtr halfSittingCfg = initializeRobot (humanoidRobot_,
+							gikStandingRobot_,
+							waistZ_,
+							ZLocalAxis);
 
-      std::string property,value;
-      property="ComputeZMP"; value="true";
-      humanoidRobot_->setProperty ( property,value );
-      property="TimeStep"; value="0.005";
-      humanoidRobot_->setProperty ( property,value );
-      property="ComputeAccelerationCoM";
-      value="true";humanoidRobot_->setProperty ( property,value );
-      property="ComputeBackwardDynamics"; value="false";
-      humanoidRobot_->setProperty ( property,value );
-      property="ComputeMomentum"; value="true";
-      humanoidRobot_->setProperty ( property,value );
-      property="ComputeAcceleration"; value="true";
-      humanoidRobot_->setProperty ( property,value );
-      property="ComputeVelocity"; value="true";
-      humanoidRobot_->setProperty ( property,value );
-      property="ComputeSkewCom"; value="true";
-      humanoidRobot_->setProperty ( property,value );
-      property="ComputeCoM"; value="true";
-      humanoidRobot_->setProperty ( property,value );
+      // Define sliding quasi static stability constraints:
+      //   - Right foot on the ground
+      //   - left foot rigidly fixed to right foot,
+      //   - projection the center of mass on the ground,
+      //   - waist height, roll and pitch constant
+      initializeStabilityTasks (waistPlaneConstraint_, waistParallelConstraint_,
+				humanoidRobot_, waistZ_, ZLocalAxis,
+				halfSittingCfg, slidingStabilityConstraints_);
 
-      gikStandingRobot_ = new ChppGikStandingRobot(*humanoidRobot_);
+      hpp::constrained::ConfigExtendor* extendor =
+	new hpp::constrained::ConfigExtendor (humanoidRobot_);
+      extendor->setConstraints (slidingStabilityConstraints_);
 
-      CkwsConfigShPtr halfSittingCfg;
-      humanoidRobot_->getCurrentConfig(halfSittingCfg);
-
-      /* Building the tasks */
-      waistZ_ =	MAL_S4x4_MATRIX_ACCESS_I_J
-	(humanoidRobot_->waist()->currentTransformation(),2,3);
-
-      vector3d ZLocalAxis =
-	gikStandingRobot_->halfsittingLocalWaistVertical ();
-      vector3d ZWorldAxis ( 0, 0, 1 );
-
-      waistPlaneConstraint_ =
-	new ChppGikPlaneConstraint ( *humanoidRobot_,
-				     *(humanoidRobot_->waist()),
-				     vector3d ( 0,0,0 ),
-				     vector3d ( 0, 0, waistZ_),
-				     ZWorldAxis ) ;
-
-      waistParallelConstraint_ =
-	new ChppGikParallelConstraint ( *humanoidRobot_,
-					*(humanoidRobot_->waist()),
-					ZLocalAxis,
-					ZWorldAxis );
-
-      /* Creating kineo constraint */
-
-      std::vector<CjrlGikStateConstraint*> sot;
-      hpp::constrained::Planner::
-	buildDoubleSupportSlidingStaticStabilityConstraints(halfSittingCfg,sot);
-      sot.push_back(waistPlaneConstraint_);
-      sot.push_back(waistParallelConstraint_);
-
-      hpp::constrained::ConfigExtendor * extendor =
-	new hpp::constrained::ConfigExtendor(humanoidRobot_);
-      extendor->setConstraints(sot);
-
-      /* Build gik solver weights */
+      // Set weights to solver
       ChppGikMaskFactory maskFactory(&(*humanoidRobot_));
       vectorN weightVector = maskFactory.weightsDoubleSupport ();
       extendor->getGikSolver()->weights(weightVector);
@@ -219,8 +260,7 @@ namespace hpp
 	hpp::constrained::KwsConstraint::create("Whole-Body Constraint",
 						extendor);
 
-      /* initializing the motion planning problem */
-
+      // Create roadmap builder
       CkwsRoadmapShPtr roadmap = CkwsRoadmap::create(humanoidRobot_);
       CkwsDiffusingRdmBuilderShPtr rdmBuilder =
 	constrained::DiffusingRoadmapBuilder::create(roadmap,extendor);
@@ -233,6 +273,7 @@ namespace hpp
       rdmBuilder->diffuseFromProblemStart (true);
       rdmBuilder->diffuseFromProblemGoal (true);
 
+      // Set steering method to linear
       steeringMethodIthProblem(0, CkppSMLinearComponent::create ());
       assert (roadmapBuilderIthProblem (0, rdmBuilder, true) == KD_OK);
       hppDout (info, "Set roadmap builder.");
@@ -249,7 +290,8 @@ namespace hpp
       postOptimizer->targetConfig(halfSittingCfg);
       postOptimizer->setConfigMask(wbMask);
 
-      numericOptimizer_ = roboptim::PathOptimizer::create (sot);
+      numericOptimizer_ = roboptim::PathOptimizer::create
+	(slidingStabilityConstraints_);
       assert (numericOptimizer_);
       std::vector<CkwsPathPlannerShPtr> optVector;
       optVector.push_back (optimizer);
@@ -257,7 +299,6 @@ namespace hpp
       CkwsMultiplePlannerShPtr combinedOptimizer =
 	CkwsMultiplePlanner::create (optVector);
       pathOptimizerIthProblem(0, combinedOptimizer);
-
       hppProblem (0)->alwaysOptimize (true);
 
       return KD_OK;
@@ -271,8 +312,9 @@ namespace hpp
       CkwsConfigShPtr iCfg = inPath->configAtStart();
       CkwsConfigShPtr fCfg = inPath->configAtEnd();
 
-      initConfIthProblem(0,iCfg);
-      goalConfIthProblem(0,fCfg);
+      initConfIthProblem (0,iCfg);
+      resetGoalConfIthProblem (0);
+      addGoalConfIthProblem (0,fCfg);
 
       return KD_OK;
     }
@@ -280,71 +322,31 @@ namespace hpp
     ktStatus Planner::generateGoalConfig (double xTarget,double yTarget,
 					  double zTarget, unsigned int nbConfig)
     {
-      std::vector<CjrlGikStateConstraint*> sot;
-
-      CkwsConfigShPtr initialConfig;
-      humanoidRobot_->getCurrentConfig(initialConfig);
-
       vector3d handCenter;
       CjrlHand* hand = humanoidRobot_->rightHand();
       hand->getCenter (handCenter);
       CjrlJoint* reachingJoint = hand->associatedWrist ();
-      ChppGikPositionConstraint * rightHandConstraint =
+      rightHandConstraint_ =
 	new ChppGikPositionConstraint (*humanoidRobot_, *reachingJoint,
 				       handCenter,
 				       vector3d(xTarget,yTarget,zTarget));
 
       // Initialize goal manifold stack of constraints
-      std::vector<CjrlGikStateConstraint*>  goalSoc;
-      buildDoubleSupportSlidingStaticStabilityConstraints
-	(initialConfig,goalSoc);
-      goalSoc.push_back(rightHandConstraint);
-      goalSoc.push_back(waistPlaneConstraint_);
-      goalSoc.push_back(waistParallelConstraint_);
+      goalConstraints_ = slidingStabilityConstraints_;
+      goalConstraints_.push_back(rightHandConstraint_);
       constrained::GoalConfigGeneratorShPtr gcg = goalConfigGenerator (robotId);
-      gcg->setConstraints(goalSoc);
+      gcg->setConstraints(goalConstraints_);
       ConfigShooterReachingShPtr configShooter = ConfigShooterReaching::create
 	(humanoidRobot_, model::Joint::fromJrlJoint (reachingJoint));
       configShooter->setTarget (xTarget, yTarget, zTarget);
       gcg->configShooter (configShooter);
       assert (numericOptimizer_);
-      numericOptimizer_->setGoalConstraints (goalSoc);
+      numericOptimizer_->setGoalConstraints (goalConstraints_);
 
-      // Before calling the general implementation, put the robot close
-      // to the target
-      unsigned int rank =
-	humanoidRobot_->getRootJoint ()->jrlJoint ()->rankInConfiguration ();
-      std::vector <double> dofValues;
-      initialConfig->getDofValues (dofValues);
-      dofValues [rank+0] = xTarget;
-      dofValues [rank+1] = yTarget;
-      CkwsConfig config (humanoidRobot_, dofValues);
-      humanoidRobot_->hppSetCurrentConfig (config,
-					   hpp::model::Device::GEOMETRIC);
       if (generateGoalConfigurations(0, nbConfig) != KD_OK) {
 	hppDout (error, "Failed to generate a goal configuration");
 	return KD_ERROR;
       }
-
-      // Initialize config extendor for configuration optimizer
-      hpp::constrained::ConfigExtendor* goalExtendor =
-	new hpp::constrained::ConfigExtendor (humanoidRobot_);
-      goalExtendor->setConstraints(goalSoc);
-      CkwsConfigShPtr goalCfg = goalConfIthProblem(0);
-      //Optimize the random goal config
-      hpp::constrained::ConfigOptimizer optimizer(humanoidRobot_,
-						  goalExtendor,
-						  initialConfig);
-
-      CkwsPathShPtr optimizationPath =
-	optimizer.optimizeConfig(goalCfg);
-
-      if (optimizationPath)
-	hppProblem(robotId)->addPath(optimizationPath);
-      else {
-	hppDout (error, "Failed to optimize goal config");
-      }
-
       return KD_OK;
     }
 

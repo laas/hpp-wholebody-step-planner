@@ -38,6 +38,7 @@ class ChppGikStandingRobot;
 class ChppGikPlaneConstraint;
 class ChppGikParallelConstraint;
 class ChppRobotMotion;
+class ChppGikPositionConstraint;
 
 namespace hpp
 {
@@ -142,7 +143,7 @@ namespace hpp
     private:
 
       hpp::model::HumanoidRobotShPtr humanoidRobot_;
-      ChppGikStandingRobot * gikStandingRobot_;
+      ChppGikStandingRobot* gikStandingRobot_;
       double samplingPeriod_;
       /// Set of constraints enforcing static stability by calling
       /// hpp::constrained::Planner::
@@ -160,8 +161,11 @@ namespace hpp
       double stepHeight_;
 
       /* Gik constraints allocated only once */
-      ChppGikPlaneConstraint * waistPlaneConstraint_;
+      ChppGikPlaneConstraint* waistPlaneConstraint_;
       ChppGikParallelConstraint* waistParallelConstraint_;
+      ChppGikPositionConstraint* rightHandConstraint_;
+      std::vector<CjrlGikStateConstraint*> slidingStabilityConstraints_;
+      std::vector<CjrlGikStateConstraint*> goalConstraints_;
 
       /* Humanoid robot specificities */
       matrix4d relativeRightFootTransformation_;
