@@ -152,6 +152,10 @@ namespace hpp
 
       /// Numeric optimizer called before generating steps
       roboptim::PathOptimizerShPtr numericOptimizer_;
+      /// Final configuration optimizer
+      hpp::constrained::ConfigExtendor* goalExtendor_;
+      /// Target configuration for optimization
+      CkwsConfigShPtr halfSittingCfg_;
 
       /* Footstep parameters */
       double zmpEndCoeff_;

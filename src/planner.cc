@@ -233,10 +233,8 @@ namespace hpp
 
       // Initialize dynamic part of robot and get half-sitting configuration.
       vector3d ZLocalAxis;
-      CkwsConfigShPtr halfSittingCfg = initializeRobot (humanoidRobot_,
-							gikStandingRobot_,
-							waistZ_,
-							ZLocalAxis);
+      halfSittingCfg_ = initializeRobot (humanoidRobot_, gikStandingRobot_,
+					 waistZ_, ZLocalAxis);
 
       // Define sliding quasi static stability constraints:
       //   - Right foot on the ground
@@ -245,7 +243,7 @@ namespace hpp
       //   - waist height, roll and pitch constant
       initializeStabilityTasks (waistPlaneConstraint_, waistParallelConstraint_,
 				humanoidRobot_, waistZ_, ZLocalAxis,
-				halfSittingCfg, slidingStabilityConstraints_);
+				halfSittingCfg_, slidingStabilityConstraints_);
 
       hpp::constrained::ConfigExtendor* extendor =
 	new hpp::constrained::ConfigExtendor (humanoidRobot_);
@@ -290,6 +288,12 @@ namespace hpp
       postOptimizer->targetConfig(halfSittingCfg);
       postOptimizer->setConfigMask(wbMask);
 
+      // Initialize goal configuration optimizer
+      goalExtendor_ = new hpp::constrained::ConfigExtendor (humanoidRobot_);
+      constrained::ConfigOptimizerShPtr goalOptimizer =
+	constrained::ConfigOptimizer::create (humanoidRobot_,
+					      goalExtendor_,
+					      halfSittingCfg_);
       numericOptimizer_ = roboptim::PathOptimizer::create
 	(slidingStabilityConstraints_);
       assert (numericOptimizer_);
@@ -347,6 +351,8 @@ namespace hpp
 	hppDout (error, "Failed to generate a goal configuration");
 	return KD_ERROR;
       }
+
+      goalExtendor_->setConstraints (goalConstraints_);
       return KD_OK;
     }
 
