@@ -263,7 +263,7 @@ namespace hpp
       CkwsDiffusingRdmBuilderShPtr rdmBuilder =
 	constrained::DiffusingRoadmapBuilder::create(roadmap,extendor);
       CkwsDiffusionShooterShPtr diffusionShooter =
-	ShooterHumanoid::create (humanoidRobot_, 1.);
+	ShooterHumanoid::create (humanoidRobot_, 5.);
       rdmBuilder->diffusionShooter (diffusionShooter);
 #ifdef HPP_DEBUG
       logDiffusionShooter (rdmBuilder->diffusionShooter ());
