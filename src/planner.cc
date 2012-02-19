@@ -275,18 +275,19 @@ namespace hpp
       steeringMethodIthProblem(0, CkppSMLinearComponent::create ());
       assert (roadmapBuilderIthProblem (0, rdmBuilder, true) == KD_OK);
       hppDout (info, "Set roadmap builder.");
-      CkwsLoopOptimizerShPtr optimizer = CkwsRandomOptimizer::create();
-      optimizer->penetration (hppProblem (0)->penetration ());
+      CkwsLoopOptimizerShPtr randomOptimizer = CkwsRandomOptimizer::create();
+      randomOptimizer->penetration (hppProblem (0)->penetration ());
 
-      PathOptimizerShPtr postOptimizer = PathOptimizer::create();
-      postOptimizer->penetration (hppProblem (0)->penetration () / 100);
+      PathOptimizerShPtr intermediateConfigOptimizer = PathOptimizer::create();
+      intermediateConfigOptimizer->penetration
+	(hppProblem (0)->penetration () / 100);
 
       /* Building wholebody mask, without the free flyer dofs */
       std::vector<bool> wbMask(humanoidRobot_->countDofs(),true);
       for(unsigned int i = 0; i<6; i++) wbMask[i] = false;
 
-      postOptimizer->targetConfig(halfSittingCfg);
-      postOptimizer->setConfigMask(wbMask);
+      intermediateConfigOptimizer->targetConfig(halfSittingCfg_);
+      intermediateConfigOptimizer->setConfigMask(wbMask);
 
       // Initialize goal configuration optimizer
       goalExtendor_ = new hpp::constrained::ConfigExtendor (humanoidRobot_);
@@ -298,8 +299,10 @@ namespace hpp
 	(slidingStabilityConstraints_);
       assert (numericOptimizer_);
       std::vector<CkwsPathPlannerShPtr> optVector;
-      optVector.push_back (optimizer);
-      optVector.push_back (postOptimizer);
+      optVector.push_back (goalOptimizer);
+      optVector.push_back (randomOptimizer);
+      optVector.push_back (numericOptimizer_);
+      //optVector.push_back (intermediateConfigOptimizer);
       CkwsMultiplePlannerShPtr combinedOptimizer =
 	CkwsMultiplePlanner::create (optVector);
       pathOptimizerIthProblem(0, combinedOptimizer);
@@ -1255,12 +1258,6 @@ namespace hpp
 	getPath (robotId ,getNbPaths (robotId) - 1);
       if (!resultPath) return KD_ERROR;
 
-      // Numerically optimize path before animation
-      if (numericOptimizer_) {
-	if (numericOptimizer_->optimizePath (resultPath) == KD_OK) {
-	  hppProblem (robotId)->addPath (resultPath);
-	}
-      }
 #if 0
       CkwsPathShPtr animatedPath = findDynamicPath ( resultPath );
 
