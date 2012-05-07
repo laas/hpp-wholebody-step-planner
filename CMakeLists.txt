@@ -35,6 +35,7 @@ SET(${PROJECT_NAME}_HEADERS
   include/hpp/wholebody-step-planner/rotation-motion-constraint.hh
   include/hpp/wholebody-step-planner/path-optimizer.hh
   include/hpp/wholebody-step-planner/shooter-humanoid.hh
+  include/hpp/wholebody-step-planner/config-shooter-reaching.hh
   include/hpp/wholebody-step-planner/fwd.hh
 )
 

@@ -61,9 +61,9 @@
 #include "hpp/wholebody-step-planner/config-motion-constraint.hh"
 #include "hpp/wholebody-step-planner/path-optimizer.hh"
 #include "hpp/wholebody-step-planner/shooter-humanoid.hh"
+#include "hpp/wholebody-step-planner/config-shooter-reaching.hh"
 
 #include "../src/roboptim/path-optimizer.hh"
-#include <../src/config-shooter-reaching.hh>
 
 #define PARAM_PRECISION 0.01
 #define TASK_PRECISION 1e-4

@@ -23,7 +23,7 @@
 #include <hpp/model/humanoid-robot.hh>
 #include <hpp/model/joint.hh>
 
-#include <../src/config-shooter-reaching.hh>
+#include "hpp/wholebody-step-planner/config-shooter-reaching.hh"
 
 #define DOF_X 0
 #define DOF_Y 1
