@@ -163,21 +163,7 @@ namespace hpp
 
       gikStandingRobot_ = new ChppGikStandingRobot(*humanoidRobot_);
       gikManager_ =  CtlcGikManager::create(humanoidRobot_);
-   
-
-      std::string property,value;
-      property="ComputeZMP"; value="true";humanoidRobot_->setProperty ( property,value );
-      property="TimeStep"; value="0.005";humanoidRobot_->setProperty ( property,value );
-      property="ComputeAccelerationCoM"; value="true";humanoidRobot_->setProperty ( property,value );
-      property="ComputeBackwardDynamics"; value="true";humanoidRobot_->setProperty ( property,value );
-      property="ComputeMomentum"; value="true";humanoidRobot_->setProperty ( property,value );
-      property="ComputeAcceleration"; value="true";humanoidRobot_->setProperty ( property,value );
-      property="ComputeVelocity"; value="true";humanoidRobot_->setProperty ( property,value );
-      property="ComputeSkewCom"; value="true";humanoidRobot_->setProperty ( property,value );
-      property="ComputeCoM"; value="true";humanoidRobot_->setProperty ( property,value );
-
-
- 
+      gikManager_->setDynamic(false);
 
       /* Building the tasks */
       waistZ_ = 
@@ -405,6 +391,7 @@ namespace hpp
     CkwsPathShPtr 
     Planner::findDynamicPath( CkwsPathShPtr i_path)
     {
+      gikManager_->setDynamic (true);
 
       CkwsPathShPtr resultPath = CkwsPath::create(humanoidRobot_);
       CkwsPathShPtr pathToAnimate = i_path;
