@@ -2,11 +2,13 @@
 
 # include <KineoWorks2/kwsRoadmap.h>
 # include <KineoWorks2/kwsDiffusingRdmBuilder.h>
+# include <KineoWorks2/kwsIPPRdmBuilder.h>
 # include <KineoWorks2/kwsRandomOptimizer.h>
 
 #include <KineoModel/kppConfigComponent.h>
 
 # include <kwsPlus/roadmap/kwsPlusLTRdmBuilder.h>
+# include <kwsPlus/roadmap/kwsPlusPCARdmBuilder.h>
 # include <hpp/gik/task/generic-task.hh>
 
 # include <hpp/util/debug.hh>
@@ -19,6 +21,7 @@
 # include <hpp/wholebody-step-planner/config-motion-constraint.hh>
 # include <hpp/wholebody-step-planner/rotation-motion-constraint.hh>
 # include <hpp/wholebody-step-planner/path-optimizer.hh>
+# include <hpp/wholebody-step-planner/kwsPlusBenchRdmBuilder.h>
 
 
 # define PARAM_PRECISION 0.01
@@ -269,9 +272,34 @@ namespace hpp
       /* initializing the motion planning problem */
 
       CkwsRoadmapShPtr roadmap = CkwsRoadmap::create(humanoidRobot_);
+      // CkwsDiffusingRdmBuilderShPtr rdmBuilder =
+      // 	CkwsPlusLTRdmBuilder< CkwsDiffusingRdmBuilder >::create (roadmap, hppProblem (0)->penetration ());
       CkwsDiffusingRdmBuilderShPtr rdmBuilder =
-	//CkwsDiffusingRdmBuilder::create(roadmap);
-	CkwsPlusLTRdmBuilder< CkwsDiffusingRdmBuilder >::create (roadmap, hppProblem (0)->penetration ());
+      	CkwsPlusBenchRdmBuilder< CkwsDiffusingRdmBuilder >
+      	::create (roadmap, hppProblem (0)->penetration ());
+      // CkwsDiffusingRdmBuilderShPtr rdmBuilder =
+      // 	CkwsPlusBenchRdmBuilder< CkwsIPPRdmBuilder >
+      // 	::create (roadmap, hppProblem (0)->penetration ());
+      // CkwsDiffusingRdmBuilderShPtr rdmBuilder =
+      // 	CkwsPlusBenchRdmBuilder< CkwsPlusLTRdmBuilder< CkwsDiffusingRdmBuilder> >
+      // 	::create (roadmap, hppProblem (0)->penetration ());
+      // CkwsDiffusingRdmBuilderShPtr rdmBuilder =
+      // 	CkwsPlusBenchRdmBuilder< CkwsPlusPCARdmBuilder< CkwsDiffusingRdmBuilder> >
+      // 	::create (roadmap, hppProblem (0)->penetration ());
+      // CkwsDiffusingRdmBuilderShPtr rdmBuilder =
+      // 	CkwsPlusBenchRdmBuilder< CkwsPlusPCARdmBuilder< CkwsIPPRdmBuilder> >
+      // 	::create (roadmap, hppProblem (0)->penetration ());
+      // CkwsDiffusingRdmBuilderShPtr rdmBuilder =
+      // 	CkwsPlusBenchRdmBuilder< CkwsPlusLTRdmBuilder< CkwsIPPRdmBuilder> >
+      // 	::create (roadmap, hppProblem (0)->penetration ());
+      // CkwsDiffusingRdmBuilderShPtr rdmBuilder =
+      // 	CkwsPlusBenchRdmBuilder<CkwsPlusPCARdmBuilder<CkwsPlusLTRdmBuilder
+      // 	<CkwsDiffusingRdmBuilder> > >
+      // 	::create (roadmap, hppProblem (0)->penetration ());
+      // CkwsDiffusingRdmBuilderShPtr rdmBuilder =
+      // 	CkwsPlusBenchRdmBuilder<CkwsPlusPCARdmBuilder<CkwsPlusLTRdmBuilder
+      // 	<CkwsIPPRdmBuilder> > >
+      // 	::create (roadmap, hppProblem (0)->penetration ());
       rdmBuilder->diffuseFromProblemGoal (true);
 
       
@@ -298,9 +326,9 @@ namespace hpp
 
       //optimizer->postOptimizer(postOptimizer);
 
-      pathOptimizerIthProblem(0,optimizer);
+      //pathOptimizerIthProblem(0,optimizer);
 
-      hppProblem (0)->alwaysOptimize (true);
+      //hppProblem (0)->alwaysOptimize (true);
 
       return KD_OK;
     }
