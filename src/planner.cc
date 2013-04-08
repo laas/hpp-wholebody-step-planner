@@ -1234,7 +1234,7 @@ namespace hpp
 	      // convertGikRobotMotionToKineoPath(&motion,newPath);
 	    }
 
-	  bool filterWorked = genericTask.filterZmpError(1.0);
+	  bool filterWorked = genericTask.filterZmpError();
 
 	  if (filterWorked) {
 	    isSolved = genericTask.solve();
@@ -1258,7 +1258,7 @@ namespace hpp
 	    }
 
 	  filterWorked = false;
-	  filterWorked = genericTask.filterZmpError(1.0);
+	  filterWorked = genericTask.filterZmpError();
 
 	  if (filterWorked) {
 	    isSolved = genericTask.solve();
@@ -1281,7 +1281,7 @@ namespace hpp
 	      convertGikRobotMotionToKineoPath(&motion,newPath);
 	    }
 
-	  genericTask.filterZmpError(1.0);
+	  genericTask.filterZmpError();
 
 	}
       else
