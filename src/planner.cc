@@ -197,7 +197,7 @@ namespace hpp
 		     double& waistZ, vector3d& ZLocalAxis)
     {
       std::string property,value;
-      property="ComputeZMP"; value="true";
+      property="ComputeZMP"; value="false";
       humanoidRobot->setProperty ( property,value );
       property="TimeStep"; value="0.005";
       humanoidRobot->setProperty ( property,value );
@@ -205,13 +205,13 @@ namespace hpp
       value="true";humanoidRobot->setProperty ( property,value );
       property="ComputeBackwardDynamics"; value="false";
       humanoidRobot->setProperty ( property,value );
-      property="ComputeMomentum"; value="true";
+      property="ComputeMomentum"; value="false";
       humanoidRobot->setProperty ( property,value );
-      property="ComputeAcceleration"; value="true";
+      property="ComputeAcceleration"; value="false";
       humanoidRobot->setProperty ( property,value );
-      property="ComputeVelocity"; value="true";
+      property="ComputeVelocity"; value="false";
       humanoidRobot->setProperty ( property,value );
-      property="ComputeSkewCom"; value="true";
+      property="ComputeSkewCom"; value="false";
       humanoidRobot->setProperty ( property,value );
       property="ComputeCoM"; value="true";
       humanoidRobot->setProperty ( property,value );
@@ -404,6 +404,25 @@ namespace hpp
     CkwsPathShPtr
     Planner::findDynamicPath( CkwsPathConstShPtr i_path)
     {
+      std::string property,value;
+      property="ComputeZMP"; value="true";
+      humanoidRobot_->setProperty ( property,value );
+      property="TimeStep"; value="0.005";
+      humanoidRobot_->setProperty ( property,value );
+      property="ComputeAccelerationCoM";
+      value="true";humanoidRobot_->setProperty ( property,value );
+      property="ComputeBackwardDynamics"; value="true";
+      humanoidRobot_->setProperty ( property,value );
+      property="ComputeMomentum"; value="true";
+      humanoidRobot_->setProperty ( property,value );
+      property="ComputeAcceleration"; value="true";
+      humanoidRobot_->setProperty ( property,value );
+      property="ComputeVelocity"; value="true";
+      humanoidRobot_->setProperty ( property,value );
+      property="ComputeSkewCom"; value="true";
+      humanoidRobot_->setProperty ( property,value );
+      property="ComputeCoM"; value="true";
+      humanoidRobot_->setProperty ( property,value );
 
       CkwsPathShPtr resultPath = CkwsPath::create(humanoidRobot_);
       CkwsPathConstShPtr pathToAnimate = i_path;
