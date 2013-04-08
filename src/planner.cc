@@ -755,7 +755,7 @@ namespace hpp
       vectorN wbMaskVector = gikStandingRobot_->maskFactory()->wholeBodyMask();
 
       ChppGikConfigMotionConstraint cfgConstraint(humanoidRobot_,startTime,time,i_path,paramOfTime,ubMaskVector);
-      ChppGikPrioritizedMotion cfgElement(&(*humanoidRobot_),4,&cfgConstraint,0.2);
+      ChppGikPrioritizedMotion cfgElement(&(*humanoidRobot_),4,&cfgConstraint,1e-6);
       cfgElement.workingJoints(ubMaskVector);
       genericTask.addElement( &cfgElement );
 
@@ -1202,7 +1202,7 @@ namespace hpp
 
       ChppGikConfigMotionConstraint cfgConstraint
 	(humanoidRobot_,startTime,time,i_path,paramOfTime,ubMaskVector);
-      ChppGikPrioritizedMotion cfgElement(&(*humanoidRobot_),4,&cfgConstraint,0.2);
+      ChppGikPrioritizedMotion cfgElement(&(*humanoidRobot_),4,&cfgConstraint,1e-6);
       cfgElement.workingJoints(ubMaskVector);
       genericTask.addElement( &cfgElement );
 
