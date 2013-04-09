@@ -86,7 +86,8 @@ namespace hpp
     Planner::size_type Planner::robotId=0;
 
     Planner::Planner(double samplingPeriod )
-      :humanoidRobot_(),
+      :hpp::constrained::Planner(),
+       humanoidRobot_(),
        gikStandingRobot_(NULL),
        samplingPeriod_(samplingPeriod),
        wholeBodyConstraint_(),
@@ -191,10 +192,10 @@ namespace hpp
     //    optimizations.
     // - get robot local z axis.
 
-    static CkwsConfigShPtr
-    initializeRobot (hpp::model::HumanoidRobotShPtr humanoidRobot,
-		     ChppGikStandingRobot*& gikStandingRobot,
-		     double& waistZ, vector3d& ZLocalAxis)
+    CkwsConfigShPtr
+    Planner::initializeRobot (hpp::model::HumanoidRobotShPtr humanoidRobot,
+			      ChppGikStandingRobot*& gikStandingRobot,
+			      double& waistZ, vector3d& ZLocalAxis)
     {
       std::string property,value;
       property="ComputeZMP"; value="false";

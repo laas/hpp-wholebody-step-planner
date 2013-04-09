@@ -139,6 +139,11 @@ namespace hpp
 
     protected:
 
+      CkwsConfigShPtr
+      initializeRobot (hpp::model::HumanoidRobotShPtr humanoidRobot,
+		       ChppGikStandingRobot*& gikStandingRobot,
+		       double& waistZ, vector3d& ZLocalAxis);
+
       ChppGikFootprint * findNextFootPrint(CkwsPathConstShPtr i_path,
 					   double & param,
 					   const ChppGikFootprint * currentFootPrint,
