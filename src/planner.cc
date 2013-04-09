@@ -709,6 +709,8 @@ namespace hpp
       /* Creating generic task */
       ChppGikGenericTask genericTask( gikStandingRobot_ , samplingPeriod );
 
+      genericTask.bringBackZMP(false,0,0);
+
       /* Iterating over footsteps */
       bool isRightFoot = true;
       double lastParam = 0.;
