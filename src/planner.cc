@@ -282,6 +282,7 @@ namespace hpp
       wholeBodyConstraint_ =
 	hpp::constrained::KwsConstraint::create("Whole-Body Constraint",
 						extendor);
+      humanoidRobot_->userConstraints()->add(wholeBodyConstraint_);
 
       // Create roadmap builder
       CkwsRoadmapShPtr roadmap = CkwsRoadmap::create(humanoidRobot_);
