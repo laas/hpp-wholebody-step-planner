@@ -1362,8 +1362,6 @@ namespace hpp
 
     ktStatus Planner::solve()
     {
-
-      humanoidRobot_->userConstraints()->add(wholeBodyConstraint_);
       ktStatus res =  solveOneProblem (robotId);
       //humanoidRobot_->userConstraints()->remove(wholeBodyConstraint_);
 
