@@ -116,7 +116,7 @@ namespace hpp
        zmpMeasuredFile_
        (debug::getFilename ("trajectory.zmpmeas", "hpp-wholebody-step-planner").c_str ()),
        rpyFile_
-       (debug::getFilename ("trajectory.rpy", "hpp-wholebody-step-planner").c_str ())
+       (debug::getFilename ("trajectory.hip", "hpp-wholebody-step-planner").c_str ())
     {
       hppDout (info, "ParamPrecision: " <<  paramPrecision_);
     }
