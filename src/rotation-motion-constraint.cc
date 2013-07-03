@@ -36,7 +36,7 @@ namespace hpp
     (const hpp::model::HumanoidRobotShPtr humanoidRobot,
      const double startTime,
      const double endTime,
-     const CkwsPathShPtr inPath,
+     const CkwsPathConstShPtr inPath,
      const std::map<double,double> & paramOfTime,
      hpp::model::JointShPtr constrainedJoint):
       rotationConstraint_(NULL),
