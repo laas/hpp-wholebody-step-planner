@@ -21,6 +21,7 @@ SET(SOURCES
   config-shooter-reaching.cc
   position-motion-constraint.cc
   rotation-motion-constraint.cc
+  plane-motion-constraint.cc
   path-optimizer.cc
   shooter-humanoid.cc
   roboptim/path-optimizer.hh
