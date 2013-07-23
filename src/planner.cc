@@ -1,5 +1,5 @@
-// Copyright (C) 2011,2012 CNRS-LAAS
-// Author: Sebastien Dalibard.
+// Copyright (C) 2011,2012, 2013 CNRS-LAAS
+// Author: Sebastien Dalibard, Antonio El Khoury
 //
 // This file is part of the hpp-wholebody-step-planner.
 //
