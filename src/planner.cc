@@ -575,6 +575,10 @@ namespace hpp
       if(!supportPol)
 	{
 	  hppDout (error, "No support Polygon found.");
+	  hppDout (error, "Right ankle transformation"
+		   << humanoidRobot_->rightAnkle ()->currentTransformation ());
+	  hppDout (error, "Left ankle transformation"
+		   << humanoidRobot_->leftAnkle ()->currentTransformation ());
 	  return KD_ERROR;
 	}
 
