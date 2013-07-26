@@ -540,6 +540,10 @@ namespace hpp
       if (wholeAnimatedPath) hppProblem(robotId)->addPath ( wholeAnimatedPath) ;
 
 
+      writePathToFile (robotId,
+		       hppProblem (robotId)->getNbPaths ()-1,
+		       "path-sol-stepping",
+		       debug::getFilename ("path-sol-stepping.kxml", "hpp-wholebody-step-planner").c_str ());
 
       return resultPath;
     }
