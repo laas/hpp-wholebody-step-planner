@@ -694,26 +694,6 @@ namespace hpp
 					1e-6);
       cfgElement->workingJoints (ubMaskVector);
       genericTask.addElement (cfgElement);
-
-      double configTaskDuration = 3;
-      CkwsConfigShPtr endCfg = i_path->configAtEnd();
-      std::vector<double> kineoTargetCfg;
-      endCfg->getDofValues(kineoTargetCfg);
-      MAL_VECTOR_DIM(jrlTargetCfg, double, humanoidRobot_->numberDof());
-      humanoidRobot_->kwsToJrlDynamicsDofValues (kineoTargetCfg, jrlTargetCfg);
-      ChppGikConfigurationConstraint* configTask
-	= new ChppGikConfigurationConstraint(*(gikStandingRobot_->robot()),
-					     jrlTargetCfg,
-					     ubMaskVector);
-      ChppGikInterpolatedElement* interpolatedCfgElement
-	= new ChppGikInterpolatedElement (gikStandingRobot_->robot(),
-					  configTask,
-					  5,
-					  time,
-					  configTaskDuration,
-					  samplingPeriod);
-
-      genericTask.addElement (interpolatedCfgElement);
     }
 
     CkwsPathShPtr
