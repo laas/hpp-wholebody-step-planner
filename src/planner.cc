@@ -1209,9 +1209,9 @@ namespace hpp
       std::map<double,double> paramOfTime;
       paramOfTime[0.] = 0.;
       double startTime = 0.;
-      //double time = 1.6;
+      double time = 1.6;
       //double time = 3.2;
-      double time = 4.8;
+      //double time = 4.8;
       paramOfTime[time] = 0.;
 
       /* Footstep parameters */
@@ -1276,46 +1276,12 @@ namespace hpp
       //solving the task
       bool isSolved = genericTask.solve();
 
-
       if (isSolved)
 	{
 	  ChppRobotMotion  motion =   genericTask.solutionMotion();
-	  if (!motion.empty())
-	    {
-	      // currentGikMotion_ = new ChppRobotMotion (motion);
-	      // validGikMotion_.push_back (currentGikMotion_);
-	      // if (writeSeqplayFiles() != KD_OK) {
-	      // 	std::cerr << "ERROR in writing seqplay files." << std::endl;
-	      // }
-	      // convertGikRobotMotionToKineoPath(&motion,newPath);
-	    }
 
+	  // Apply ZMP filtering stage
 	  bool filterWorked = genericTask.filterZmpError();
-
-	  if (filterWorked) {
-	    isSolved = genericTask.solve();
-
-	    if (!isSolved) {
-	      std::cerr << "ERROR: AnimateWholePath - Second pass zmp filtering failed."
-	  		<< std::endl;
-	      newPath.reset();
-	      return newPath;
-	    }
-	  }
-
-	  motion =   genericTask.solutionMotion();
-	  if (!motion.empty())
-	    {
-	      // currentGikMotion_ = new ChppRobotMotion (motion);
-	      // validGikMotion_.push_back (currentGikMotion_);
-	      // if (writeSeqplayFiles() != KD_OK) {
-	      // 	std::cerr << "ERROR in writing seqplay files." << std::endl;
-	      // }
-	      // convertGikRobotMotionToKineoPath(&motion,newPath);
-	    }
-
-	  filterWorked = false;
-	  filterWorked = genericTask.filterZmpError();
 
 	  if (filterWorked) {
 	    isSolved = genericTask.solve();
@@ -1334,13 +1300,10 @@ namespace hpp
 	      currentGikMotion_ = new ChppRobotMotion (motion);
 	      validGikMotion_.push_back (currentGikMotion_);
 	      if (writeSeqplayFiles() != KD_OK) {
-		hppDout (error, "when writing seqplay files.");
+	      	std::cerr << "ERROR in writing seqplay files." << std::endl;
 	      }
 	      convertGikRobotMotionToKineoPath(&motion,newPath);
 	    }
-
-	  genericTask.filterZmpError();
-
 	}
       else
 	{
