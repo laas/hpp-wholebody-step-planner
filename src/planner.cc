@@ -995,26 +995,37 @@ namespace hpp
       if (outOpenHrpDofVector.size () != inKwsDofVector.size ())
 	return KD_ERROR;
 
-      for (unsigned int i = 0; i < 29; i++)
+      // FF
+      for (unsigned int i = 0; i < 6; i++)
 	outOpenHrpDofVector[i] = inKwsDofVector[i];
 
-      // Switch vector index for left arm and right hand joints.
-      outOpenHrpDofVector[29] = inKwsDofVector[34];
-      outOpenHrpDofVector[30] = inKwsDofVector[35];
-      outOpenHrpDofVector[31] = inKwsDofVector[36];
-      outOpenHrpDofVector[32] = inKwsDofVector[37];
-      outOpenHrpDofVector[33] = inKwsDofVector[38];
-      outOpenHrpDofVector[34] = inKwsDofVector[39];
-      outOpenHrpDofVector[35] = inKwsDofVector[40];
+      // RLEG
+      for (unsigned int i = 0; i < 6; ++i)
+	outOpenHrpDofVector[i + 6] = inKwsDofVector[i + 40];
 
-      outOpenHrpDofVector[36] = inKwsDofVector[29];
-      outOpenHrpDofVector[37] = inKwsDofVector[30];
-      outOpenHrpDofVector[38] = inKwsDofVector[31];
-      outOpenHrpDofVector[39] = inKwsDofVector[32];
-      outOpenHrpDofVector[40] = inKwsDofVector[33];
+      // LLEG
+      for (unsigned int i = 0; i < 6; ++i)
+	outOpenHrpDofVector[i + 12] = inKwsDofVector[i + 34];
 
-      for (unsigned int i = 41 ; i < 46; i++)
-	outOpenHrpDofVector[i] = inKwsDofVector[i];
+      // CHEST + HEAD
+      for (unsigned int i = 0; i < 4; ++i)
+	outOpenHrpDofVector[i + 18] = inKwsDofVector[i + 6];
+
+      // RARM
+      for (unsigned int i = 0; i < 7; ++i)
+	outOpenHrpDofVector[i + 22] = inKwsDofVector[i + 22];
+
+      // LARM
+      for (unsigned int i = 0; i < 7; ++i)
+	outOpenHrpDofVector[i + 29] = inKwsDofVector[i + 10];
+
+      // RHAND
+      for (unsigned int i = 0; i < 5; ++i)
+	outOpenHrpDofVector[i + 36] = inKwsDofVector[i + 29];
+
+      // LHAND
+      for (unsigned int i = 0; i < 5; ++i)
+	outOpenHrpDofVector[i + 41] = inKwsDofVector[i + 17];
 
       return KD_OK;
     }
