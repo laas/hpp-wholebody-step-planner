@@ -39,6 +39,7 @@ class ChppGikPlaneConstraint;
 class ChppGikParallelConstraint;
 class ChppRobotMotion;
 class ChppGikPositionConstraint;
+class ChppGikGenericTask;
 
 namespace hpp
 {
@@ -165,7 +166,14 @@ namespace hpp
 				const ChppGikFootprint * ft2,
 				bool isRightFoot);
 
-
+      /// \brief Add whole-body constraints to generic task.
+      void
+      addWholeBodyConstraints (const double& startTime,
+			       const double& time,
+			       const double& samplingPeriod,
+			       const CkwsPathConstShPtr& i_path,
+			       const std::map<double,double>& paramOfTime,
+			       ChppGikGenericTask& genericTask);
 
     private:
 

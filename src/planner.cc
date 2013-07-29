@@ -630,6 +630,84 @@ namespace hpp
       footPrintOfParam.clear();
     }
 
+    void
+    Planner::addWholeBodyConstraints (const double& startTime,
+				      const double& time,
+				      const double& samplingPeriod,
+				      const CkwsPathConstShPtr& i_path,
+				      const std::map<double,double>& paramOfTime,
+				      ChppGikGenericTask& genericTask)
+    {
+      //Constraint on the waist height
+      ChppGikPlaneMotionConstraint* heightConstraint
+	= new ChppGikPlaneMotionConstraint (humanoidRobot_,
+					    startTime,
+					    time,
+					    i_path,
+					    paramOfTime,
+					    humanoidRobot_->hppWaist ());
+      ChppGikPrioritizedMotion* heightElem
+	= new ChppGikPrioritizedMotion (gikStandingRobot_->robot (),
+					2,
+					heightConstraint,
+					1e-6);
+      genericTask.addElement (heightElem);
+
+      vectorN ubMaskVector = gikStandingRobot_->maskFactory()->upperBodyMask();
+      vectorN wbMaskVector = gikStandingRobot_->maskFactory()->wholeBodyMask();
+
+      ChppGikRotationMotionConstraint* waistConstraint
+	= new ChppGikRotationMotionConstraint (humanoidRobot_,
+					       startTime,
+					       time,
+					       i_path,
+					       paramOfTime,
+					       humanoidRobot_->hppWaist ());
+      ChppGikPrioritizedMotion* verticalElem
+	= new ChppGikPrioritizedMotion (gikStandingRobot_->robot (),
+					3,
+					waistConstraint,
+					1e-6);
+      genericTask.addElement (verticalElem);
+
+      for(unsigned int i =0;i<6;i++)
+	ubMaskVector[i] = 0;
+
+      //Config Constraint
+      ChppGikConfigMotionConstraint* cfgConstraint
+	= new ChppGikConfigMotionConstraint (humanoidRobot_,
+					     startTime,time,
+					     i_path,paramOfTime,
+					     ubMaskVector);
+      ChppGikPrioritizedMotion* cfgElement
+	= new ChppGikPrioritizedMotion (&(*humanoidRobot_),
+					4,
+					cfgConstraint,
+					1e-6);
+      cfgElement->workingJoints (ubMaskVector);
+      genericTask.addElement (cfgElement);
+
+      double configTaskDuration = 3;
+      CkwsConfigShPtr endCfg = i_path->configAtEnd();
+      std::vector<double> kineoTargetCfg;
+      endCfg->getDofValues(kineoTargetCfg);
+      MAL_VECTOR_DIM(jrlTargetCfg, double, humanoidRobot_->numberDof());
+      humanoidRobot_->kwsToJrlDynamicsDofValues (kineoTargetCfg, jrlTargetCfg);
+      ChppGikConfigurationConstraint* configTask
+	= new ChppGikConfigurationConstraint(*(gikStandingRobot_->robot()),
+					     jrlTargetCfg,
+					     ubMaskVector);
+      ChppGikInterpolatedElement* interpolatedCfgElement
+	= new ChppGikInterpolatedElement (gikStandingRobot_->robot(),
+					  configTask,
+					  5,
+					  time,
+					  configTaskDuration,
+					  samplingPeriod);
+
+      genericTask.addElement (interpolatedCfgElement);
+    }
+
     CkwsPathShPtr
     Planner::animatePath (CkwsPathConstShPtr i_path ,
 			  footprintOfParam_t & i_footPrintOfParam )
@@ -762,70 +840,9 @@ namespace hpp
 
       paramOfTime[time] = i_path->length();
 
-      //Constraint on the waist height
-      ChppGikPlaneMotionConstraint heightConstraint (humanoidRobot_,
-						     startTime,
-						     time,
-						     i_path,
-						     paramOfTime,
-						     humanoidRobot_->hppWaist ());
-      ChppGikPrioritizedMotion heightElem (gikStandingRobot_->robot (),
-					   2,
-					   &heightConstraint,
-					   1e-6);
-      genericTask.addElement( &heightElem );
-
-      vectorN ubMaskVector = gikStandingRobot_->maskFactory()->upperBodyMask();
-      vectorN wbMaskVector = gikStandingRobot_->maskFactory()->wholeBodyMask();
-
-      //Constraint on the waist orientation
-      // ChppGikInterpolatedElement verticalElem ( gikStandingRobot_->robot(),
-      // 						waistParallelConstraint_,
-      // 						3,
-      // 						startTime,
-      // 						time,
-      // 						samplingPeriod);
-      // genericTask.addElement( &verticalElem );
-
-      ChppGikRotationMotionConstraint waistConstraint (humanoidRobot_,
-						       startTime,
-						       time,
-						       i_path,
-						       paramOfTime,
-						       humanoidRobot_->hppWaist ());
-      ChppGikPrioritizedMotion verticalElem (gikStandingRobot_->robot (),
-					     3,
-					     &waistConstraint,
-					     1e-6);
-      genericTask.addElement( &verticalElem );
-
-      for(unsigned int i =0;i<6;i++){
-	ubMaskVector[i] = 0;
-	wbMaskVector[i] = 0;
-      }
-
-      //Config Constraint
-      ChppGikConfigMotionConstraint cfgConstraint(humanoidRobot_,startTime,time,i_path,paramOfTime,ubMaskVector);
-      ChppGikPrioritizedMotion cfgElement(&(*humanoidRobot_),4,&cfgConstraint,1e-6);
-      cfgElement.workingJoints(ubMaskVector);
-      genericTask.addElement( &cfgElement );
-
-      double configTaskDuration = 3;
-      CkwsConfigShPtr endCfg = i_path->configAtEnd();
-      std::vector<double> kineoTargetCfg;
-      endCfg->getDofValues(kineoTargetCfg);
-      MAL_VECTOR_DIM(jrlTargetCfg, double, humanoidRobot_->numberDof());
-      humanoidRobot_->kwsToJrlDynamicsDofValues(kineoTargetCfg,jrlTargetCfg);
-      ChppGikConfigurationConstraint configTask(*(gikStandingRobot_->robot()), jrlTargetCfg, ubMaskVector);
-      ChppGikInterpolatedElement interpolatedCfgElement(gikStandingRobot_->robot(),
-      							&configTask,
-      							5,
-      							time,
-      							configTaskDuration,
-      							samplingPeriod);
-
-      genericTask.addElement( &interpolatedCfgElement );
-
+      // Add whole-body constraints to generic task.
+      addWholeBodyConstraints (startTime, time, samplingPeriod,
+			       i_path, paramOfTime, genericTask);
 
       hppDout (info, "Solving the task");
 
@@ -1242,75 +1259,11 @@ namespace hpp
       paramOfTime[time] = i_path->length();
       paramOfTime_ = paramOfTime;
 
-      //Constraint on the waist height
-      ChppGikPlaneMotionConstraint heightConstraint (humanoidRobot_,
-						     startTime,
-						     time,
-						     i_path,
-						     paramOfTime,
-						     humanoidRobot_->hppWaist ());
-      ChppGikPrioritizedMotion heightElem (gikStandingRobot_->robot (),
-					   2,
-					   &heightConstraint,
-					   1e-6);
-      genericTask.addElement( &heightElem );
-
-      //Constraint on the waist orientation
-      ChppGikInterpolatedElement verticalElem ( gikStandingRobot_->robot(),
-						waistParallelConstraint_,
-						3,
-						startTime,
-						time,
-						samplingPeriod);
-      genericTask.addElement( &verticalElem );
-
-      vectorN ubMaskVector = gikStandingRobot_->maskFactory()->upperBodyMask();
-      vectorN wbMaskVector = gikStandingRobot_->maskFactory()->wholeBodyMask();  
-
-      ChppGikRotationMotionConstraint waistConstraint (humanoidRobot_,
-						       startTime,
-						       time,
-						       i_path,
-						       paramOfTime,
-						       humanoidRobot_->hppWaist ());
-      ChppGikPrioritizedMotion verticalElem (gikStandingRobot_->robot (),
-					     3,
-					     &waistConstraint,
-					     1e-6);
-      genericTask.addElement( &verticalElem );
-
-      //Removing ff dofs from upper body mask vector
-      for(unsigned int i = 0;i<6;i++)
-	ubMaskVector[i] = 0;
-
-
-      //Config Constraint
-      ChppGikConfigMotionConstraint cfgConstraint
-	(humanoidRobot_,startTime,time,i_path,paramOfTime,ubMaskVector);
-      ChppGikPrioritizedMotion cfgElement(&(*humanoidRobot_),4,&cfgConstraint,1e-6);
-      cfgElement.workingJoints(ubMaskVector);
-      genericTask.addElement( &cfgElement );
+      // Add whole-body constraints to generic task.
+      addWholeBodyConstraints (startTime, time, samplingPeriod,
+			       i_path, paramOfTime, genericTask);
 
       hppDout (info, "Solving the task");
-
-      // Interpolated config task
-      double configTaskDuration = 3;
-      CkwsConfigShPtr endCfg = i_path->configAtEnd();
-      std::vector<double> kineoTargetCfg;
-      endCfg->getDofValues(kineoTargetCfg);
-      MAL_VECTOR_DIM(jrlTargetCfg, double, humanoidRobot_->numberDof());
-      humanoidRobot_->kwsToJrlDynamicsDofValues(kineoTargetCfg,jrlTargetCfg);
-      ChppGikConfigurationConstraint configTask(*(gikStandingRobot_->robot()), jrlTargetCfg, ubMaskVector);
-      ChppGikInterpolatedElement interpolatedCfgElement(gikStandingRobot_->robot(),
-							&configTask,
-							5,
-							time,
-							configTaskDuration,
-							samplingPeriod);
-
-      genericTask.addElement( &interpolatedCfgElement );
-
-
 
       //solving the task
       bool isSolved = genericTask.solve();
