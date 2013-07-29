@@ -101,6 +101,9 @@ namespace hpp
        stepHeight_(STEP_HEIGHT),
        waistPlaneConstraint_(NULL),
        waistParallelConstraint_(NULL),
+       rightHandConstraint_(NULL),
+       slidingStabilityConstraints_(),
+       goalConstraints_(),
        relativeRightFootTransformation_(),
        relativeLeftFootTransformation_(),
        waistZ_(1.0),
@@ -128,11 +131,16 @@ namespace hpp
     {
       if (waistPlaneConstraint_) delete waistPlaneConstraint_ ;
       if (waistParallelConstraint_) delete waistParallelConstraint_ ;
+      if (rightHandConstraint_) delete rightHandConstraint_;
       if (gikStandingRobot_) delete gikStandingRobot_;
       if (currentGikMotion_) delete currentGikMotion_;
       if (validGikMotion_.size () > 0)
 	for (unsigned int i = 0; i < validGikMotion_.size (); ++i)
 	  delete validGikMotion_[i];
+      for (unsigned int i = 0; i < slidingStabilityConstraints_.size (); ++i)
+	delete slidingStabilityConstraints_[i];
+      for (unsigned int i = 0; i < goalConstraints_.size (); ++i)
+	delete goalConstraints_[i];
     }
 
     hpp::model::HumanoidRobotShPtr Planner::humanoidRobot ()
