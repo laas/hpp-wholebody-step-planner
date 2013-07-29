@@ -113,7 +113,6 @@ namespace hpp
 
       virtual ktStatus solve();
 
-
       ktStatus computeFootPrints( CkwsPathConstShPtr i_path,
 				  footprintOfParam_t & o_footPrintOfParam);
 
