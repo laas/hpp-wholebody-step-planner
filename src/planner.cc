@@ -781,9 +781,7 @@ namespace hpp
 
       if ( footFlightTime < 1 )   samplingPeriod = 0.02;
       if ( footFlightTime < 0.4 ) samplingPeriod = 0.01;
-      if ( footFlightTime < 0.2 ) samplingPeriod = 0.05;
-
-      samplingPeriod = 0.005;
+      if ( footFlightTime < 0.2 ) samplingPeriod = 0.005;
 
       footFlightTime = ((int) (footFlightTime / samplingPeriod) +1) * samplingPeriod ;
       zmpStartShiftTime =  ((int) (zmpStartShiftTime /  samplingPeriod) +1) * samplingPeriod ;
