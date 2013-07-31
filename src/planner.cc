@@ -61,6 +61,7 @@
 #include "hpp/wholebody-step-planner/config-motion-constraint.hh"
 #include "hpp/wholebody-step-planner/position-motion-constraint.hh"
 #include "hpp/wholebody-step-planner/plane-motion-constraint.hh"
+#include "hpp/wholebody-step-planner/parallel-motion-constraint.hh"
 #include "hpp/wholebody-step-planner/rotation-motion-constraint.hh"
 #include "hpp/wholebody-step-planner/path-optimizer.hh"
 #include "hpp/wholebody-step-planner/shooter-humanoid.hh"
@@ -646,53 +647,38 @@ namespace hpp
 				      const std::map<double,double>& paramOfTime,
 				      ChppGikGenericTask& genericTask)
     {
-      //Constraint on the waist height
-      ChppGikPlaneMotionConstraint* heightConstraint
-	= new ChppGikPlaneMotionConstraint (humanoidRobot_,
-					    startTime,
-					    time,
-					    i_path,
-					    paramOfTime,
-					    humanoidRobot_->hppWaist ());
-      ChppGikPrioritizedMotion* heightElem
-	= new ChppGikPrioritizedMotion (gikStandingRobot_->robot (),
-					2,
-					heightConstraint,
-					1e-6);
-      genericTask.addElement (heightElem);
-
-      vectorN ubMaskVector = gikStandingRobot_->maskFactory()->upperBodyMask();
-      vectorN wbMaskVector = gikStandingRobot_->maskFactory()->wholeBodyMask();
-
-      ChppGikRotationMotionConstraint* waistConstraint
-	= new ChppGikRotationMotionConstraint (humanoidRobot_,
+      // Constrain waist local vertical axis to remain parallel to
+      // world vertical axis. For a still unknown reason, the HRP-2
+      // stabilizer does not behave correctly otherwise, and the robot
+      // might fall.
+      ChppGikParallelMotionConstraint* waistParallelConstraint
+	= new ChppGikParallelMotionConstraint (humanoidRobot_,
 					       startTime,
 					       time,
 					       i_path,
 					       paramOfTime,
 					       humanoidRobot_->hppWaist ());
-      ChppGikPrioritizedMotion* verticalElem
+      ChppGikPrioritizedMotion* waistElem
 	= new ChppGikPrioritizedMotion (gikStandingRobot_->robot (),
-					3,
-					waistConstraint,
+					2,
+					waistParallelConstraint,
 					1e-6);
-      genericTask.addElement (verticalElem);
+      genericTask.addElement (waistElem);
 
-      for(unsigned int i =0;i<6;i++)
-	ubMaskVector[i] = 0;
+      vectorN wbMaskVector = gikStandingRobot_->maskFactory()->wholeBodyMask();
 
       //Config Constraint
       ChppGikConfigMotionConstraint* cfgConstraint
 	= new ChppGikConfigMotionConstraint (humanoidRobot_,
 					     startTime,time,
 					     i_path,paramOfTime,
-					     ubMaskVector);
+					     wbMaskVector);
       ChppGikPrioritizedMotion* cfgElement
 	= new ChppGikPrioritizedMotion (&(*humanoidRobot_),
-					4,
+					3,
 					cfgConstraint,
 					1e-6);
-      cfgElement->workingJoints (ubMaskVector);
+      cfgElement->workingJoints (wbMaskVector);
       genericTask.addElement (cfgElement);
     }
 
