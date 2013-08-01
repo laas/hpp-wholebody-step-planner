@@ -1174,8 +1174,6 @@ namespace hpp
       paramOfTime[0.] = 0.;
       double startTime = 0.;
       double time = 1.6;
-      //double time = 3.2;
-      //double time = 4.8;
       paramOfTime[time] = 0.;
 
       /* Footstep parameters */
