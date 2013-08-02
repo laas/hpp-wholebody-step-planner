@@ -76,7 +76,7 @@
 #define END_COEFF 0.5
 #define START_SHIFT_TIME 0.1
 #define END_SHIFT_TIME 0.1
-#define FOOT_FILGHT_TIME 0.8
+#define FOOT_FLIGHT_TIME 0.8
 #define STEP_HEIGHT 0.05
 
 namespace hpp
@@ -98,7 +98,7 @@ namespace hpp
        zmpEndCoeff_(END_COEFF),
        zmpStartShiftTime_(START_SHIFT_TIME),
        zmpEndShiftTime_(END_SHIFT_TIME),
-       footFlightTime_(FOOT_FILGHT_TIME),
+       footFlightTime_(FOOT_FLIGHT_TIME),
        stepHeight_(STEP_HEIGHT),
        waistPlaneConstraint_(NULL),
        waistParallelConstraint_(NULL),
