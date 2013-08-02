@@ -641,7 +641,7 @@ namespace hpp
 
     void
     Planner::addWholeBodyConstraints (const double& startTime,
-				      const double& time,
+				      const double& endTime,
 				      const double& samplingPeriod,
 				      const CkwsPathConstShPtr& i_path,
 				      const std::map<double,double>& paramOfTime,
@@ -654,7 +654,7 @@ namespace hpp
       ChppGikParallelMotionConstraint* waistParallelConstraint
 	= new ChppGikParallelMotionConstraint (humanoidRobot_,
 					       startTime,
-					       time,
+					       endTime,
 					       i_path,
 					       paramOfTime,
 					       humanoidRobot_->hppWaist ());
@@ -670,8 +670,10 @@ namespace hpp
       //Config Constraint
       ChppGikConfigMotionConstraint* cfgConstraint
 	= new ChppGikConfigMotionConstraint (humanoidRobot_,
-					     startTime,time,
-					     i_path,paramOfTime,
+					     startTime,
+					     endTime,
+					     i_path,
+					     paramOfTime,
 					     wbMaskVector);
       ChppGikPrioritizedMotion* cfgElement
 	= new ChppGikPrioritizedMotion (&(*humanoidRobot_),
