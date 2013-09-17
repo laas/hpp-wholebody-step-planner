@@ -49,6 +49,24 @@ namespace hpp
       KIT_PREDEF_CLASS (PathOptimizer)
     } // namespace roboptim
 
+    /// This class implements an algorithm to plan walking and
+    /// whole-body motions satisfying a goal task for a humanoid
+    /// robot.  The algorithm described in <a
+    /// href="http://hal.archives-ouvertes.fr/hal-00654175/PDF/paper.pdf">this
+    /// paper</a> proceeds in two steps:
+    /// \li first a sliding motion is computed for the humanoid
+    /// robot. Along this motion, the feet are constrained to remain
+    /// on the ground with a constant relative position and the center
+    /// of mass is constrained to project vertically at a point
+    /// rigidly fixed to the feet.
+    ///\li in a second step, the motion is approximated by dynamic
+    /// walking motions.  While a part of dynamic walking motion is in
+    /// collision, the length and the duration of the steps are
+    /// shorten.
+    ///
+    /// A helper method \link generateGoalConfig \endlink produces
+    /// goal configurations for a right hand reaching task
+
     class Planner : public hpp::constrained::Planner
     {
     public:

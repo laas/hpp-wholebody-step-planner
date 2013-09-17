@@ -15,23 +15,17 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with hpp-wholebody-step-planner.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * \brief Main documentation header.
- */
+/// \mainpage
+///
+/// This package implements algorithms to plan walking and whole-body motions
+/// satisfying a goal task for a humanoid robot.
+/// The main algorithm implemented by hpp::wholeBodyStepPlanner::Planner and
+/// described in <a href="http://hal.archives-ouvertes.fr/hal-00654175/PDF/paper.pdf">this paper</a> proceeds in two steps:
+/// \li first a sliding motion is computed for the humanoid robot. Along this
+/// motion, the feet are constrained to remain on the ground with a constant
+/// relative position and the center of mass is constrained to project
+/// vertically at a point rigidly fixed to the feet.
+/// \li in a second step, the motion is approximated by dynamic walking motions.
+/// While a part of dynamic walking motion is in collision, the length and the
+/// duration of the steps are shorten.
 
-/**
-
-   \mainpage
-
-   \section intro Introduction
-
-   FIXME: Document here.
-*/
-
-/*!
-  \namespace Hpp-wholebody-step-planner
-
-  \brief Main namespace
-
-  The namespace gathers all the classes of this library.
-*/
