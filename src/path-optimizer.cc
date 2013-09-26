@@ -24,7 +24,7 @@
 # include <KineoWorks2/kwsValidatorDPCollision.h>
 
 # include <hpp/util/debug.hh>
-# include <kwsIO/kwsioConfig.h>
+# include <hpp/kwsio/configuration.hh>
 
 # include <hpp/wholebody-step-planner/path-optimizer.hh>
 

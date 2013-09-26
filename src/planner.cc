@@ -36,7 +36,7 @@
 # include <KineoWorks2/kwsShooterRoadmapNodes.h>
 #endif
 #include <jrl/mal/matrixabstractlayer.hh>
-#include <kwsPlus/roadmap/kwsPlusLTRdmBuilder.h>
+#include <hpp/kwsplus/roadmap/lt-rdm-builder.hh>
 #include <hpp/gik/task/generic-task.hh>
 
 #include <hpp/util/debug.hh>
