@@ -1,5 +1,8 @@
                                                                 -*- outline -*-
 
+New in 0.2.1, 2013-09-26:
+* Fill README.md file.
+
 New in 0.2, 2013-09-26:
 * Use hpp-constrained and hpp-constrained-planner packages instead of tlc ones.
 * Define additionnal constraint classes.
