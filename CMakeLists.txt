@@ -51,11 +51,11 @@ SETUP_PROJECT()
 
 
 # Search for dependencies.
-ADD_REQUIRED_DEPENDENCY("hpp-roboptim >= 0.1")
-ADD_REQUIRED_DEPENDENCY("hpp-constrained >= 0.1")
-ADD_REQUIRED_DEPENDENCY("hpp-constrained-planner >= 0.1")
-ADD_REQUIRED_DEPENDENCY("kwsPlus >= 1.8")
-ADD_REQUIRED_DEPENDENCY("hpp-util >= 0.4")
+ADD_REQUIRED_DEPENDENCY("hpp-roboptim >= 1.0")
+ADD_REQUIRED_DEPENDENCY("hpp-constrained >= 1.0")
+ADD_REQUIRED_DEPENDENCY("hpp-constrained-planner >= 1.0")
+ADD_REQUIRED_DEPENDENCY("hpp-kwsplus >= 2.3")
+ADD_REQUIRED_DEPENDENCY("hpp-util >= 0.6")
 PKG_CONFIG_APPEND_LIBS(${PROJECT_NAME})
 
 ADD_SUBDIRECTORY(src)
