@@ -21,6 +21,7 @@
 #include <KineoUtility/kitPRNGGameRand.h>
 #include <hpp/util/debug.hh>
 #include <hpp/util/exception.hh>
+#include <hpp/util/assertion.hh>
 #include <hpp/model/device.hh>
 
 #include "hpp/wholebody-step-planner/shooter-humanoid.hh"
@@ -58,11 +59,11 @@ namespace hpp {
     ShooterHumanoid::shoot (const CkwsNodeShPtr& node,
 			    CkwsDiffusingRdmBuilder::EDiffusionNodeType,
 			    double standardDeviation,
-			    CkwsDiffusionShooter::TShootData& shootData,
-			    CkwsConfig& cfg)
+			    CkwsDiffusionShooter::TShootData&,
+			    CkwsConfig& hppDebugStatement (cfg))
     {
-      assert (cfg.device () == robot_);
-      assert (node->config ().device () == robot_);
+      HPP_ASSERT (cfg.device () == robot_);
+      HPP_ASSERT (node->config ().device () == robot_);
       const CkwsConfig& diffusionConfig (node->config ());
       CkwsDevice::TDofVector dofVector;
       robot_->kwsDevice ()->getDofVector (dofVector);
@@ -80,7 +81,7 @@ namespace hpp {
 	    randomGenerator_->generateNormal (standardDeviation);
 	}
       }
-      assert (cfg.setDofValues (dofValues) == KD_OK);
+      HPP_ASSERT (cfg.setDofValues (dofValues) == KD_OK);
       return KD_OK;
     }
   } // namespace wholeBodyStepPlanner

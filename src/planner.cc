@@ -642,7 +642,7 @@ namespace hpp
     void
     Planner::addWholeBodyConstraints (const double& startTime,
 				      const double& endTime,
-				      const double& samplingPeriod,
+				      const double&,
 				      const CkwsPathConstShPtr& i_path,
 				      const std::map<double,double>& paramOfTime,
 				      ChppGikGenericTask& genericTask)
