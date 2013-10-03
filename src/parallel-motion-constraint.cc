@@ -117,7 +117,6 @@ namespace hpp
 
       humanoidRobot_->setCurrentConfig(kineoCfg);
 
-      CkitMat4 jointT = joint_->kppJoint()->kwsJoint()->currentPosition();
       // FIXME local and target vectors set to the target z axis for now.
       vector3d localVector(0,0,1);
       vector3d targetVector(0,0,1);
