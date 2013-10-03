@@ -120,10 +120,10 @@ namespace hpp
        (debug::getFilename ("trajectory.pos", "hpp-wholebody-step-planner").c_str ()),
        zmpFile_
        (debug::getFilename ("trajectory.zmp", "hpp-wholebody-step-planner").c_str ()),
-       zmpMeasuredFile_
-       (debug::getFilename ("trajectory.zmpmeas", "hpp-wholebody-step-planner").c_str ()),
        rpyFile_
-       (debug::getFilename ("trajectory.hip", "hpp-wholebody-step-planner").c_str ())
+       (debug::getFilename ("trajectory.hip", "hpp-wholebody-step-planner").c_str ()),
+       zmpMeasuredFile_
+       (debug::getFilename ("trajectory.zmpmeas", "hpp-wholebody-step-planner").c_str ())
     {
       hppDout (info, "ParamPrecision: " <<  paramPrecision_);
     }
