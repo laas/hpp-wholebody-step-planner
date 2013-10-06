@@ -264,8 +264,9 @@ namespace hpp
 	      << paramPrecision_);
 
       assert (getNbHppProblems () >= 1);
-      assert (humanoidRobot_ = KIT_DYNAMIC_PTR_CAST
-	      (hpp::model::HumanoidRobot, robotIthProblem (0)));
+      humanoidRobot_ = KIT_DYNAMIC_PTR_CAST
+	(hpp::model::HumanoidRobot, robotIthProblem (0));
+      assert (humanoidRobot_);
 
       // Initialize dynamic part of robot and get half-sitting configuration.
       vector3d ZLocalAxis;
@@ -310,7 +311,8 @@ namespace hpp
 
       // Set steering method to linear
       steeringMethodIthProblem(0, CkppSMLinearComponent::create ());
-      assert (roadmapBuilderIthProblem (0, rdmBuilder, true) == KD_OK);
+      ktStatus result = roadmapBuilderIthProblem (0, rdmBuilder, true);
+      assert (result == KD_OK);
       hppDout (info, "Set roadmap builder.");
       CkwsLoopOptimizerShPtr randomOptimizer = CkwsRandomOptimizer::create();
       randomOptimizer->penetration (hppProblem (0)->penetration ());
