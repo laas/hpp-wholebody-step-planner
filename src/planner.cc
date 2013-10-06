@@ -917,7 +917,9 @@ namespace hpp
 	  hppDout (error, "Empty motion vector.");
 	  return KD_ERROR;
 	}
-      else hppDout (info, "validGikMotion_ size: " << validGikMotion_.size ());
+      else {
+	hppDout (info, "validGikMotion_ size: " << validGikMotion_.size ());
+      }
 
       std::vector<double> kineoCfg(humanoidRobot_->countDofs ());
       std::vector<double> openHrpCfg(humanoidRobot_->countDofs ());
