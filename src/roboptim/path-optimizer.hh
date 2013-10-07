@@ -25,7 +25,7 @@
 namespace hpp {
   namespace wholeBodyStepPlanner {
     namespace roboptim {
-      KIT_PREDEF_CLASS (PathOptimizer)
+      HPP_KIT_PREDEF_CLASS (PathOptimizer);
       /// Path optimizer based on numerical optimization of B-splines
       class PathOptimizer : public CkwsPathOptimizer
       {

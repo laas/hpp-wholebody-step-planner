@@ -86,7 +86,7 @@ namespace hpp
 #ifdef HPP_DEBUG
     static void logDiffusionShooter (CkwsDiffusionShooterShPtr shooter);
 #endif
-    KIT_PREDEF_CLASS (ConfigShooterReaching)
+    HPP_KIT_PREDEF_CLASS (ConfigShooterReaching);
     Planner::size_type Planner::robotId=0;
 
     Planner::Planner(double samplingPeriod )

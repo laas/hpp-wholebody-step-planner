@@ -26,7 +26,7 @@
 
 namespace hpp {
   namespace wholeBodyStepPlanner {
-    KIT_PREDEF_CLASS (ShooterHumanoid)
+    HPP_KIT_PREDEF_CLASS (ShooterHumanoid);
     /// Diffusion shooter taking into account bounds of degrees of freedom
 
     /// Derives from 

@@ -25,7 +25,7 @@
 
 namespace hpp {
   namespace wholeBodyStepPlanner {
-    KIT_PREDEF_CLASS (ConfigShooterReaching)
+    HPP_KIT_PREDEF_CLASS (ConfigShooterReaching);
     /// Configuration shooter tuned to generate reaching goal configurations.
 
     /// Shoot configuration around a target in workspace. the position of the

@@ -24,8 +24,7 @@
 # include <vector>
 # include <map>
 
-# include <KineoUtility/kitDefine.h>
-
+# include <hpp/util/kitelab.hh>
 
 # include <hpp/core/planner.hh>
 # include <hpp/model/humanoid-robot.hh>
@@ -46,7 +45,7 @@ namespace hpp
   namespace wholeBodyStepPlanner
   {
     namespace roboptim {
-      KIT_PREDEF_CLASS (PathOptimizer)
+      HPP_KIT_PREDEF_CLASS (PathOptimizer);
     } // namespace roboptim
 
     /// This class implements an algorithm to plan walking and
