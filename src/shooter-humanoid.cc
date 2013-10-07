@@ -60,7 +60,7 @@ namespace hpp {
 			    CkwsDiffusingRdmBuilder::EDiffusionNodeType,
 			    double standardDeviation,
 			    CkwsDiffusionShooter::TShootData&,
-			    CkwsConfig& hppDebugStatement (cfg))
+			    CkwsConfig& cfg)
     {
       HPP_ASSERT (cfg.device () == robot_);
       HPP_ASSERT (node->config ().device () == robot_);
@@ -81,7 +81,8 @@ namespace hpp {
 	    randomGenerator_->generateNormal (standardDeviation);
 	}
       }
-      HPP_ASSERT (cfg.setDofValues (dofValues) == KD_OK);
+      ktStatus result = cfg.setDofValues (dofValues);
+      HPP_ASSERT (result == KD_OK);
       return KD_OK;
     }
   } // namespace wholeBodyStepPlanner
