@@ -40,6 +40,7 @@
 #include <hpp/gik/task/generic-task.hh>
 
 #include <hpp/util/debug.hh>
+#include <hpp/util/assertion.hh>
 #include <hpp/model/joint.hh>
 
 #include <hpp/gik/robot/foot-print-related.hh>
@@ -311,8 +312,9 @@ namespace hpp
 
       // Set steering method to linear
       steeringMethodIthProblem(0, CkppSMLinearComponent::create ());
-      ktStatus result = roadmapBuilderIthProblem (0, rdmBuilder, true);
-      assert (result == KD_OK);
+      hppDebugStatement (ktStatus result =)
+	roadmapBuilderIthProblem (0, rdmBuilder, true);
+      HPP_ASSERT (result == KD_OK);
       hppDout (info, "Set roadmap builder.");
       CkwsLoopOptimizerShPtr randomOptimizer = CkwsRandomOptimizer::create();
       randomOptimizer->penetration (hppProblem (0)->penetration ());
