@@ -88,6 +88,8 @@ namespace hpp
 
       for (unsigned int i = 0; i<io_cfg.device()->countDofs(); i++)
 	{
+	  targetCfg_->isValidItself ();
+	  io_cfg.isValidItself ();
 	  double dofValue = cfgMask_[i] ? targetCfg_->dofValue(i) :
 	    io_cfg.dofValue(i);
 	  localTargetCfg.dofValue(i,dofValue);
