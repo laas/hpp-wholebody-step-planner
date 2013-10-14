@@ -1,5 +1,9 @@
                                                                 -*- outline -*-
 
+New in 0.2.2, 2013-10-08:
+* Fix compilation warnings.
+* Synchronize cmake submodule.
+
 New in 0.2.1, 2013-09-26:
 * Fill README.md file.
 
