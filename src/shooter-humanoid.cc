@@ -76,9 +76,9 @@ namespace hpp {
 	    (dof->vmin (), dof->vmax ());
 	} else {
 	  // If dof is not bounded use normal distribution about initial value.
-	  hppDout (info, "standardDeviation: " << standardDeviation);
+	  hppDout (info, "standardDeviation: " << standardDeviation_);
 	  dofValues [i] = diffusionConfig.dofValue (i) +
-	    randomGenerator_->generateNormal (standardDeviation);
+	    randomGenerator_->generateNormal (standardDeviation_);
 	}
       }
       ktStatus result = cfg.setDofValues (dofValues);
