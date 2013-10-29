@@ -60,6 +60,7 @@
 
 #include "hpp/wholebody-step-planner/planner.hh"
 #include "hpp/wholebody-step-planner/config-motion-constraint.hh"
+#include "hpp/wholebody-step-planner/direct-path-validator.hh"
 #include "hpp/wholebody-step-planner/position-motion-constraint.hh"
 #include "hpp/wholebody-step-planner/plane-motion-constraint.hh"
 #include "hpp/wholebody-step-planner/parallel-motion-constraint.hh"
@@ -221,6 +222,17 @@ namespace hpp
 
       CkwsConfigShPtr halfSittingCfg;
       humanoidRobot->getCurrentConfig(halfSittingCfg);
+      // Remove default direct path validator
+      CkwsValidatorSetShPtr validators
+	(humanoidRobot->userDirectPathValidators ());
+      validators->clear ();
+      DirectPathValidatorShPtr validator (DirectPathValidator::create
+					  (humanoidRobot->configSpace (),
+					   "Simple DP collision validator",
+					   hppProblem (0)->penetration ()));
+      if (validator) {
+	validators->add (validator);
+      }
       return halfSittingCfg;
     }
 

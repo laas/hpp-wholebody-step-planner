@@ -31,6 +31,7 @@ SET(PROJECT_URL "http://github.com/laas/hpp-wholebody-step-planner")
 SET(${PROJECT_NAME}_HEADERS
   include/hpp/wholebody-step-planner/planner.hh
   include/hpp/wholebody-step-planner/config-motion-constraint.hh
+  include/hpp/wholebody-step-planner/direct-path-validator.hh
   include/hpp/wholebody-step-planner/position-motion-constraint.hh
   include/hpp/wholebody-step-planner/rotation-motion-constraint.hh
   include/hpp/wholebody-step-planner/plane-motion-constraint.hh

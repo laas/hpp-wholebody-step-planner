@@ -19,6 +19,7 @@ SET(SOURCES
   planner.cc
   config-motion-constraint.cc
   config-shooter-reaching.cc
+  direct-path-validator.cc
   position-motion-constraint.cc
   rotation-motion-constraint.cc
   plane-motion-constraint.cc
